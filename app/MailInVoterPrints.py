@@ -111,6 +111,10 @@ if __name__ == '__main__':
 
     test_fromturfselection(driver)
 
+    #After filtering and searching, back on the list page
+    turf_name = '';   #Whatever we want the name for the list to be
+    print_list(driver, turf_name)
+
 
     print('Click Preview Button')
     element = driver.find_element_by_id("ResultsPreviewButton").click()
