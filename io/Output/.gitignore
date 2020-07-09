@@ -1,0 +1,5 @@
+# Ignore everything in this directory
+# This folder is for input files that don't belong in repo
+*
+# Except this file
+!.gitignore
