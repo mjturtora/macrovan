@@ -134,3 +134,24 @@ def edit_search(driver):
     # Edit Search:
     print('Edit Search')
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
+
+#Returns list of turf name and last name pairs under a provided captain
+def getTurfsByCaptain(captain, data):
+    try:
+        return data[captain]
+    except KeyError:
+        print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
+
+#Returns list of all turf name and last name pairs
+def getAllTurfs(data):
+    output = []
+    for item in data.values():
+        output += item
+    return output
+
+#Return list of all block captains
+def getAllCaptains(data):
+    output = []
+    for item in data.keys():
+        output += [item]
+    return output
