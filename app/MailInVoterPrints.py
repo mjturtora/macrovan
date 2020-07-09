@@ -8,86 +8,73 @@ from secrets import *
 from app.utils import *
 import ctypes  # An included library with Python install.
 
-def pause():
-    ctypes.windll.user32.MessageBoxW(0, "Click Ok to Finish", "Macrovan", 1)
+def pause(message):
+    ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
-def test_fromturfselection(driver):
-    # ORIGINAL Test name: from turf selection
-    # 2 | setWindowSize | 810x682 |
-    #driver.set_window_size(810, 682)
+def turfselection_plus(driver, turf_name):
+    # ORIGINAL (SIDE) Test name: from turf selection
+
+    # SELECT OWNER (PRECINCT CAPTAIN) NAME
+    # On Folder page, click "owner" text entry field
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").click()
     # 9 | type | id=ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input | Law, Barbara
-    # Select Owners...
+    # Select Owners... (will need to cycle through list in outer loop)
+    # might want a try/except block here for owner not found:
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys("Law, Barbara")
-    # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton | 
+    # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton (runs owner selection)
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
-    # 11 | click | css=tr:nth-child(1) > td:nth-child(4) .grid-result | 
-    driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(4) .grid-result").click()
+
+    # SELECT TURF NAME
+    # use turf name selection method from macrovan
+    print(f'Select turf_name = {turf_name}')
+    select_turf(driver, turf_name)
+    print('Handle erase current list alert')
     handle_alert(driver)
 
-    # # 12 | assertConfirmation | Are you sure you want to load this Map Turf and overwrite your current version of My List? |
-    # assert driver.switch_to.alert.text == "Are you sure you want to load this Map Turf and overwrite your current version of My List?"
-    # # 13 | webdriverChooseOkOnVisibleConfirmation |  |
-    # # gets list to edit
-    # driver.switch_to.alert.accept()
-
     # 14 | click | id=addStep |
-    # Edit Search
+    # Edit Search. Odd that this addStep works?
     driver.find_element(By.ID, "addStep").click()
     # 15 | click | id=stepTypeItem4 | 
-    # Narrow People
+    # Narrow People (Selection from addStep dropdown)
     driver.find_element(By.ID, "stepTypeItem4").click()
-    # 16 | click | id=ImageButtonSectionEarlyVoting | 
-    # Early Voting Twisty
-
+    # some wait needed for page to load...
     wait_no_longer_than = 10
+    # to click Early Voting Twisty
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
     print(f'Early Voting Section element located = {element}')
-
     driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
-    # 17 | click | id=ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived | 
-    print('Anyone Who Requested a Ballot')
+    print('Click anyone Who Requested a Ballot')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
-
-    # 18 | click | css=#ResultsPreviewButton > span:nth-child(2) |
-    # Click Preview My results
-    # driver.find_element(By.CSS_SELECTOR, "#ResultsPreviewButton > span:nth-child(2)").click()
-
     print('Click Preview Button')
     driver.find_element_by_id("ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
-
-
-    # 19 | click | css=#AddNewStepButton > span:nth-child(2) |
-    #driver.find_element(By.CSS_SELECTOR, "#AddNewStepButton > span:nth-child(2)").click()
-
-    #print('Waiting for invisibility')
-    #WebDriverWait(driver, wait_no_longer_than).until(EC.invisibility_of_element_located(By.XPATH('//*[@id="ctl00_BodyTag"]/div[2]')))
-    #print('Waiting before Add Step')
-    #driver.implicitly_wait(25)
     print('Click #AddNewStepButton')
-    pause()
-    #driver.find_element(By.CSS_SELECTOR, "#AddNewStepButton").click()
-    #driver.find_element_by_xpath('//*[@id="AddNewStepButton"]').click()
+    pause('Click Add New Step: Remove, and wait\n for page to load to continue')
 
-    #driver.find_element(By.ID, "AddNewStepButton").click()
-    # gets error: selenium.common.exceptions.ElementClickInterceptedException: Message: element click intercepted: Element <button id="AddNewStepButton" type="button" class="AddNewStep btn-full" ng-click="addStepClickHandler()" ng-class="{'AddStepActive' : showAddNewStepTypes }">...</button> is not clickable at point (850, 466). Other element would receive the click: <div class="loading-overlay" style="visibility: visible;"></div>
-    # 20 | click | css=.ng-scope:nth-child(2) > .ng-binding |
-    # Remove People
-    #driver.find_element(By.CSS_SELECTOR, ".ng-scope:nth-child(2) > .ng-binding").click()
-
-    # If wait too long? get:
-    #selenium.common.exceptions.StaleElementReferenceException: Message: stale element reference: element is not attached to the page document
-
-    # 21 | click | id=NoteText | 
+    print('Try to click "Notes" twisty')
+    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    print('Click in note text field. Is this needed?')
     driver.find_element(By.ID, "NoteText").click()
-    # 22 | type | id=NoteText | *moved
+    print('Send keys to NoteText "*moved')
     driver.find_element(By.ID, "NoteText").send_keys("*moved")
-    # 23 | click | css=#ctl00_ContentPlaceHolderVANPage_SearchRunButton > span:nth-child(2) | 
+    print(f'Sent keys *moved for remove step')
+
+    # # This worked for notes before:
+    # element = driver.find_element_by_id("ImageButtonSectionNotes").click()
+    # print('Find NoteText')
+    # element = driver.find_element_by_id('NoteText')
+    # print('Send Keys: Voted')
+    # element.send_keys('Voted')
+
+
     # Run Search
-    driver.find_element(By.CSS_SELECTOR, "#ctl00_ContentPlaceHolderVANPage_SearchRunButton > span:nth-child(2)").click()
+    # print('Run Search ?')
+    # driver.find_element(By.CSS_SELECTOR, "#ctl00_ContentPlaceHolderVANPage_SearchRunButton > span:nth-child(2)").click()
+    print('Run Search to Remove selected voters (Click Search Button)')
+    element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+    print("Driver title is: \n", driver.title)
 
 
 if __name__ == '__main__':
@@ -109,10 +96,13 @@ if __name__ == '__main__':
     # turf_name = 'P123 Turf 04'
     #turfs = [('P 138 Turf 01')]
 
-    test_fromturfselection(driver)
+
+    turf_name = 'P 138 Turf 01'
+    print(f'Call Turf Selection from main')
+    turfselection_plus(driver, turf_name)
 
 
-    print('Click Preview Button')
+    print(' Back in Main from turf selection Click Preview Button')
     element = driver.find_element_by_id("ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
 

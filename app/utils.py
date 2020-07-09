@@ -45,7 +45,7 @@ def get_page(driver):
 
 
 def login_to_page(driver):
-    ## login and initialize:
+    # login and initialize:
     # Click ActionID Button to open login
 
     wait_no_longer_than = 30
@@ -53,18 +53,14 @@ def login_to_page(driver):
                 EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
     print(f'ELEMENT = {element}')
 
-
     driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print('After ActionID Button')
     print_title(driver)
-
 
     wait_no_longer_than = 30
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, 'username')))
     print(f'ELEMENT = {element}')
-
-
 
     username = driver.find_element_by_id("username")
     username.send_keys(user_name)
@@ -135,23 +131,26 @@ def edit_search(driver):
     print('Edit Search')
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
 
+
 #Returns list of turf name and last name pairs under a provided captain
-def getTurfsByCaptain(captain, data):
+def getTurfsByCaptain(captain, turf_data):
     try:
-        return data[captain]
+        return turf_data[captain]
     except KeyError:
         print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
 
+
 #Returns list of all turf name and last name pairs
-def getAllTurfs(data):
+def getAllTurfs(turf_data):
     output = []
-    for item in data.values():
+    for item in turf_data.values():
         output += item
     return output
 
+
 #Return list of all block captains
-def getAllCaptains(data):
+def getAllCaptains(turf_data):
     output = []
-    for item in data.keys():
+    for item in turf_data.keys():
         output += [item]
     return output
