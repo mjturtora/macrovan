@@ -33,12 +33,12 @@ def turfselection_plus(driver, turf_name, captain_name):
     print('Click Preview Button')
     driver.find_element_by_id("ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
-    print('Unclick early voting twisty?')
-
-    early_voting_twisty(driver)
     print('Click #AddNewStepButton')
 
     pause('Click Add New Step: Remove, and wait\n for page to load to continue')
+
+    print('Unclick early voting twisty?')
+    early_voting_twisty(driver)
 
     # click notes twisty
     notes_twisty(driver)

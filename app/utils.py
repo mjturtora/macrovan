@@ -190,20 +190,27 @@ def print_list(driver, listName):
     print('in print_list about to click')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo")
-    dropdown.find_element(By.XPATH, "//option[. = '*2020 D68 VBM Enrollment']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
+
+    # Select Report Format Option
+    # Locate the Sector and create a Select object
+    print('Select Print Format Option')
+    select_element = Select(driver.find_element_by_id('ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
+                                                      )
+                            )
+    element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
+
+    # Select Script Option
+    # Locate the Sector and create a Select object
+    select_element = Select(driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
+                                                      )
+                            )
+    #print([o.text for o in select_element.options])
+    element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
+
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID")
-    dropdown.find_element(By.XPATH, "//option[. = '*2020 D68 VBM Enrollment']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+
+    # Script source selection (Walk)
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     dropdown = driver.find_element(By.ID,
