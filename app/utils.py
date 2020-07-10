@@ -104,7 +104,7 @@ def remember_this(driver):
 
 def list_folders(driver):
     # List "My Folders" and select folder:
-    wait_no_longer_than = 40
+    wait_no_longer_than = 60
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.XPATH, '//a[@href="FolderList.aspx"]')))
     #print(f'ELEMENT = {element}')
