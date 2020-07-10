@@ -6,10 +6,10 @@ Testing whether selenium resume after windows pop-up (MessageBox) works... Seems
 
 from secrets import *
 from app.utils import *
-import ctypes  # An included library with Python install.
-
-def pause(message):
-    ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
+# import ctypes  # An included library with Python install.
+#
+# def pause(message):
+#     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
 def turfselection_plus(driver, turf_name):
@@ -109,6 +109,8 @@ if __name__ == '__main__':
     # element = driver.find_element_by_id("ResultsPreviewButton").click()
     # print("Driver title is: \n", driver.title)
 
+    listName = 'huh'
+    print_list(driver, listName)
 
     # select_turf(driver, turf_name)
     # handle_alert(driver)
