@@ -139,6 +139,23 @@ def edit_search(driver):
     print('Edit Search')
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
 
+def early_voting_twisty(driver):
+    # some wait needed for page to load...
+    wait_no_longer_than = 10
+    # to click Early Voting Twisty
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    print(f'Early Voting Section element located = {element}')
+    driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+
+
+def notes_twisty(driver):
+    wait_no_longer_than = 30
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    print('Try to click "Notes" twisty')
+    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+
 
 #Returns list of turf name and last name pairs under a provided captain
 def getTurfsByCaptain(captain, turf_dict):
@@ -166,7 +183,7 @@ def getAllCaptains(turf_dict):
 
 def print_list(driver, listName):
     #Print a List
-    wait_no_longer_than=30
+    wait_no_longer_than = 30
     print('in print_list waiting for print icon')
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
@@ -184,7 +201,7 @@ def print_list(driver, listName):
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
     dropdown = driver.find_element(By.ID,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID")
-    dropdown.find_element(By.XPATH, "//option[. = '2020 D68 VBM Enrollment']").click()
+    dropdown.find_element(By.XPATH, "//option[. = '*2020 D68 VBM Enrollment']").click()
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
     driver.find_element(By.ID,

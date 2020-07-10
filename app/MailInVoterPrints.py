@@ -1,27 +1,18 @@
 from utils import *
-
-def early_voting_twisty(driver):
-    # some wait needed for page to load...
-    wait_no_longer_than = 10
-    # to click Early Voting Twisty
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-        EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
-    print(f'Early Voting Section element located = {element}')
-    driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
-
+#import utils
 
 def turfselection_plus(driver, turf_name, captain_name):
     # ORIGINAL (SIDE) Test name: from turf selection
 
-    # SELECT OWNER (PRECINCT CAPTAIN) NAME
-    # On Folder page, click "owner" text entry field
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").click()
-    # 9 | type | id=ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input | Law, Barbara
-    # Select Owners... (will need to cycle through list in outer loop)
-    # might want a try/except block here for owner not found:
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys(captain_name)
-    # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton (runs owner selection)
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+    # # SELECT OWNER (PRECINCT CAPTAIN) NAME
+    # # On Folder page, click "owner" text entry field
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").click()
+    # # 9 | type | id=ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input | Law, Barbara
+    # # Select Owners... (will need to cycle through list in outer loop)
+    # # might want a try/except block here for owner not found:
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys(captain_name)
+    # # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton (runs owner selection)
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
 
     # SELECT TURF NAME
     # use turf name selection method from macrovan
@@ -42,19 +33,24 @@ def turfselection_plus(driver, turf_name, captain_name):
     print('Click Preview Button')
     driver.find_element_by_id("ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
+    print('Unclick early voting twisty?')
+
+    early_voting_twisty(driver)
     print('Click #AddNewStepButton')
 
     pause('Click Add New Step: Remove, and wait\n for page to load to continue')
-    print('Unclick early voting twisty?')
-    early_voting_twisty(driver)
 
-    print('Try to click "Notes" twisty')
-    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    # click notes twisty
+    notes_twisty(driver)
+
     print('Click in note text field. Is this needed?')
     driver.find_element(By.ID, "NoteText").click()
     print('Send keys to NoteText "*moved')
     driver.find_element(By.ID, "NoteText").send_keys("*moved")
     print(f'Sent keys *moved for remove step')
+
+    # unclick notes_twisty
+    notes_twisty(driver)
 
     # # This worked for notes before:
     # element = driver.find_element_by_id("ImageButtonSectionNotes").click()
@@ -68,6 +64,7 @@ def turfselection_plus(driver, turf_name, captain_name):
 
     print("Driver title is: \n", driver.title)
     print("And done with SIDE function")
+
 
 if __name__ == '__main__':
 
