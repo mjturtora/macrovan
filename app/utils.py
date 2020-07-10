@@ -57,7 +57,7 @@ def login_to_page(driver):
     wait_no_longer_than = 30
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
-    print(f'ELEMENT = {element}')
+    #print(f'ELEMENT = {element}')
 
     driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print('After ActionID Button')
@@ -66,7 +66,7 @@ def login_to_page(driver):
     wait_no_longer_than = 30
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, 'username')))
-    print(f'ELEMENT = {element}')
+    #print(f'ELEMENT = {element}')
 
     username = driver.find_element_by_id("username")
     username.send_keys(user_name)
@@ -164,7 +164,14 @@ def getAllCaptains(turf_data):
 
 def print_list(driver, listName):
     #Print a List
+    wait_no_longer_than=30
+    print('in print_list waiting for print icon')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+                EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    #print(f'ELEMENT = {element}')
+
     print('in print_list about to click')
+
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked')
     pause("What happened?")
