@@ -30,6 +30,7 @@ def sendAllEmails():
             message['From'] = emailAddress
             message['Subject'] = emailSubject
             lastName = organizer[1]
+            fullName = organizer[0] + " " + organizer[1]
             emailBody = "Hello " + organizer[0] + " " + lastName + ", \n \n Your PDFs are attached.  Click the download all attachments button to download them in one go." 
             email = emailsAndDirPaths[organizer]
             message['To'] = email
@@ -42,46 +43,10 @@ def sendAllEmails():
             try:
                 session.sendmail(sender_address, receiver_address, text)
             except smtplib.SMTPException:
-                print("Email failed to send to: " + organizer[0] + " " + organizer[1])        
+                print("Email failed to send to: " + fullName)
+            else:
+                print("Email sent to: " + fullName)               
         session.quit()
-    else:
-        print("Test Mode")
-        print("=========================================")
-        for organizer in emailsAndDirPaths:
-            print(organizer[0] + " " + organizer[1])
-            print(emailsAndDirPaths[organizer])
-            print("Files that will be sent: ")
-            attachPDFs(organizer,0)
-            print("=========================================")
-
-def sendEmail(organizer):
-    if not testMode:
-        session = smtplib.SMTP('smtp.gmail.com', 587) 
-        session.starttls() 
-        session.login(sender_address, sender_pass) 
-        
-        #Iterate through each organizer creating their emails and calling the attachPDFs function to attach their files      
-        message = MIMEMultipart()
-        message['From'] = emailAddress
-        message['Subject'] = emailSubject
-        lastName = organizer[1]
-        fullName = organizer[0] + " " + organizer[1]
-        emailBody = "Hello " + organizer[0] + " " + lastName + ", \n \n Your PDFs are attached.  Click the download all attachments button to download them in one go." 
-        email = emailsAndDirPaths[organizer]
-        message['To'] = email
-        receiver_address = email
-        message.attach(MIMEText(emailBody, 'plain'))
-
-        attachPDFs(organizer, message) 
-        
-        text = message.as_string()
-        try:
-            session.sendmail(sender_address, receiver_address, text)
-        except smtplib.SMTPException:
-            print("Email failed to send to: " + fullName)
-        else:
-            print("Email sent to: " + fullName)        
-        session.quit()        
     else:
         print("Test Mode")
         print("=========================================")
@@ -100,8 +65,7 @@ def attachPDFs(organizer, message):
         if not testMode:  
             pdf = MIMEApplication(open(filePath, 'rb').read())
             pdf.add_header('Content-Disposition','attachment', filename=fileName)
-            message.attach(pdf)
- 
+            message.attach(pdf) 
         else:
             try:
                 test = open(filePath, 'rb')
