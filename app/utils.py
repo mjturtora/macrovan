@@ -121,6 +121,8 @@ def select_folder(driver):
 
 def select_turf(driver, turf_name):
     print('Select Saved Search')
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
     driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
 
 
@@ -139,9 +141,9 @@ def edit_search(driver):
 
 
 #Returns list of turf name and last name pairs under a provided captain
-def getTurfsByCaptain(captain, turf_data):
+def getTurfsByCaptain(captain, turf_dict):
     try:
-        return turf_data[captain]
+        return turf_dict[captain]
     except KeyError:
         print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
 
@@ -155,9 +157,9 @@ def getAllTurfs(turf_data):
 
 
 #Return list of all block captains
-def getAllCaptains(turf_data):
+def getAllCaptains(turf_dict):
     output = []
-    for item in turf_data.keys():
+    for item in turf_dict.keys():
         output += [item]
     return output
 
@@ -174,7 +176,7 @@ def print_list(driver, listName):
 
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked')
-    pause("What happened?")
+    # pause("What happened?")
 
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
@@ -235,5 +237,13 @@ def print_list(driver, listName):
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
+
+    pause("Double Check Selections. Then Press Okay.")
+
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+
+def return_to_folder(driver):
+    driver.find_element(By.LINK_TEXT, "Home").click()
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
+    driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()

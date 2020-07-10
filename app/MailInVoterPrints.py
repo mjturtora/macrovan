@@ -12,7 +12,7 @@ from app.utils import *
 #     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
-def turfselection_plus(driver, turf_name):
+def turfselection_plus(driver, turf_name, captain_name):
     # ORIGINAL (SIDE) Test name: from turf selection
 
     # SELECT OWNER (PRECINCT CAPTAIN) NAME
@@ -21,7 +21,7 @@ def turfselection_plus(driver, turf_name):
     # 9 | type | id=ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input | Law, Barbara
     # Select Owners... (will need to cycle through list in outer loop)
     # might want a try/except block here for owner not found:
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys("Law, Barbara")
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys(captain_name)
     # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton (runs owner selection)
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
 
@@ -96,21 +96,45 @@ if __name__ == '__main__':
     #
     # # Need to begin loop here to cycle through all turfs
 
+    test_dict = {
+        ("Barbara", "Law"): [("P 138 Turf 03", "Santee"), ("P 138 Turf 04", "Keenen"), ("P 138 Turf 05", "Gaukel"),
+                             ("P 154 Turf 02", "Fite")],
+
+        ("Andy", "Bragg"): [("P130 Upper Downtown Turf 02", "Benjamin"), ("P130 Upper Downtown Turf 03", "Arnold"),
+                            ("P130 Upper Downtown Turf 04", "Nohlgren"), ("P130 Upper Downtown Turf 05", "Hechtkopf"),
+                            ("P130 Upper Downtown Turf 06", "Peebles")]
+    }
+
+    captains = getAllCaptains(test_dict)
+
+    for captain in captains:
+        turfs = getTurfsByCaptain(captain, test_dict)
+        captain_name = captain[1] + ", " + captain[0]
+        for turf in turfs:
+            turf_name = turf[0]
+            list_name = turf[0] + " " + turf[1]
+            turfselection_plus(driver, turf_name, captain_name)
+            print_list(driver, list_name)
+            driver.implicitly_wait(30)
+            return_to_folder(driver)
+            driver.implicitly_wait(30)
+            # pause("Click Ok to continue")
+
     # turf_name = 'P123 Turf 04'
     #turfs = [('P 138 Turf 01')]
 
 
-    turf_name = 'P 138 Turf 01'
-    print(f'Call Turf Selection from main')
-    turfselection_plus(driver, turf_name)
+    # turf_name = 'P 138 Turf 01'
+    # print(f'Call Turf Selection from main')
+    # turfselection_plus(driver, turf_name)
 
 
-    print(' Back in Main from turf selection Click Preview Button')
+    # print(' Back in Main from turf selection Click Preview Button')
     # element = driver.find_element_by_id("ResultsPreviewButton").click()
     # print("Driver title is: \n", driver.title)
 
-    listName = 'huh'
-    print_list(driver, listName)
+    # listName = 'huh'
+    # print_list(driver, listName)
 
     # select_turf(driver, turf_name)
     # handle_alert(driver)
