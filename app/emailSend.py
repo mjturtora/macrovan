@@ -5,6 +5,7 @@ from email.mime.application import MIMEApplication
 from secrets import *
 import os
 import fnmatch
+from utils import getAllTurfs
 
 path = "../macrovan/io/Output/"
 emailBody = '''Your PDFs are attached'''
@@ -13,17 +14,18 @@ sender_address = emailAddress
 sender_pass = emailPassword
 
 #Set this to False to actually send the emails
-testMode = True
+testMode = False
 
 def sendAllEmails():
     #Iterate through the organizer email address and email them their specific zip file
+    numFiles = 0
     if not testMode:
         session = smtplib.SMTP('smtp.gmail.com', 587) 
         session.starttls() 
         session.login(sender_address, sender_pass) 
-        
         #Iterate through each organizer creating their emails and calling the attachPDFs function to attach their files
-        for organizer in emailsAndDirPaths:        
+        for organizer in emailsAndDirPaths:
+            organizerTurfCount = len(turf_dict[organizer])        
             message = MIMEMultipart()
             message['From'] = emailAddress
             message['Subject'] = emailSubject
@@ -35,15 +37,19 @@ def sendAllEmails():
             receiver_address = email
             message.attach(MIMEText(emailBody, 'plain'))
 
-            attachPDFs(organizer, message) 
+            numAttachedFiles = attachPDFs(organizer, message) 
+            numFiles += numAttachedFiles
             
             text = message.as_string()
-            try:
-                session.sendmail(sender_address, receiver_address, text)
-            except smtplib.SMTPException:
-                print("Email failed to send to: " + fullName)
+            if(numAttachedFiles == organizerTurfCount and numAttachedFiles != 0):
+                try:
+                    session.sendmail(sender_address, receiver_address, text)
+                except smtplib.SMTPException:
+                    print("Email failed to send to: " + fullName)
+                else:
+                    print("Email sent to: " + fullName + " : " + str(numAttachedFiles) + " files successfully attached")
             else:
-                print("Email sent to: " + fullName)               
+                print("Email failed to send to: " + fullName)               
         session.quit()
     else:
         print("Test Mode")
@@ -54,11 +60,21 @@ def sendAllEmails():
             print(organizer[0] + " " + organizer[1])
             print(emailsAndDirPaths[organizer])
             print("Files that will be sent: ")
-            attachPDFs(organizer,0)
+            numFiles += attachPDFs(organizer,0)
             print("=========================================")
+
+    #Compare the total count of attached files to the amount of turfs
+    expectedFileCount = len(getAllTurfs(turf_dict))
+    if numFiles == expectedFileCount:
+        print("All " + str(numFiles) + " files successfully attached!")
+    else:
+        difference = expectedFileCount - numFiles
+        print(expectedFileCount)
+        print("Failed to attach " + str(difference) + " files.....")
 
 
 def attachPDFs(organizer, message):
+    numFiles = 0
     for file in turf_dict[organizer]:
         fileName = file[0] + " " + file[1] + "*" + ".pdf"
         outFileName= file[0] + " " + file[1] + ".pdf"
@@ -69,6 +85,8 @@ def attachPDFs(organizer, message):
                     pdf = MIMEApplication(open(path + file, 'rb').read())
                     pdf.add_header('Content-Disposition','attachment', filename=outFileName)
                     message.attach(pdf)
+                    numFiles+=1
+                    break
                     
         #Testing mode
         else:
@@ -78,9 +96,11 @@ def attachPDFs(organizer, message):
                     foundFile = file
                     test = open(path + file, 'rb')
                     test.close()
+                    numFiles+=1
                     break
             #Expected on left, found on right            
             print(fileName + " : " + foundFile)
+    return numFiles
 
 if __name__ == '__main__':
     sendAllEmails()
