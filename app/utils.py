@@ -187,7 +187,7 @@ def print_list(driver, listName):
     print('in print_list waiting for print icon')
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
-    print('in print_list about to click')
+    print('in print_list trying to click')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
 
