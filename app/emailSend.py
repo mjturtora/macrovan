@@ -3,7 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
-from turfData import *
+from secrets import *
 import os
 
 #This file is setup to read data from turfData containing an organizers email address and the zipped directory
@@ -51,5 +51,3 @@ def attachPDFs(lastName, message):
      pdf = MIMEApplication(open(fileLocation, 'rb').read())
      pdf.add_header('Content-Disposition','attachment', filename=filename)
      message.attach(pdf)
-
-sendEmails()
