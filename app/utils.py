@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-import ctypes  # An included library with Python install.
+import ctypes  # for windows message pop-up
 
 
 def pause(message):
@@ -57,7 +57,7 @@ def login_to_page(driver):
     wait_no_longer_than = 30
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
-    print(f'ELEMENT = {element}')
+    #print(f'ELEMENT = {element}')
 
     driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print('After ActionID Button')
@@ -66,7 +66,7 @@ def login_to_page(driver):
     wait_no_longer_than = 30
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, 'username')))
-    print(f'ELEMENT = {element}')
+    #print(f'ELEMENT = {element}')
 
     username = driver.find_element_by_id("username")
     username.send_keys(user_name)
@@ -121,6 +121,8 @@ def select_folder(driver):
 
 def select_turf(driver, turf_name):
     print('Select Saved Search')
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
     driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
 
 
@@ -137,11 +139,28 @@ def edit_search(driver):
     print('Edit Search')
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
 
+def early_voting_twisty(driver):
+    # some wait needed for page to load...
+    wait_no_longer_than = 10
+    # to click Early Voting Twisty
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    print(f'Early Voting Section element located = {element}')
+    driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+
+
+def notes_twisty(driver):
+    wait_no_longer_than = 30
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    print('Try to click "Notes" twisty')
+    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+
 
 #Returns list of turf name and last name pairs under a provided captain
-def getTurfsByCaptain(captain, turf_data):
+def getTurfsByCaptain(captain, turf_dict):
     try:
-        return turf_data[captain]
+        return turf_dict[captain]
     except KeyError:
         print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
 
@@ -155,34 +174,43 @@ def getAllTurfs(turf_data):
 
 
 #Return list of all block captains
-def getAllCaptains(turf_data):
+def getAllCaptains(turf_dict):
     output = []
-    for item in turf_data.keys():
+    for item in turf_dict.keys():
         output += [item]
     return output
 
 
 def print_list(driver, listName):
     #Print a List
-    print('in print_list about to click')
+    wait_no_longer_than = 30
+    print('in print_list waiting for print icon')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+                EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    print('in print_list trying to click')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
-    print('just clicked')
-    pause("What happened?")
+    print('just clicked print icon might need another EC')
+
+    # Select Report Format Option
+    # Locate the Sector and create a Select object
+    print('Select Print Format Option')
+    select_element = Select(driver.find_element_by_id('ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
+                                                      )
+                            )
+    element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
+
+    # Select Script Option
+    # Locate the Sector and create a Select object
+    select_element = Select(driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
+                                                      )
+                            )
+    #print([o.text for o in select_element.options])
+    element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
     driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo")
-    dropdown.find_element(By.XPATH, "//option[. = '*2020 D68 VBM Enrollment']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
-    driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID")
-    dropdown.find_element(By.XPATH, "//option[. = '2020 D68 VBM Enrollment']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+
+    # Script source selection (Walk)
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     dropdown = driver.find_element(By.ID,
@@ -228,5 +256,13 @@ def print_list(driver, listName):
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
+
+    pause("Double Check Selections. Then Press Okay.")
+
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+
+def return_to_folder(driver):
+    driver.find_element(By.LINK_TEXT, "Home").click()
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
+    driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
