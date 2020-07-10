@@ -14,7 +14,7 @@ sender_address = emailAddress
 sender_pass = emailPassword
 
 #Set this to False to actually send the emails
-testMode = False
+testMode = True
 
 def sendAllEmails():
     #Iterate through the organizer email address and email them their specific zip file
@@ -73,6 +73,7 @@ def sendAllEmails():
         print("Failed to attach " + str(difference) + " files.....")
 
 
+
 def attachPDFs(organizer, message):
     numFiles = 0
     for file in turf_dict[organizer]:
@@ -101,6 +102,7 @@ def attachPDFs(organizer, message):
             #Expected on left, found on right            
             print(fileName + " : " + foundFile)
     return numFiles
+
 
 if __name__ == '__main__':
     sendAllEmails()
