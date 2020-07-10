@@ -106,8 +106,8 @@ if __name__ == '__main__':
 
 
     print(' Back in Main from turf selection Click Preview Button')
-    element = driver.find_element_by_id("ResultsPreviewButton").click()
-    print("Driver title is: \n", driver.title)
+    # element = driver.find_element_by_id("ResultsPreviewButton").click()
+    # print("Driver title is: \n", driver.title)
 
 
     # select_turf(driver, turf_name)
