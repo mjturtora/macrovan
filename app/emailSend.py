@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from secrets import *
 import os
-
+import fnmatch
 
 path = "../macrovan/io/Output/"
 emailBody = '''Your PDFs are attached'''
@@ -13,7 +13,7 @@ sender_address = emailAddress
 sender_pass = emailPassword
 
 #Set this to False to actually send the emails
-testMode = False
+testMode = True
 
 def sendAllEmails():
     #Iterate through the organizer email address and email them their specific zip file
@@ -55,23 +55,31 @@ def sendAllEmails():
             attachPDFs(organizer,0)
             print("=========================================")
 
-#Cycles through the PDFs in output and attaches each organizers files to their email
+
 def attachPDFs(organizer, message):
     for file in turf_dict[organizer]:
-        fileName = file[0] + ".pdf"
-        filePath = path + fileName
+        fileName = file[0] + " " + file[1] + "*" + ".pdf"
+        outFileName= file[0] + " " + file[1] + ".pdf"
         if not testMode:  
-            pdf = MIMEApplication(open(filePath, 'rb').read())
-            pdf.add_header('Content-Disposition','attachment', filename=fileName)
-            message.attach(pdf) 
+            #Search the directory for a file that matches the fileName
+            for file in os.listdir(path):
+                if fnmatch.fnmatch(file, fileName):
+                    pdf = MIMEApplication(open(path + file, 'rb').read())
+                    pdf.add_header('Content-Disposition','attachment', filename=outFileName)
+                    message.attach(pdf)
+                    
+        #Testing mode
         else:
             try:
-                test = open(filePath, 'rb')
-                test.close()
+                for file in os.listdir('.'):
+                    if fnmatch.fnmatch(file, fileName):
+                        test = open(file, 'rb')
+                        test.close()
+
             except FileNotFoundError:
-                print(filePath + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FILE NOT FOUND")
+                print(fileName + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FILE NOT FOUND")
             else:
-                print(filePath)
+                print(fileName)
 
 if __name__ == '__main__':
     sendAllEmails()
