@@ -70,16 +70,18 @@ def attachPDFs(organizer, message):
                     
         #Testing mode
         else:
+            foundFile = ""
             try:
-                for file in os.listdir('.'):
+                for file in os.listdir(path):
                     if fnmatch.fnmatch(file, fileName):
-                        test = open(file, 'rb')
+                        foundFile = file
+                        test = open(path + file, 'rb')
                         test.close()
 
             except FileNotFoundError:
                 print(fileName + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FILE NOT FOUND")
             else:
-                print(fileName)
+                print(foundFile)
 
 if __name__ == '__main__':
     sendAllEmails()
