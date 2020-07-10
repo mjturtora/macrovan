@@ -30,7 +30,7 @@ def sendEmails():
         receiver_address = email
         message.attach(MIMEText(emailBody, 'plain'))
 
-        attachPDFs(lastName, message) 
+        attachPDFs(organizer, message) 
 
         #Send the email
         session = smtplib.SMTP('smtp.gmail.com', 587) 
@@ -44,10 +44,10 @@ def sendEmails():
 
     session.quit()
 
-#Attaches a given organizers pdfs to an email
-def attachPDFs(lastName, message):
-    for filename in os.listdir(path + lastName):
-     fileLocation = path + lastName + "/" + filename
-     pdf = MIMEApplication(open(fileLocation, 'rb').read())
-     pdf.add_header('Content-Disposition','attachment', filename=filename)
-     message.attach(pdf)
+def attachPDFs(organizer, message):
+    for file in turf_data[organizer]:
+        fileName = file[0] + ".pdf"
+        filePath = path + fileName
+        pdf = MIMEApplication(open(filePath, 'rb').read())
+        pdf.add_header('Content-Disposition','attachment', filename=fileName)
+        message.attach(pdf)
