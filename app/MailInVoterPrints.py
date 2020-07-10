@@ -74,7 +74,10 @@ def turfselection_plus(driver, turf_name):
     # driver.find_element(By.CSS_SELECTOR, "#ctl00_ContentPlaceHolderVANPage_SearchRunButton > span:nth-child(2)").click()
     print('Run Search to Remove selected voters (Click Search Button)')
     element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+
     print("Driver title is: \n", driver.title)
+    print("And done with SIDE function")
+
 
 
 if __name__ == '__main__':
