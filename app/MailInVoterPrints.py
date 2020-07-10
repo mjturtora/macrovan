@@ -1,6 +1,9 @@
 from utils import *
 #import utils
 
+path = os.getcwd()
+print(f"The current working directory is {path}")
+
 def turfselection_plus(driver, turf_name, captain_name):
     # ORIGINAL (SIDE) Test name: from turf selection
 
