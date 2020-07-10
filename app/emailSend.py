@@ -43,6 +43,7 @@ def sendEmails():
 
     session.quit()
 
+#Cycles through the PDFs in output and attaches each organizers files to their email
 def attachPDFs(organizer, message):
     for file in turf_data[organizer]:
         fileName = file[0] + ".pdf"
