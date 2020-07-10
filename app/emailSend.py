@@ -48,6 +48,8 @@ def sendAllEmails():
     else:
         print("Test Mode")
         print("=========================================")
+        print("=====EXPECTED=================FOUND======")
+        print("=========================================")
         for organizer in emailsAndDirPaths:
             print(organizer[0] + " " + organizer[1])
             print(emailsAndDirPaths[organizer])
@@ -70,18 +72,15 @@ def attachPDFs(organizer, message):
                     
         #Testing mode
         else:
-            foundFile = ""
-            try:
-                for file in os.listdir(path):
-                    if fnmatch.fnmatch(file, fileName):
-                        foundFile = file
-                        test = open(path + file, 'rb')
-                        test.close()
-
-            except FileNotFoundError:
-                print(fileName + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FILE NOT FOUND")
-            else:
-                print(foundFile)
+            foundFile = "FILE NOT FOUND-------------------------------------F"
+            for file in os.listdir(path):
+                if fnmatch.fnmatch(file, fileName):
+                    foundFile = file
+                    test = open(path + file, 'rb')
+                    test.close()
+                    break
+            #Expected on left, found on right            
+            print(fileName + " : " + foundFile)
 
 if __name__ == '__main__':
     sendAllEmails()
