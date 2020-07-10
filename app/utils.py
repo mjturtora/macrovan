@@ -7,6 +7,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+import ctypes  # An included library with Python install.
+
+def pause(message):
+    ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
+
 
 
 def start_driver():
@@ -159,7 +164,10 @@ def getAllCaptains(turf_data):
 
 def print_list(driver, listName):
     #Print a List
+    print('in print_list about to click')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
+    print('just clicked')
+
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
     dropdown = driver.find_element(By.ID,
