@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-import ctypes  # An included library with Python install.
+import ctypes  # for windows message pop-up
 
 
 def pause(message):
@@ -170,14 +170,9 @@ def print_list(driver, listName):
     print('in print_list waiting for print icon')
     element = WebDriverWait(driver, wait_no_longer_than).until(
                 EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
-    #print(f'ELEMENT = {element}')
-
     print('in print_list about to click')
-
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
-    print('just clicked')
-    # pause("What happened?")
-
+    print('just clicked print icon might need another EC')
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo").click()
     dropdown = driver.find_element(By.ID,
