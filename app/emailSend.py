@@ -5,8 +5,6 @@ from email.mime.application import MIMEApplication
 from secrets import *
 import os
 
-#This file is setup to read data from turfData containing an organizers email address and the zipped directory
-#that their PDFS are stored in and email that to them
 
 path = "../macrovan/io/Output/"
 emailBody = '''Your PDFs are attached'''
