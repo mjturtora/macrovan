@@ -16,7 +16,12 @@ sender_pass = emailPassword
 #Set this to False to actually send the emails
 testMode = True
 
+#sendAllEmails will send emails to all the organizers in the secrets file
 def sendAllEmails():
+    sendEmails(emailsAndDirPaths.keys())
+
+
+def sendEmails(organizers):
     #Iterate through the organizer email address and email them their specific zip file
     numFiles = 0
     if not testMode:
@@ -24,8 +29,10 @@ def sendAllEmails():
         session.starttls() 
         session.login(sender_address, sender_pass) 
         #Iterate through each organizer creating their emails and calling the attachPDFs function to attach their files
-        for organizer in emailsAndDirPaths:
-            organizerTurfCount = len(turf_dict[organizer])        
+        for organizer in organizers:
+            organizerTurfCount = len(turf_dict[organizer])
+
+            #Create the email        
             message = MIMEMultipart()
             message['From'] = emailAddress
             message['Subject'] = emailSubject
@@ -36,11 +43,13 @@ def sendAllEmails():
             message['To'] = email
             receiver_address = email
             message.attach(MIMEText(emailBody, 'plain'))
+            text = message.as_string()
 
+            #attachPDFs attaches the PDFs and returns the number of PDFs it attached
             numAttachedFiles = attachPDFs(organizer, message) 
             numFiles += numAttachedFiles
             
-            text = message.as_string()
+            #Check that the organizer had all of their files attached.  The email will not be sent if all the files were not attached
             if(numAttachedFiles == organizerTurfCount and numAttachedFiles != 0):
                 try:
                     session.sendmail(sender_address, receiver_address, text)
@@ -51,12 +60,14 @@ def sendAllEmails():
             else:
                 print("Email failed to send to: " + fullName)               
         session.quit()
+
+    #In test mode the files will still be searched for and found filenames will be displayed
     else:
         print("Test Mode")
         print("=========================================")
         print("=====EXPECTED=================FOUND======")
         print("=========================================")
-        for organizer in emailsAndDirPaths:
+        for organizer in organizers:
             print(organizer[0] + " " + organizer[1])
             print(emailsAndDirPaths[organizer])
             print("Files that will be sent: ")
@@ -71,8 +82,6 @@ def sendAllEmails():
         difference = expectedFileCount - numFiles
         print(expectedFileCount)
         print("Failed to attach " + str(difference) + " files.....")
-
-
 
 def attachPDFs(organizer, message):
     numFiles = 0
@@ -103,6 +112,8 @@ def attachPDFs(organizer, message):
             print(fileName + " : " + foundFile)
     return numFiles
 
+    
 
-if __name__ == '__main__':
-    sendAllEmails()
+if __name__ == '__main__':    
+    #sendAllEmails()
+    sendEmails([("Kate", "Steinway")])
