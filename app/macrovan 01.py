@@ -7,6 +7,7 @@ It logs into webpage, pulls a list, modifies it, and prints using some options.
 
 import utils
 import os
+from secrets import user_name, pass_word
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -14,7 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 def start_driver():
     """Initialize Chrome WebDriver with option to save user data to local
@@ -36,7 +37,8 @@ def start_driver():
     # driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
 
     chrome_options.add_argument("--user-data-dir=chrome-data")
-    driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
+    #driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     return driver
 
 
@@ -52,8 +54,6 @@ def login_to_page(driver):
     # Click ActionID Button to open login
     driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print("Driver title is: \n", driver.title)
-    user_name = "USERNAMEGOESHERE"
-    pass_word = "PASSWORDGOESHERE"
     username = driver.find_element_by_id("username")
     username.send_keys(user_name)
     password = driver.find_element_by_id("password")
