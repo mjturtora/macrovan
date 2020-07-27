@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
 import ctypes  # for windows message pop-up
 
 
@@ -34,7 +35,7 @@ def start_driver():
     # #driver = webdriver.Chrome('./chromedriver 83')
 
     chrome_options.add_argument("--user-data-dir=chrome-data")
-    driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
 
     return driver
 
