@@ -93,8 +93,8 @@ def print_list(driver, listName):
     #Print a List
     open_print(driver)
     top_selections(driver, listName)
-    pause('click ok when done')
+    # pause('click ok when done')
     headers_and_pagebreaks(driver)
-    pause('click ok when done')
+    # pause('click ok when done')
     sort_orders(driver)
     final_selections_submit(driver)
