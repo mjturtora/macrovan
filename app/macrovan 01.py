@@ -100,10 +100,8 @@ def edit_search(driver):
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
 
 
-
 if __name__ == '__main__':
     driver = start_driver()
-    #driver =
     get_page(driver)
     login_to_page(driver)
     #remember_this()
