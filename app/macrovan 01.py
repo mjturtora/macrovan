@@ -38,7 +38,7 @@ def start_driver():
 
     chrome_options.add_argument("--user-data-dir=chrome-data")
     #driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
 
