@@ -1,25 +1,45 @@
+import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+import ctypes  # for windows message pop-up
 import tkinter as tk
+from utils import *
 from printing_steps import *
+from secrets import *
 
-
-def printNowButton(driver, entry):
+def printNowButton():
     print('print button clicked')
     # Start from 'List' screen
     # Get list name and then clear the field
-    list_name = entry.get()
-    entry.delete(0, tk.END)
+    list_name = list_name_entry.get()
+    list_name_entry.delete(0, tk.END)
     print_list(driver, list_name)
 
-
-def continueButton(driver):
+def continueButton():
     print('continue button clicked')
+    driver.implicitly_wait(30)
+    return_to_folder(driver)
 
-
-def exitButton(driver):
+def exitButton():
     print('exit button clicked')
 
+# Main function for testing
+if __name__ == '__main__':
+    window = tk.Tk()
 
-def createGUI(window, driver):
+    # Create driver and login
+    driver = start_driver()
+    get_page(driver)
+    driver.implicitly_wait(10)
+    login_to_page(driver)
+
+    # Create GUI
     # Create Labels for instructions
     instructions1 = tk.Label(
         text="Please enter the name for your list below."
@@ -46,7 +66,7 @@ def createGUI(window, driver):
         height=5,
         fg="snow",
         bg="steel blue",
-        command=printNowButton(driver, list_name_entry)
+        command=printNowButton
     )
     continue_button = tk.Button(
         text="Continue",
@@ -75,13 +95,4 @@ def createGUI(window, driver):
     exit_instructions.pack()
     exit_button.pack()
 
-
-# Main function for testing
-if __name__ == '__main__':
-    window = tk.Tk()
-    driver = start_driver()
-    get_page(driver)
-    #driver.implicitly_wait(10)
-    login_to_page(driver)
-    createGUI(window, driver)
     window.mainloop()
