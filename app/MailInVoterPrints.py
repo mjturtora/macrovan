@@ -1,7 +1,5 @@
 from utils import *
 from PrintingSteps import *
-#import utils
-# Mike's little change
 
 path = os.getcwd()
 print(f"The current working directory is {path}")
@@ -26,17 +24,18 @@ if __name__ == '__main__':
     ("P130 Upper Downtown Turf 13", "Grebenschikoff"), ("P130 Upper Downtown Turf 14", "Singer")]
     }
 
-    captains = getAllCaptains(test_dict)
+    captains = get_all_captains(test_dict)
 
     """
     Remaining problems:
+    sometimes already logged in so login_to_page fails. Have login status check.
     note field
     print icon click fail
     anyone who requested (so early voting twisty i think)
     """
 
     for captain in captains:
-        turfs = getTurfsByCaptain(captain, test_dict)
+        turfs = get_turfs_by_captain(captain, test_dict)
         captain_name = captain[1] + ", " + captain[0]
         for turf in turfs:
             turf_name = turf[0]

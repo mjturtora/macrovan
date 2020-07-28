@@ -155,7 +155,7 @@ def notes_twisty(driver):
 
 
 #Returns list of turf name and last name pairs under a provided captain
-def getTurfsByCaptain(captain, turf_dict):
+def get_turfs_by_captain(captain, turf_dict):
     try:
         return turf_dict[captain]
     except KeyError:
@@ -171,7 +171,7 @@ def getAllTurfs(turf_data):
 
 
 #Return list of all block captains
-def getAllCaptains(turf_dict):
+def get_all_captains(turf_dict):
     output = []
     for item in turf_dict.keys():
         output += [item]
