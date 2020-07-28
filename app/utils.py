@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
 import ctypes  # for windows message pop-up
 
 
@@ -34,7 +35,7 @@ def start_driver():
     # #driver = webdriver.Chrome('./chromedriver 83')
 
     chrome_options.add_argument("--user-data-dir=chrome-data")
-    driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
 
     return driver
 
@@ -182,11 +183,11 @@ def getAllCaptains(turf_dict):
 
 
 def print_list(driver, listName):
-    #Print a List
+    # Print a List
     wait_no_longer_than = 30
     print('in print_list waiting for print icon')
     element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+        EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
     print('in print_list trying to click')
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
@@ -194,17 +195,19 @@ def print_list(driver, listName):
     # Select Report Format Option
     # Locate the Sector and create a Select object
     print('Select Print Format Option')
-    select_element = Select(driver.find_element_by_id('ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
-                                                      )
-                            )
+    select_element = Select(driver.find_element_by_id(
+        'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
+    )
+    )
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
-    select_element = Select(driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
-                                                      )
-                            )
-    #print([o.text for o in select_element.options])
+    select_element = Select(driver.find_element_by_id(
+        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
+    )
+    )
+    # print([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
     driver.find_element(By.ID,
@@ -224,6 +227,8 @@ def print_list(driver, listName):
         "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
+
+    # Deselect Headers amd Breaks
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
@@ -232,33 +237,32 @@ def print_list(driver, listName):
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+
+    # Sort Order 4
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4")
-    dropdown.find_element(By.XPATH, "//option[. = 'Street Number']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5")
-    dropdown.find_element(By.XPATH, "//option[. = 'Apartment']").click()
+    dropdown = Select(driver.find_element_by_id(
+        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    dropdown.select_by_index(4)
+
+    # Sort Order 5
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    dropdown = Select(driver.find_element_by_id(
+        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    dropdown.select_by_index(5)
+
+    # Sort Order 6
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
-    # dropdown = driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6")
-    # dropdown.find_element(By.XPATH, "//option[. = 'label']").click()
-    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+
+    # Submit
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
-
-    pause("Double Check Selections. Then Press Okay.")
-
+    pause("Double Check that selections are correct")
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
 

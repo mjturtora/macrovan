@@ -1,6 +1,10 @@
 from utils import *
+from PrintingSteps import *
 #import utils
 # Mike's little change
+
+path = os.getcwd()
+print(f"The current working directory is {path}")
 
 def turfselection_plus(driver, turf_name, captain_name):
     # ORIGINAL (SIDE) Test name: from turf selection
@@ -77,15 +81,23 @@ if __name__ == '__main__':
     select_folder(driver)
 
     test_dict = {
-        ("Barbara", "Law"): [("P 138 Turf 03", "Santee"), ("P 138 Turf 04", "Keenen"), ("P 138 Turf 05", "Gaukel"),
-                             ("P 154 Turf 02", "Fite")],
+        ("Barbara", "Law"): [("P 144 Turf 02", "Prendergast"),  ("P 602 Turf 02", "Baker"), ("P138Hunter", "Hunter"),
+    ("P 150 Turf 02", "Thurmond"), ("P 156 Turf 02", "Fling"), ('P 121Pincus', 'Pincus'), ('P 150 Turf 03','Davis'),
+    ('P 155Tur', 'Tur'), ('P155Tur2', 'Tur')],
 
-        ("Andy", "Bragg"): [("P130 Upper Downtown Turf 02", "Benjamin"), ("P130 Upper Downtown Turf 03", "Arnold"),
-                            ("P130 Upper Downtown Turf 04", "Nohlgren"), ("P130 Upper Downtown Turf 05", "Hechtkopf"),
-                            ("P130 Upper Downtown Turf 06", "Peebles")]
+        ("Andy", "Bragg"): [("P130 Upper Downtown Turf 07", "O'Connor"), ("P130 Upper Downtown Turf 08", "Gardner"), ("P130 Upper Downtown Turf 09", "Warren"),
+    ("P130 Upper Downtown Turf 10", "Strickler"), ("P130 Upper Downtown Turf 11", "Roux"), ("P130 Upper Downtown Turf 12", "Taylor"),
+    ("P130 Upper Downtown Turf 13", "Grebenschikoff"), ("P130 Upper Downtown Turf 14", "Singer")]
     }
 
     captains = getAllCaptains(test_dict)
+
+    """
+    Remaining problems:
+    note field
+    print icon click fail
+    anyone who requested (so early voting twisty i think)
+    """
 
     for captain in captains:
         turfs = getTurfsByCaptain(captain, test_dict)
@@ -100,3 +112,4 @@ if __name__ == '__main__':
             driver.implicitly_wait(30)
             # pause("Click Ok to continue")
 
+            #Select Print Format Option??
