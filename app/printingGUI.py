@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import Select
 import ctypes  # for windows message pop-up
 import tkinter as tk
 from utils import *
-from PrintingSteps import *
+from printing_steps import *
 
 def printNowButton(driver, entry):
     print('print button clicked')

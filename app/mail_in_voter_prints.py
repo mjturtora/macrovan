@@ -1,5 +1,5 @@
 from utils import *
-from PrintingSteps import *
+from printing_steps import *
 
 path = os.getcwd()
 print(f"The current working directory is {path}")
@@ -50,6 +50,7 @@ if __name__ == '__main__':
             turf_name = turf[0]
             list_name = turf[0] + " " + turf[1]
             turfselection_plus(driver, turf_name, captain_name)
+
             print_list(driver, list_name)
             driver.implicitly_wait(30)
             return_to_folder(driver)
