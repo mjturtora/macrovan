@@ -1,6 +1,7 @@
 from secrets import *
 
 import os
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -9,6 +10,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
 import ctypes  # for windows message pop-up
+
+
+def get_os():
+    print(sys.platform)
+    if "win" in sys.platform:
+        print("os = Windows")
+        return "Windows"
 
 
 def pause(message):
