@@ -2,6 +2,8 @@ from secrets import *
 
 import os
 import sys
+import glob
+import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -13,11 +15,25 @@ import ctypes  # for windows message pop-up
 
 
 def get_os():
-    print(sys.platform)
+    # print(sys.platform)
     if "win" in sys.platform:
-        print("os = Windows")
+        # print("os = Windows")
         return "Windows"
 
+
+def teardown():
+    """Remove temp files from prior run before starting driver"""
+
+    print('Start Teardown')
+    if get_os() == "Windows":
+        print("Do Windows")
+        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'scoped_dir*')):
+            print(path)
+            shutil.rmtree(path)
+        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
+            print(path)
+            shutil.rmtree(path)
+    print('Teardown complete')
 
 def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)

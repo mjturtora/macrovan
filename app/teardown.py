@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 
-print('hi')
+print('Start Teardown')
 
 for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'scoped_dir*')):
     print(path)
@@ -12,4 +12,4 @@ for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 
     print(path)
     shutil.rmtree(path)
 
-print('bye')
+print('Teardown complete')
