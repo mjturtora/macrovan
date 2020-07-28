@@ -38,7 +38,7 @@ def start_driver():
 
     chrome_options.add_argument("--user-data-dir=chrome-data")
     #driver = webdriver.Chrome('./chromedriver 83', options=chrome_options)
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
 
@@ -100,10 +100,8 @@ def edit_search(driver):
     driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
 
 
-
 if __name__ == '__main__':
     driver = start_driver()
-    #driver =
     get_page(driver)
     login_to_page(driver)
     #remember_this()

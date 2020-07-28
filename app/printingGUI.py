@@ -12,8 +12,8 @@ from PrintingSteps import *
 
 def printNowButton(driver, entry):
     print('print button clicked')
-    #Start from 'List' screen
-    #Get list name and then clear the field
+    # Start from 'List' screen
+    # Get list name and then clear the field
     list_name = entry.get()
     entry.delete(0, tk.END)
     print_list(driver, list_name)
@@ -31,28 +31,28 @@ def createGUI(window, driver):
         text="Please enter the name for your list below."
     )
     instructions2 = tk.Label(
-        text = "After you have opened your List click 'Print Now' to begin the printing process."
+        text="After you have opened your List click 'Print Now' to begin the printing process."
     )
     continue_instructions = tk.Label(
-        text = "If you need to print another list, click 'Continue'."
+        text="If you need to print another list, click 'Continue'."
     )
     exit_instructions = tk.Label(
-        text = "When you finish, click 'Exit'."
+        text="When you finish, click 'Exit'."
     )
 
-    #Create text Input
+    # Create text Input
     list_name_entry = tk.Entry(
-        width = 25
+        width=25
     )
 
     # Create Buttons
     print_now_button = tk.Button(
-        text = "Print Now",
-        width = 15,
-        height = 5,
-        fg = "snow",
-        bg = "steel blue",
-        command = printNowButton(driver, list_name_entry)
+        text="Print Now",
+        width=15,
+        height=5,
+        fg="snow",
+        bg="steel blue",
+        command=printNowButton(driver, list_name_entry)
     )
     continue_button = tk.Button(
         text="Continue",
@@ -60,7 +60,7 @@ def createGUI(window, driver):
         height=5,
         fg="snow",
         bg="steel blue",
-        command = continueButton
+        command=continueButton
     )
     exit_button = tk.Button(
         text="Exit",
@@ -68,10 +68,10 @@ def createGUI(window, driver):
         height=5,
         fg="snow",
         bg="steel blue",
-        command = exitButton
+        command=exitButton
     )
 
-    #pack everything into GUI
+    # pack everything into GUI
     instructions1.pack()
     list_name_entry.pack()
     instructions2.pack()
@@ -82,7 +82,7 @@ def createGUI(window, driver):
     exit_button.pack()
 
 
-#Main function for testing
+# Main function for testing
 if __name__ == '__main__':
     window = tk.Tk()
     driver = start_driver()

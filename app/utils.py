@@ -1,6 +1,9 @@
 from secrets import *
 
 import os
+import sys
+import glob
+import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -11,14 +14,34 @@ from webdriver_manager.chrome import ChromeDriverManager
 import ctypes  # for windows message pop-up
 
 
+def get_os():
+    # print(sys.platform)
+    if "win" in sys.platform:
+        # print("os = Windows")
+        return "Windows"
+
+
+def teardown():
+    """Remove temp files from prior run before starting driver"""
+
+    print('Start Teardown')
+    if get_os() == "Windows":
+        print("Do Windows")
+        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'scoped_dir*')):
+            print(path)
+            shutil.rmtree(path)
+        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
+            print(path)
+            shutil.rmtree(path)
+    print('Teardown complete')
+
 def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
 def start_driver():
-    """Initialize Chrome WebDriver with option to save user data to local
+    """Initialize Chrome WebDriver with option that saves user-data-dir to local
      folder to handle cookies"""
-    # todo: check for valid (up-to-date) webdriver
     # driver.get('chrome://settings/')
     # driver.set_window_size(1210, 720)
 
@@ -26,17 +49,14 @@ def start_driver():
 
     chrome_options = Options()
 
-    # todo: following lines added 7/8 trying to make repo pretty. Gave up. Maybe later.
-    # Or maybe someone else can tell what I was trying to do and make it work. :)
+    # todo: following lines added 7/8 trying to make repo pretty.
+    #  Trying to save chrome-data elsewhere. Gave up. Maybe later.
     # chrome_options.add_argument(r"--user-data-dir='..\io\chrome-data'")
     # #chrome_options.add_argument("--enable-caret-browsing")
-    # driver = webdriver.Chrome(r'..\io\drivers\chromedriver 83', options=chrome_options)
-    # # adding argument opens with address bar highlighted and I can't figure out why!
-    # #driver = webdriver.Chrome('./chromedriver 83')
 
+    # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
     chrome_options.add_argument("--user-data-dir=chrome-data")
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
 
@@ -158,28 +178,93 @@ def notes_twisty(driver):
     driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
 
 
-#Returns list of turf name and last name pairs under a provided captain
-def getTurfsByCaptain(captain, turf_dict):
+# Returns list of turf name and last name pairs under a provided captain
+def get_turfs_by_captain(captain, turf_dict):
     try:
         return turf_dict[captain]
     except KeyError:
         print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
 
 
-#Returns list of all turf name and last name pairs
-def getAllTurfs(turf_data):
+# Returns list of all turf name and last name pairs
+def get_all_turfs(turf_data):
     output = []
     for item in turf_data.values():
         output += item
     return output
 
 
-#Return list of all block captains
-def getAllCaptains(turf_dict):
+# Return list of all block captains
+def get_all_captains(turf_dict):
     output = []
     for item in turf_dict.keys():
         output += [item]
     return output
+
+
+def turfselection_plus(driver, turf_name, captain_name):
+    # ORIGINAL (SIDE) Test name: from turf selection
+
+    # # SELECT OWNER (PRECINCT CAPTAIN) NAME
+    # # On Folder page, click "owner" text entry field
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").click()
+    # # 9 | type | id=ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input | Law, Barbara
+    # # Select Owners... (will need to cycle through list in outer loop)
+    # # might want a try/except block here for owner not found:
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_viiFilterOwner_rac_viiFilterOwner_Input").send_keys(captain_name)
+    # # 10 | click | id=ctl00_ContentPlaceHolderVANPage_RefreshFilterButton (runs owner selection)
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+
+    # SELECT TURF NAME
+    # use turf name selection method from macrovan
+    print(f'Select turf_name = {turf_name}')
+    select_turf(driver, turf_name)
+    print('Handle erase current list alert')
+    handle_alert(driver)
+
+    # 14 | click | id=addStep |
+    # Edit Search. Odd that this addStep works?
+    driver.find_element(By.ID, "addStep").click()
+    # 15 | click | id=stepTypeItem4 |
+    # Narrow People (Selection from addStep dropdown)
+    driver.find_element(By.ID, "stepTypeItem4").click()
+    early_voting_twisty(driver)
+    print('Click anyone Who Requested a Ballot')
+    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
+    print('Click Preview Button')
+    driver.find_element_by_id("ResultsPreviewButton").click()
+    print("Driver title is: \n", driver.title)
+    print('Click #AddNewStepButton')
+
+    pause('Click Add New Step: Remove, and wait\n for page to load to continue')
+
+    print('Unclick early voting twisty?')
+    early_voting_twisty(driver)
+
+    # click notes twisty
+    notes_twisty(driver)
+
+    print('Click in note text field. Is this needed?')
+    driver.find_element(By.ID, "NoteText").click()
+    print('Send keys to NoteText "*moved')
+    driver.find_element(By.ID, "NoteText").send_keys("*moved")
+    print(f'Sent keys *moved for remove step')
+
+    # unclick notes_twisty
+    notes_twisty(driver)
+
+    # # This worked for notes before:
+    # element = driver.find_element_by_id("ImageButtonSectionNotes").click()
+    # print('Find NoteText')
+    # element = driver.find_element_by_id('NoteText')
+    # print('Send Keys: Voted')
+    # element.send_keys('Voted')
+
+    print('Run Search to Remove selected voters (Click Run Search Button)')
+    element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+
+    print("Driver title is: \n", driver.title)
+    print("And done with SIDE function")
 
 
 def print_list(driver, listName):

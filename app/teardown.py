@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 
-print('hi')
+print('Start Teardown')
 
 windowsUser = os.getlogin()
 
@@ -15,4 +15,4 @@ for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Lo
     print(path)
     shutil.rmtree(path)
 
-print('bye')
+print('Teardown complete')
