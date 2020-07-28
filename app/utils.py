@@ -16,9 +16,8 @@ def pause(message):
 
 
 def start_driver():
-    """Initialize Chrome WebDriver with option to save user data to local
+    """Initialize Chrome WebDriver with option that saves user-data-dir to local
      folder to handle cookies"""
-    # todo: check for valid (up-to-date) webdriver
     # driver.get('chrome://settings/')
     # driver.set_window_size(1210, 720)
 
@@ -26,17 +25,14 @@ def start_driver():
 
     chrome_options = Options()
 
-    # todo: following lines added 7/8 trying to make repo pretty. Gave up. Maybe later.
-    # Or maybe someone else can tell what I was trying to do and make it work. :)
+    # todo: following lines added 7/8 trying to make repo pretty.
+    #  Trying to save chrome-data elsewhere. Gave up. Maybe later.
     # chrome_options.add_argument(r"--user-data-dir='..\io\chrome-data'")
     # #chrome_options.add_argument("--enable-caret-browsing")
-    # driver = webdriver.Chrome(r'..\io\drivers\chromedriver 83', options=chrome_options)
-    # # adding argument opens with address bar highlighted and I can't figure out why!
-    # #driver = webdriver.Chrome('./chromedriver 83')
 
+    # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
     chrome_options.add_argument("--user-data-dir=chrome-data")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-
     return driver
 
 
