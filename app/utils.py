@@ -154,7 +154,7 @@ def notes_twisty(driver):
     driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
 
 
-#Returns list of turf name and last name pairs under a provided captain
+# Returns list of turf name and last name pairs under a provided captain
 def get_turfs_by_captain(captain, turf_dict):
     try:
         return turf_dict[captain]
@@ -162,15 +162,15 @@ def get_turfs_by_captain(captain, turf_dict):
         print("Turf captain doesn't exist: " + captain[0] + " " + captain[1])
 
 
-#Returns list of all turf name and last name pairs
-def getAllTurfs(turf_data):
+# Returns list of all turf name and last name pairs
+def get_all_turfs(turf_data):
     output = []
     for item in turf_data.values():
         output += item
     return output
 
 
-#Return list of all block captains
+# Return list of all block captains
 def get_all_captains(turf_dict):
     output = []
     for item in turf_dict.keys():
