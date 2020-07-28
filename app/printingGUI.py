@@ -1,14 +1,6 @@
-import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-import ctypes  # for windows message pop-up
 import tkinter as tk
-from utils import *
 from printing_steps import *
+
 
 def printNowButton(driver, entry):
     print('print button clicked')
@@ -22,8 +14,10 @@ def printNowButton(driver, entry):
 def continueButton(driver):
     print('continue button clicked')
 
+
 def exitButton(driver):
     print('exit button clicked')
+
 
 def createGUI(window, driver):
     # Create Labels for instructions
@@ -87,7 +81,7 @@ if __name__ == '__main__':
     window = tk.Tk()
     driver = start_driver()
     get_page(driver)
-    driver.implicitly_wait(10)
+    #driver.implicitly_wait(10)
     login_to_page(driver)
     createGUI(window, driver)
     window.mainloop()
