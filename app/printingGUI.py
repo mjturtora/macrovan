@@ -18,9 +18,18 @@ def printNowButton():
 # def exitButton():
 #     print('exit button clicked')
 
+
+def on_exit(window):
+    teardown()
+    window.destroy()
+    
 # Main function for testing
+
 if __name__ == '__main__':
     window = tk.Tk()
+
+    #Override the exit button of the tk window.
+    window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window))
 
     # Create driver and login
     driver = start_driver()
