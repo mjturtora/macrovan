@@ -7,10 +7,15 @@ def printNowButton():
     # Start from 'List' screen
     # Get list name and then clear the field
     list_name = list_name_entry.get()
-    list_name_entry.delete(0, tk.END)
-    print_list(driver, list_name)
-    continue_instructions.pack()
-    continue_button.pack()
+    if (list_name == ""):
+        no_name_warning_text.pack()
+    else:
+        if (no_name_warning_text.winfo_ismapped()):
+            no_name_warning_text.pack_forget()
+        list_name_entry.delete(0, tk.END)
+        print_list(driver, list_name)
+        continue_instructions.pack()
+        continue_button.pack()
 
 
 def continueButton():
@@ -31,6 +36,7 @@ def on_exit(window):
 
 if __name__ == '__main__':
     window = tk.Tk()
+    window.title('GUIvan')
 
     #Override the exit button of the tk window.
     window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window))
@@ -40,18 +46,23 @@ if __name__ == '__main__':
     driver = start_driver()
     get_page(driver)
     driver.implicitly_wait(10)
+    # take out login for release
     login_to_page(driver)
 
     # Create GUI
     # Create Labels for instructions
     instructions1 = tk.Label(
-        text="Please enter the name for your list below."
+        text="Please enter a name for this print file (pdf)."
     )
     instructions2 = tk.Label(
-        text="After you have opened your List click 'Print Now' to begin the printing process."
+        text="When you are ready to print your list click 'Print Now'."
     )
     continue_instructions = tk.Label(
         text="Please make sure everything is correct. After reviewing press 'Continue'."
+    )
+    no_name_warning_text = tk.Label(
+        text="Please enter a name for the print file.",
+        fg = "red"
     )
     # exit_instructions = tk.Label(
     #     text="When you finish, click 'Exit'."
@@ -59,7 +70,7 @@ if __name__ == '__main__':
 
     # Create text Input
     list_name_entry = tk.Entry(
-        width=25
+        width=35
     )
 
     # Create Buttons
@@ -90,6 +101,8 @@ if __name__ == '__main__':
 
     # pack everything into GUI
     instructions1.pack()
+    no_name_warning_text.pack()
+    no_name_warning_text.pack_forget()
     list_name_entry.pack()
     instructions2.pack()
     print_now_button.pack()
