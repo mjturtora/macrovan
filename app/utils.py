@@ -27,10 +27,12 @@ def teardown():
     print('Start Teardown')
     if get_os() == "Windows":
         print("Do Windows")
-        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'scoped_dir*')):
+        windowsUser = os.getlogin()
+        for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'scoped_dir*')):
             print(path)
             shutil.rmtree(path)
-        for path in glob.iglob(os.path.join('C:', 'Users', 'admin', 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
+
+        for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
             print(path)
             shutil.rmtree(path)
     print('Teardown complete')
