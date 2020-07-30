@@ -9,12 +9,16 @@ def printNowButton():
     list_name = list_name_entry.get()
     list_name_entry.delete(0, tk.END)
     print_list(driver, list_name)
+    continue_instructions.pack()
+    continue_button.pack()
 
-# def continueButton():
-#     print('continue button clicked')
-#     driver.implicitly_wait(30)
-#     return_to_folder(driver)
-#
+
+def continueButton():
+    print('continue button clicked')
+    final_selections_submit(driver)
+    continue_instructions.pack_forget()
+    continue_button.pack_forget()
+
 # def exitButton():
 #     print('exit button clicked')
 
@@ -23,6 +27,7 @@ if __name__ == '__main__':
     window = tk.Tk()
 
     # Create driver and login
+    teardown()
     driver = start_driver()
     get_page(driver)
     driver.implicitly_wait(10)
@@ -36,9 +41,9 @@ if __name__ == '__main__':
     instructions2 = tk.Label(
         text="After you have opened your List click 'Print Now' to begin the printing process."
     )
-    # continue_instructions = tk.Label(
-    #     text="If you need to print another list, click 'Continue'."
-    # )
+    continue_instructions = tk.Label(
+        text="Please make sure everything is correct. After reviewing press 'Continue'."
+    )
     # exit_instructions = tk.Label(
     #     text="When you finish, click 'Exit'."
     # )
@@ -57,14 +62,14 @@ if __name__ == '__main__':
         bg="steel blue",
         command=printNowButton
     )
-    # continue_button = tk.Button(
-    #     text="Continue",
-    #     width=15,
-    #     height=5,
-    #     fg="snow",
-    #     bg="steel blue",
-    #     command=continueButton
-    # )
+    continue_button = tk.Button(
+        text="Continue",
+        width=15,
+        height=5,
+        fg="snow",
+        bg="steel blue",
+        command=continueButton
+    )
     # exit_button = tk.Button(
     #     text="Exit",
     #     width=15,

@@ -79,12 +79,13 @@ def sort_orders(driver):
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
-
-def final_selections_submit(driver):
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
 
-    pause("Double Check Selections. Then Press Okay.")
+def final_selections_submit(driver):
+
+
+    # pause("Double Check Selections. Then Press Okay.")
 
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
@@ -97,6 +98,6 @@ def print_list(driver, listName):
     headers_and_pagebreaks(driver)
     # pause('click ok when done')
     sort_orders(driver)
-    final_selections_submit(driver)
+    # final_selections_submit(driver)
 
     #ACTION ID BUTTON FAIL
