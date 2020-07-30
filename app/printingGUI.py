@@ -36,7 +36,6 @@ if __name__ == '__main__':
     window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window))
 
     # Create driver and login
-    teardown()
     driver = start_driver()
     get_page(driver)
     driver.implicitly_wait(10)
