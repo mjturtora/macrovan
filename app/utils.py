@@ -357,10 +357,10 @@ def return_to_folder(driver):
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
     driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
-def get_status(driver, window):
+#Checks if the chrome browser is open or not closes everything if the chrome browser closed.
+def check_browser(driver, window):
     if len(driver.get_log('driver')) > 0:
-        print("HEREREERERERERERERERE")
         driver.quit()
         window.destroy()
     else:
-        window.after(1000, lambda: get_status(driver, window))
+        window.after(1500, lambda: check_browser(driver, window))

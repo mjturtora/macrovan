@@ -31,15 +31,15 @@ def continueButton():
 
 
 def on_exit(window, driver):
-    teardown()
     window.destroy()
     driver.quit()
+    teardown()
     
 # Main function for testing
 
 if __name__ == '__main__':
 
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG, format="%(message)s")
+    logging.basicConfig(stream=sys.stderr, level=logging.CRITICAL, format="%(message)s")
     log = logging.getLogger(__name__)
     log.warning("prints to stderr by default")
 
@@ -119,5 +119,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-    window.after(1000,lambda: get_status(driver, window))
+    window.after(1500,lambda: check_browser(driver, window))
     window.mainloop()
