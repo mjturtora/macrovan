@@ -9,14 +9,23 @@ def printNowButton():
     # Start from 'List' screen
     # Get list name and then clear the field
     list_name = list_name_entry.get()
-    list_name_entry.delete(0, tk.END)
-    print_list(driver, list_name)
+    if (list_name == ""):
+        no_name_warning_text.pack()
+    else:
+        if (no_name_warning_text.winfo_ismapped()):
+            no_name_warning_text.pack_forget()
+        list_name_entry.delete(0, tk.END)
+        print_list(driver, list_name)
+        continue_instructions.pack()
+        continue_button.pack()
 
-# def continueButton():
-#     print('continue button clicked')
-#     driver.implicitly_wait(30)
-#     return_to_folder(driver)
-#
+
+def continueButton():
+    print('continue button clicked')
+    final_selections_submit(driver)
+    continue_instructions.pack_forget()
+    continue_button.pack_forget()
+
 # def exitButton():
 #     print('exit button clicked')
 
@@ -35,12 +44,14 @@ if __name__ == '__main__':
     log.warning("prints to stderr by default")
 
     window = tk.Tk()
+    window.title('GUIvan')
 
 
     # Create driver and login
     driver = start_driver()
     get_page(driver)
     driver.implicitly_wait(10)
+    # take out login for release
     login_to_page(driver)
 
 
@@ -50,21 +61,25 @@ if __name__ == '__main__':
     # Create GUI
     # Create Labels for instructions
     instructions1 = tk.Label(
-        text="Please enter the name for your list below."
+        text="Please enter a name for this print file (pdf)."
     )
     instructions2 = tk.Label(
-        text="After you have opened your List click 'Print Now' to begin the printing process."
+        text="When you are ready to print your list click 'Print Now'."
     )
-    # continue_instructions = tk.Label(
-    #     text="If you need to print another list, click 'Continue'."
-    # )
+    continue_instructions = tk.Label(
+        text="Please make sure everything is correct. After reviewing press 'Continue'."
+    )
+    no_name_warning_text = tk.Label(
+        text="Please enter a name for the print file.",
+        fg = "red"
+    )
     # exit_instructions = tk.Label(
     #     text="When you finish, click 'Exit'."
     # )
 
     # Create text Input
     list_name_entry = tk.Entry(
-        width=25
+        width=35
     )
 
     # Create Buttons
@@ -76,14 +91,14 @@ if __name__ == '__main__':
         bg="steel blue",
         command=printNowButton
     )
-    # continue_button = tk.Button(
-    #     text="Continue",
-    #     width=15,
-    #     height=5,
-    #     fg="snow",
-    #     bg="steel blue",
-    #     command=continueButton
-    # )
+    continue_button = tk.Button(
+        text="Continue",
+        width=15,
+        height=5,
+        fg="snow",
+        bg="steel blue",
+        command=continueButton
+    )
     # exit_button = tk.Button(
     #     text="Exit",
     #     width=15,
@@ -95,6 +110,8 @@ if __name__ == '__main__':
 
     # pack everything into GUI
     instructions1.pack()
+    no_name_warning_text.pack()
+    no_name_warning_text.pack_forget()
     list_name_entry.pack()
     instructions2.pack()
     print_now_button.pack()
