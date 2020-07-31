@@ -2,8 +2,6 @@ import tkinter as tk
 from utils import *
 from printing_steps import *
 import time
-import io
-import sys
 
 def printNowButton():
     print('print button clicked')
@@ -35,9 +33,10 @@ def continueButton():
 
 if __name__ == '__main__':
 
-    text_trap = io.StringIO()
-    sys.stdout = text_trap
-    sys.stderr = text_trap
+    #Suppress all print statements
+    disable_print()
+
+
     window = tk.Tk()
     window.title('GUIvan')
 

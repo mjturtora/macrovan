@@ -1,5 +1,6 @@
 from secrets import *
 import os
+import io
 import sys
 import glob
 import shutil
@@ -58,6 +59,7 @@ def start_driver():
     # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
     chrome_options.add_argument("--user-data-dir=chrome-data")
     chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
@@ -390,3 +392,10 @@ def check_browser(window, driver):
     else:
         window.after(1500, lambda: check_browser(window, driver))
 
+
+def disable_print():
+    text_trap = io.StringIO()
+    sys.stdout = text_trap
+    sys.stderr = text_trap
+
+def display_loading():
