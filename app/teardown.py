@@ -2,7 +2,8 @@ import os
 import glob
 import shutil
 
-def teardown:
+def teardown():
+
     print('Start Teardown')
 
     windowsUser = os.getlogin()

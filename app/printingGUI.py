@@ -52,7 +52,7 @@ if __name__ == '__main__':
     get_page(driver)
     driver.implicitly_wait(10)
     # take out login for release
-    login_to_page(driver)
+    #login_to_page(driver)
 
 
     #Override the exit button of the tk window.
