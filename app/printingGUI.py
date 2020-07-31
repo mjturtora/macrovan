@@ -1,7 +1,6 @@
 import tkinter as tk
 from utils import *
 from printing_steps import *
-import logging
 import time
 
 def printNowButton():
@@ -29,19 +28,10 @@ def continueButton():
 # def exitButton():
 #     print('exit button clicked')
 
-
-def on_exit(window, driver):
-    window.destroy()
-    driver.quit()
-    teardown()
     
 # Main function for testing
 
 if __name__ == '__main__':
-
-    logging.basicConfig(stream=sys.stderr, level=logging.CRITICAL, format="%(message)s")
-    log = logging.getLogger(__name__)
-    log.warning("prints to stderr by default")
 
     window = tk.Tk()
     window.title('GUIvan')
@@ -56,7 +46,7 @@ if __name__ == '__main__':
 
 
     #Override the exit button of the tk window.
-    window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window, driver))
+    window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
 
     # Create GUI
     # Create Labels for instructions
@@ -119,5 +109,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-    window.after(1500,lambda: check_browser(driver, window))
+    window.after(1500,lambda: check_browser(window, driver))
     window.mainloop()
