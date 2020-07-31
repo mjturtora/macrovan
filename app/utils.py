@@ -23,18 +23,18 @@ def get_os():
 def teardown():
     """Remove temp files from prior run before starting driver"""
 
-    #print('Start Teardown')
+    print('Start Teardown')
     if get_os() == "Windows":
-        #print("Do Windows")
+        print("Do Windows")
         windowsUser = os.getlogin()
         for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'scoped_dir*')):
-            #print(path)
+            print(path)
             shutil.rmtree(path)
 
         for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
-            #print(path)
+            print(path)
             shutil.rmtree(path)
-    #print('Teardown complete')
+    print('Teardown complete')
 
 def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
@@ -58,6 +58,7 @@ def start_driver():
     # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
     chrome_options.add_argument("--user-data-dir=chrome-data")
     chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument('disable-infobars')
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
@@ -368,7 +369,7 @@ def exit_program(window, driver):
         print("Window closed!")
 
     try:
-        driver.close()
+        driver.close
         driver.quit()
     except:
         print("Driver does not exist!")    
@@ -388,3 +389,4 @@ def check_browser(window, driver):
         exit_program(window, driver)
     else:
         window.after(1500, lambda: check_browser(window, driver))
+
