@@ -1,5 +1,4 @@
 from secrets import *
-
 import os
 import sys
 import glob
@@ -11,8 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.remote.command import Command
 import ctypes  # for windows message pop-up
-
 
 def get_os():
     # print(sys.platform)
@@ -357,3 +356,11 @@ def return_to_folder(driver):
     driver.find_element(By.LINK_TEXT, "Home").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
     driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+
+def get_status(driver, window):
+    if len(driver.get_log('driver')) > 0:
+        print("HEREREERERERERERERERE")
+        driver.quit()
+        window.destroy()
+    else:
+        window.after(1000, lambda: get_status(driver, window))

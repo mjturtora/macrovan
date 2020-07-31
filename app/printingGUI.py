@@ -1,6 +1,8 @@
 import tkinter as tk
 from utils import *
 from printing_steps import *
+import logging
+import time
 
 def printNowButton():
     print('print button clicked')
@@ -19,23 +21,31 @@ def printNowButton():
 #     print('exit button clicked')
 
 
-def on_exit(window):
+def on_exit(window, driver):
     teardown()
     window.destroy()
+    driver.quit()
     
 # Main function for testing
 
 if __name__ == '__main__':
+
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG, format="%(message)s")
+    log = logging.getLogger(__name__)
+    log.warning("prints to stderr by default")
+
     window = tk.Tk()
 
-    #Override the exit button of the tk window.
-    window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window))
 
     # Create driver and login
     driver = start_driver()
     get_page(driver)
     driver.implicitly_wait(10)
     login_to_page(driver)
+
+
+    #Override the exit button of the tk window.
+    window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window, driver))
 
     # Create GUI
     # Create Labels for instructions
@@ -92,5 +102,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-
+    window.after(1000,lambda: get_status(driver, window))
     window.mainloop()
