@@ -398,4 +398,3 @@ def disable_print():
     sys.stdout = text_trap
     sys.stderr = text_trap
 
-def display_loading():
