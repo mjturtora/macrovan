@@ -12,7 +12,6 @@ side/
 
 # executables and other randos
 chromedriver*.*
-*.txt
 
 # chrome user profile
 chrome-data/
