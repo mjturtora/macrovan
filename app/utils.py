@@ -61,11 +61,8 @@ def start_driver():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
-    sys.stdout = sys.__stdout__
-    display_console("This can take up to 15 seconds")
-    display_console("Loading...")
+
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    display_console("Finished loading!")
 
     return driver
 
