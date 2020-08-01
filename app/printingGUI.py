@@ -71,7 +71,7 @@ if __name__ == '__main__':
     )
     no_name_warning_text = tk.Label(
         text="Please enter a name for the print file",
-        fg = "red",
+        fg = "#ff0000",
         font=custom_font,
         pady=5
     )
@@ -89,8 +89,8 @@ if __name__ == '__main__':
         text="Print Now",
         width=25,
         height=5,
-        fg="snow",
-        bg="steel blue",
+        fg="#ffffff",
+        bg="#419cd1",
         command=printNowButton,
         font=custom_font
     )
@@ -98,8 +98,8 @@ if __name__ == '__main__':
         text="Continue",
         width=25,
         height=5,
-        fg="snow",
-        bg="steel blue",
+        fg="#ffffff",
+        bg="#419cd1",
         command=continueButton,
         font=custom_font
     )
