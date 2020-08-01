@@ -1,6 +1,6 @@
 from secrets import *
-
 import os
+import io
 import sys
 import glob
 import shutil
@@ -11,8 +11,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.remote.command import Command
 import ctypes  # for windows message pop-up
-
 
 def get_os():
     # print(sys.platform)
@@ -58,7 +58,12 @@ def start_driver():
 
     # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
     chrome_options.add_argument("--user-data-dir=chrome-data")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
+    chrome_options.add_argument('disable-infobars')
+    display_to_console("Loading...")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    display_to_console("Finished loading!")
     return driver
 
 
@@ -357,3 +362,50 @@ def return_to_folder(driver):
     driver.find_element(By.LINK_TEXT, "Home").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
     driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+
+#Close everything and cleanup
+def exit_program(window, driver):
+    try:
+        window.destroy()
+    except:
+        print("Window does not exist!")
+    else:
+        print("Window closed!")
+
+    try:
+        driver.close
+        driver.quit()
+    except:
+        print("Driver does not exist!")    
+    else:
+        print("Driver closed!")
+
+    try:
+        teardown()
+    except:
+        print("Teardown failed!")
+    else:
+        print("Teardown successfully ran!")
+
+#Checks if the chrome browser is open or not closes everything if the chrome browser closed.
+def check_browser(window, driver):
+    if len(driver.get_log('driver')) > 0:
+        if driver.get_log('driver')[0]['message'] == "Unable to evaluate script: disconnected: not connected to DevTools\n":
+            exit_program(window, driver)
+    else:
+        window.after(1500, lambda: check_browser(window, driver))
+
+
+def enable_print():
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
+
+def disable_print():
+    text_trap = io.StringIO()
+    sys.stdout = text_trap
+    sys.stderr = text_trap
+
+def display_to_console(x):
+    enable_print()
+    print(x)
+    disable_print()
