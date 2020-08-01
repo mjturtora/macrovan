@@ -61,9 +61,9 @@ def start_driver():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
-    display_to_console("Loading...")
+    #display_to_console("Loading...")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    display_to_console("Finished loading!")
+    #display_to_console("Finished loading!")
     return driver
 
 
@@ -390,7 +390,8 @@ def exit_program(window, driver):
 #Checks if the chrome browser is open or not closes everything if the chrome browser closed.
 def check_browser(window, driver):
     if len(driver.get_log('driver')) > 0:
-        exit_program(window, driver)
+        if driver.get_log('driver')[0]['message'] == "Unable to evaluate script: disconnected: not connected to DevTools\n":
+            exit_program(window, driver)
     else:
         window.after(1500, lambda: check_browser(window, driver))
 
