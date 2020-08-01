@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tkFont
 from utils import *
 from printing_steps import *
 
@@ -49,19 +50,30 @@ if __name__ == '__main__':
     #login_to_page(driver)
 
     # Create GUI
+    #Create custom font to adjust size
+    custom_font = tkFont.Font(family="Courier", size=17, weight="bold")
     # Create Labels for instructions
     instructions1 = tk.Label(
-        text="Please enter a name for this print file (pdf)."
+        text="Please enter a name for this print file (pdf)",
+        font=custom_font,
+        padx=10,
+        pady=5
     )
     instructions2 = tk.Label(
-        text="When you are ready to print your list click 'Print Now'."
+        text="To automatically click VAN print icon \nclick 'Print Now' button",
+        font=custom_font,
+        pady=5
     )
     continue_instructions = tk.Label(
-        text="Please make sure everything is correct. After reviewing press 'Continue'."
+        text="Please make sure everything is correct. After reviewing press 'Continue'",
+        font=custom_font,
+        pady=5
     )
     no_name_warning_text = tk.Label(
-        text="Please enter a name for the print file.",
-        fg = "red"
+        text="Please enter a name for the print file",
+        fg = "red",
+        font=custom_font,
+        pady=5
     )
     # exit_instructions = tk.Label(
     #     text="When you finish, click 'Exit'."
@@ -69,25 +81,27 @@ if __name__ == '__main__':
 
     # Create text Input
     list_name_entry = tk.Entry(
-        width=35
+        width=50
     )
 
     # Create Buttons
     print_now_button = tk.Button(
         text="Print Now",
-        width=15,
+        width=25,
         height=5,
         fg="snow",
         bg="steel blue",
-        command=printNowButton
+        command=printNowButton,
+        font=custom_font
     )
     continue_button = tk.Button(
         text="Continue",
-        width=15,
+        width=25,
         height=5,
         fg="snow",
         bg="steel blue",
-        command=continueButton
+        command=continueButton,
+        font=custom_font
     )
     # exit_button = tk.Button(
     #     text="Exit",
