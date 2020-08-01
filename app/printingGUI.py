@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.font as tkFont
 from utils import *
 from printing_steps import *
+import time
 
 def printNowButton():
     print('print button clicked')
@@ -28,19 +29,17 @@ def continueButton():
 # def exitButton():
 #     print('exit button clicked')
 
-
-def on_exit(window):
-    teardown()
-    window.destroy()
     
 # Main function for testing
 
 if __name__ == '__main__':
+
+    #Suppress all print statements
+    disable_print()
+
     window = tk.Tk()
     window.title('GUIvan')
 
-    #Override the exit button of the tk window.
-    window.wm_protocol("WM_DELETE_WINDOW", lambda: on_exit(window))
 
     # Create driver and login
     driver = start_driver()
@@ -48,6 +47,10 @@ if __name__ == '__main__':
     driver.implicitly_wait(10)
     # take out login for release
     #login_to_page(driver)
+
+
+    #Override the exit button of the tk window.
+    window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
 
     # Create GUI
     #Create custom font to adjust size
@@ -123,5 +126,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-
+    window.after(1500,lambda: check_browser(window, driver))
     window.mainloop()
