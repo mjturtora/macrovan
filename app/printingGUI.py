@@ -34,7 +34,7 @@ def continueButton():
 if __name__ == '__main__':
 
     #Suppress all print statements
-    #disable_print()
+    disable_print()
 
     window = tk.Tk()
     window.title('GUIvan')
