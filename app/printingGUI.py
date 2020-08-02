@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
 
     #Override the exit button of the tk window.
-    window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
+    #window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
 
     # Create GUI
     # Create Labels for instructions
@@ -112,5 +112,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-    window.after(1500,lambda: check_browser(window, driver))
+    #window.after(1500,lambda: check_browser(window, driver))
     window.mainloop()
