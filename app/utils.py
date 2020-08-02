@@ -83,24 +83,30 @@ def login_to_page(driver):
     # Click ActionID Button to open login
 
     wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
+    element = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
     #print(f'ELEMENT = {element}')
 
-    driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
+    # driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
+    expect_by_XPATH(driver, "//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print('After ActionID Button')
     print_title(driver)
 
-    wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.ID, 'username')))
+    # wait_no_longer_than = 30
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.ID, 'username')))
+    expect_by_id(driver, 'username')
     #print(f'ELEMENT = {element}')
 
-    username = driver.find_element_by_id("username")
+    # username = driver.find_element_by_id("username")
+    username = expect_by_id(driver, "username")
     username.send_keys(user_name)
-    password = driver.find_element_by_id("password")
+    # password = driver.find_element_by_id("password")
+    password = expect_by_id(driver, "password")
     password.send_keys(pass_word)
-    driver.find_element_by_class_name("btn-blue").click()
+    # driver.find_element_by_class_name("btn-blue").click()
+    expect_by_class(driver, "btn-blue").click()
 
     #wait_no_longer_than = 30
     # element = WebDriverWait(driver, wait_no_longer_than).until(
@@ -125,33 +131,40 @@ def login_to_page(driver):
 
 
 def remember_this(driver):
-    driver.find_element_by_class_name("checkbox").click()
+    # driver.find_element_by_class_name("checkbox").click()
+    expect_by_class(driver, "checkbox").click()
     # wait at least long enough to enter code and pin
     #driver.implicitly_wait(25)
 
 
 def list_folders(driver):
     # List "My Folders" and select folder:
-    wait_no_longer_than = 60
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//a[@href="FolderList.aspx"]')))
+    # wait_no_longer_than = 60
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//a[@href="FolderList.aspx"]')))
+    # expect_by_XPATH(driver, '//a[@href="FolderList.aspx"]')
     #print(f'ELEMENT = {element}')
-    driver.find_element_by_xpath('//a[@href="FolderList.aspx"]').click()
+    # driver.find_element_by_xpath('//a[@href="FolderList.aspx"]').click()
+    expect_by_XPATH(driver, '//a[@href="FolderList.aspx"]').click()
     print('AFTER FOLDER LIST CLICK')
 
 
 def select_folder(driver):
     print('Select Folder')
     #driver.find_element_by_xpath('//*[text()="District 68 2020 3/17 Primary/Municipals"]').click()
-    driver.find_element_by_xpath('//*[text()="2020 District 68"]').click()
+    #driver.find_element_by_xpath('//*[text()="2020 District 68"]').click()
+    expect_by_XPATH(driver, '//*[text()="2020 District 68"]').click()
     print_title(driver)
 
 
 def select_turf(driver, turf_name):
     print('Select Saved Search')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
-    driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+    # driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
+    expect_by_XPATH(driver, '//*[text()="' + turf_name + '"]').click()
 
 
 def handle_alert(driver):
@@ -165,24 +178,29 @@ def handle_alert(driver):
 def edit_search(driver):
     # Edit Search:
     print('Edit Search')
-    driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
+    # driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
+    expect_by_XPATH(driver, '//button[normalize-space()="Edit Search"]').click()
 
 def early_voting_twisty(driver):
     # some wait needed for page to load...
-    wait_no_longer_than = 10
+    #wait_no_longer_than = 10
     # to click Early Voting Twisty
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-        EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #     EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    element = expect_by_id(driver, 'ImageButtonSectionEarlyVoting')
     print(f'Early Voting Section element located = {element}')
-    driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+    # driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+    expect_by_id(driver, "ImageButtonSectionEarlyVoting").click()
 
 
 def notes_twisty(driver):
-    wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    #wait_no_longer_than = 30
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    element = expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]')
     print('Try to click "Notes" twisty')
-    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    # driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]').click()
 
 
 # Returns list of turf name and last name pairs under a provided captain
@@ -231,15 +249,19 @@ def turfselection_plus(driver, turf_name, captain_name):
 
     # 14 | click | id=addStep |
     # Edit Search. Odd that this addStep works?
-    driver.find_element(By.ID, "addStep").click()
+    # driver.find_element(By.ID, "addStep").click()
+    expect_by_id(driver, "addStep").click()
     # 15 | click | id=stepTypeItem4 |
     # Narrow People (Selection from addStep dropdown)
-    driver.find_element(By.ID, "stepTypeItem4").click()
+    # driver.find_element(By.ID, "stepTypeItem4").click()
+    expect_by_id(driver, "stepTypeItem4").click()
     early_voting_twisty(driver)
     print('Click anyone Who Requested a Ballot')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
     print('Click Preview Button')
-    driver.find_element_by_id("ResultsPreviewButton").click()
+    # driver.find_element_by_id("ResultsPreviewButton").click()
+    expect_by_id(driver, "ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
     print('Click #AddNewStepButton')
 
@@ -252,9 +274,11 @@ def turfselection_plus(driver, turf_name, captain_name):
     notes_twisty(driver)
 
     print('Click in note text field. Is this needed?')
-    driver.find_element(By.ID, "NoteText").click()
+    # driver.find_element(By.ID, "NoteText").click()
+    expect_by_id(driver, "NoteText").click()
     print('Send keys to NoteText "*moved')
-    driver.find_element(By.ID, "NoteText").send_keys("*moved")
+    # driver.find_element(By.ID, "NoteText").send_keys("*moved")
+    expect_by_id(driver, "NoteText").send_keys("*moved")
     print(f'Sent keys *moved for remove step')
 
     # unclick notes_twisty
@@ -268,7 +292,8 @@ def turfselection_plus(driver, turf_name, captain_name):
     # element.send_keys('Voted')
 
     print('Run Search to Remove selected voters (Click Run Search Button)')
-    element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+    # element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
 
     print("Driver title is: \n", driver.title)
     print("And done with SIDE function")
@@ -276,92 +301,119 @@ def turfselection_plus(driver, turf_name, captain_name):
 
 def print_list(driver, listName):
     # Print a List
-    wait_no_longer_than = 30
+    # wait_no_longer_than = 30
     print('in print_list waiting for print icon')
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-        EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #     EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")
     print('in print_list trying to click')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
 
     # Select Report Format Option
     # Locate the Sector and create a Select object
     print('Select Print Format Option')
-    select_element = Select(driver.find_element_by_id(
-        'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
-    )
-    )
+    # select_element = Select(driver.find_element_by_id(
+    #     'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
+    # )
+    # )
+    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
-    select_element = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
-    )
-    )
+    # select_element = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
+    # )
+    # )
+    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
     # print([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
 
     # Script source selection (Walk)
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
-    dropdown.find_element(By.XPATH, "//option[. = 'Walk']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    # dropdown = driver.find_element(By.ID,
+    #                                "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+    dropdown = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+    # dropdown.find_element(By.XPATH, "//option[. = 'Walk']").click()
+    expect_by_XPATH(driver, "//option[. = 'Walk']").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle").click()
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle").send_keys("Test")
-    element = driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+    # element = driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
 
     # Deselect Headers amd Breaks
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
 
     # Sort Order 4
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    #driver.find_element(By.ID,"ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    # Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    # dropdown = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+    # dropdown = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
-    pause("Double Check that selections are correct")
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
-    driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+    pause("Double Check that selections are correct").click()
+    #driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
+    # driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+    expect_by_link_text(driver, "My PDF Files").click()
 
 def return_to_folder(driver):
-    driver.find_element(By.LINK_TEXT, "Home").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
-    driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+    # driver.find_element(By.LINK_TEXT, "Home").click()
+    expect_by_link_text(driver, "Home").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
+    expect_by_css(driver, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+    # driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
 #Close everything and cleanup
 def exit_program(window, driver):
@@ -409,3 +461,47 @@ def display_to_console(x):
     enable_print()
     print(x)
     disable_print()
+
+
+# def expect_by_id_and_click(driver, id_tag):
+#     # handle expected conditions by id
+#     expect_by_id(driver,id_tag).click() 
+#     print(f'clicked Expected ID {id_tag}')
+
+def expect_by_id(driver, id_tag):
+    # handle expected conditions by id
+    wait_no_longer_than = 30
+    print(f'Expecting {id_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.ID, id_tag)))
+    return element
+
+def expect_by_XPATH(driver, XPATH):
+    wait_no_longer_than = 30
+    print(f'Expecting {XPATH}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.XPATH, XPATH)))
+    return element
+
+def expect_by_class(driver, class_tag):
+    wait_no_longer_than = 30
+    print(f'Expecting {class_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.CLASS_NAME, class_tag)))
+    return element
+
+def expect_by_css(driver, css_tag):
+    wait_no_longer_than = 30
+    print(f'Expecting {css_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, css_tag)))
+    return element
+
+def expect_by_link_text(driver, link_text):
+    wait_no_longer_than = 30
+    print(f'Expecting {link_text}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.LINK_TEXT, link_text)))
+    return element
+
+
