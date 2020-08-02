@@ -83,17 +83,20 @@ def login_to_page(driver):
     # Click ActionID Button to open login
 
     wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')))
+    element = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
     #print(f'ELEMENT = {element}')
 
-    driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
+    # driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
+    expect_by_XPATH(driver, "//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print('After ActionID Button')
     print_title(driver)
 
-    wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.ID, 'username')))
+    # wait_no_longer_than = 30
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.ID, 'username')))
+    expect_by_id(driver, 'username')
     #print(f'ELEMENT = {element}')
 
     username = driver.find_element_by_id("username")
@@ -132,26 +135,32 @@ def remember_this(driver):
 
 def list_folders(driver):
     # List "My Folders" and select folder:
-    wait_no_longer_than = 60
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//a[@href="FolderList.aspx"]')))
+    # wait_no_longer_than = 60
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//a[@href="FolderList.aspx"]')))
+    # expect_by_XPATH(driver, '//a[@href="FolderList.aspx"]')
     #print(f'ELEMENT = {element}')
-    driver.find_element_by_xpath('//a[@href="FolderList.aspx"]').click()
+    # driver.find_element_by_xpath('//a[@href="FolderList.aspx"]').click()
+    expect_by_XPATH(driver, '//a[@href="FolderList.aspx"]').click()
     print('AFTER FOLDER LIST CLICK')
 
 
 def select_folder(driver):
     print('Select Folder')
     #driver.find_element_by_xpath('//*[text()="District 68 2020 3/17 Primary/Municipals"]').click()
-    driver.find_element_by_xpath('//*[text()="2020 District 68"]').click()
+    #driver.find_element_by_xpath('//*[text()="2020 District 68"]').click()
+    expect_by_XPATH(driver, '//*[text()="2020 District 68"]').click()
     print_title(driver)
 
 
 def select_turf(driver, turf_name):
     print('Select Saved Search')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
-    driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
+    # driver.find_element_by_xpath('//*[text()="' + turf_name + '"]').click()
+    expect_by_XPATH(driver, '//*[text()="' + turf_name + '"]').click()
 
 
 def handle_alert(driver):
@@ -165,24 +174,29 @@ def handle_alert(driver):
 def edit_search(driver):
     # Edit Search:
     print('Edit Search')
-    driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
+    # driver.find_element_by_xpath('//button[normalize-space()="Edit Search"]').click()
+    expect_by_XPATH(driver, '//button[normalize-space()="Edit Search"]').click()
 
 def early_voting_twisty(driver):
     # some wait needed for page to load...
-    wait_no_longer_than = 10
+    #wait_no_longer_than = 10
     # to click Early Voting Twisty
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-        EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #     EC.presence_of_element_located((By.ID, 'ImageButtonSectionEarlyVoting')))
+    element = expect_by_id(driver, 'ImageButtonSectionEarlyVoting')
     print(f'Early Voting Section element located = {element}')
-    driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+    # driver.find_element(By.ID, "ImageButtonSectionEarlyVoting").click()
+    expect_by_id(driver, "ImageButtonSectionEarlyVoting").click()
 
 
 def notes_twisty(driver):
-    wait_no_longer_than = 30
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-                EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    #wait_no_longer_than = 30
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #             EC.presence_of_element_located((By.XPATH, '//*[@id="ImageButtonSectionNotes"]')))
+    element = expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]')
     print('Try to click "Notes" twisty')
-    driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    # driver.find_element_by_xpath('//*[@id="ImageButtonSectionNotes"]').click()
+    expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]').click()
 
 
 # Returns list of turf name and last name pairs under a provided captain
@@ -274,7 +288,8 @@ def turfselection_plus(driver, turf_name, captain_name):
     # element.send_keys('Voted')
 
     print('Run Search to Remove selected voters (Click Run Search Button)')
-    element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+    # element = driver.find_element_by_id("ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
 
     print("Driver title is: \n", driver.title)
     print("And done with SIDE function")
@@ -383,9 +398,11 @@ def print_list(driver, listName):
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
 
 def return_to_folder(driver):
-    driver.find_element(By.LINK_TEXT, "Home").click()
+    # driver.find_element(By.LINK_TEXT, "Home").click()
+    expect_by_link_text(driver, "Home").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
-    driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+    expect_by_css(driver, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
+    # driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
 #Close everything and cleanup
 def exit_program(window, driver):
@@ -450,7 +467,30 @@ def expect_by_id(driver, id_tag):
 
 def expect_by_XPATH(driver, XPATH):
     wait_no_longer_than = 30
-    print(f'Expecting {id_tag}')
+    print(f'Expecting {XPATH}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.XPATH, XPATH)))
     return element
+
+def expect_by_class(driver, class_tag):
+    wait_no_longer_than = 30
+    print(f'Expecting {class_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.CLASS_NAME, class_tag)))
+    return element
+
+def expect_by_css(driver, css_tag):
+    wait_no_longer_than = 30
+    print(f'Expecting {css_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, css_tag)))
+    return element
+
+def expect_by_link_text(driver, link_text):
+    wait_no_longer_than = 30
+    print(f'Expecting {link_text}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.LINK_TEXT, link_text)))
+    return element
+
+
