@@ -61,9 +61,9 @@ def start_driver():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
-    display_to_console("Loading...")
+    #display_to_console("Loading...")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    display_to_console("Finished loading!")
+    #display_to_console("Finished loading!")
     return driver
 
 
@@ -384,8 +384,8 @@ def exit_program(window, driver):
         teardown()
     except:
         print("Teardown failed!")
-    else:
-        print("Teardown successfully ran!")
+    #else:
+        #print("Teardown successfully ran!")
 
 #Checks if the chrome browser is open or not closes everything if the chrome browser closed.
 def check_browser(window, driver):
