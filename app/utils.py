@@ -99,11 +99,14 @@ def login_to_page(driver):
     expect_by_id(driver, 'username')
     #print(f'ELEMENT = {element}')
 
-    username = driver.find_element_by_id("username")
+    # username = driver.find_element_by_id("username")
+    username = expect_by_id(driver, "username")
     username.send_keys(user_name)
-    password = driver.find_element_by_id("password")
+    # password = driver.find_element_by_id("password")
+    password = expect_by_id(driver, "password")
     password.send_keys(pass_word)
-    driver.find_element_by_class_name("btn-blue").click()
+    # driver.find_element_by_class_name("btn-blue").click()
+    expect_by_class(driver, "btn-blue").click()
 
     #wait_no_longer_than = 30
     # element = WebDriverWait(driver, wait_no_longer_than).until(
@@ -128,7 +131,8 @@ def login_to_page(driver):
 
 
 def remember_this(driver):
-    driver.find_element_by_class_name("checkbox").click()
+    # driver.find_element_by_class_name("checkbox").click()
+    expect_by_class(driver, "checkbox").click()
     # wait at least long enough to enter code and pin
     #driver.implicitly_wait(25)
 
@@ -297,12 +301,14 @@ def turfselection_plus(driver, turf_name, captain_name):
 
 def print_list(driver, listName):
     # Print a List
-    wait_no_longer_than = 30
+    # wait_no_longer_than = 30
     print('in print_list waiting for print icon')
-    element = WebDriverWait(driver, wait_no_longer_than).until(
-        EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    # element = WebDriverWait(driver, wait_no_longer_than).until(
+    #     EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")))
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")
     print('in print_list trying to click')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
 
     # Select Report Format Option
@@ -336,7 +342,8 @@ def print_list(driver, listName):
     # dropdown = driver.find_element(By.ID,
     #                                "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
     dropdown = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
-    dropdown.find_element(By.XPATH, "//option[. = 'Walk']").click()
+    # dropdown.find_element(By.XPATH, "//option[. = 'Walk']").click()
+    expect_by_XPATH(driver, "//option[. = 'Walk']").click()
     # driver.find_element(By.ID,
     #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
@@ -368,24 +375,27 @@ def print_list(driver, listName):
     # Sort Order 4
     #driver.find_element(By.ID,"ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    # Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
     # driver.find_element(By.ID,
     #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    # dropdown = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     # driver.find_element(By.ID,
     #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
-    dropdown = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
+    # dropdown = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
+    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
@@ -395,7 +405,8 @@ def print_list(driver, listName):
     pause("Double Check that selections are correct").click()
     #driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
-    driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+    # driver.find_element(By.LINK_TEXT, "My PDF Files").click()
+    expect_by_link_text(driver, "My PDF Files").click()
 
 def return_to_folder(driver):
     # driver.find_element(By.LINK_TEXT, "Home").click()
