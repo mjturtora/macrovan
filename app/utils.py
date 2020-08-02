@@ -334,20 +334,6 @@ def print_list(driver, listName):
     element.send_keys(listName)
 
     # Deselect Headers amd Breaks
-<<<<<<< Updated upstream
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
-
-    # Sort Order 4
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-=======
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
@@ -367,7 +353,6 @@ def print_list(driver, listName):
     # Sort Order 4
     #driver.find_element(By.ID,"ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
->>>>>>> Stashed changes
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
@@ -447,9 +432,6 @@ def disable_print():
 def display_to_console(x):
     enable_print()
     print(x)
-<<<<<<< Updated upstream
-    disable_print()
-=======
     disable_print()
 
 
@@ -472,4 +454,3 @@ def expect_by_XPATH(driver, XPATH):
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.XPATH, XPATH)))
     return element
->>>>>>> Stashed changes
