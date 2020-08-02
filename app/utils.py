@@ -231,15 +231,19 @@ def turfselection_plus(driver, turf_name, captain_name):
 
     # 14 | click | id=addStep |
     # Edit Search. Odd that this addStep works?
-    driver.find_element(By.ID, "addStep").click()
+    # driver.find_element(By.ID, "addStep").click()
+    expect_by_id(driver, "addStep").click()
     # 15 | click | id=stepTypeItem4 |
     # Narrow People (Selection from addStep dropdown)
-    driver.find_element(By.ID, "stepTypeItem4").click()
+    # driver.find_element(By.ID, "stepTypeItem4").click()
+    expect_by_id(driver, "stepTypeItem4").click()
     early_voting_twisty(driver)
     print('Click anyone Who Requested a Ballot')
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
     print('Click Preview Button')
-    driver.find_element_by_id("ResultsPreviewButton").click()
+    # driver.find_element_by_id("ResultsPreviewButton").click()
+    expect_by_id(driver, "ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
     print('Click #AddNewStepButton')
 
@@ -252,9 +256,11 @@ def turfselection_plus(driver, turf_name, captain_name):
     notes_twisty(driver)
 
     print('Click in note text field. Is this needed?')
-    driver.find_element(By.ID, "NoteText").click()
+    # driver.find_element(By.ID, "NoteText").click()
+    expect_by_id(driver, "NoteText").click()
     print('Send keys to NoteText "*moved')
-    driver.find_element(By.ID, "NoteText").send_keys("*moved")
+    # driver.find_element(By.ID, "NoteText").send_keys("*moved")
+    expect_by_id(driver, "NoteText").send_keys("*moved")
     print(f'Sent keys *moved for remove step')
 
     # unclick notes_twisty
@@ -287,40 +293,48 @@ def print_list(driver, listName):
     # Select Report Format Option
     # Locate the Sector and create a Select object
     print('Select Print Format Option')
-    select_element = Select(driver.find_element_by_id(
-        'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
-    )
-    )
+    # select_element = Select(driver.find_element_by_id(
+    #     'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
+    # )
+    # )
+    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
-    select_element = Select(driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
-    )
-    )
+    # select_element = Select(driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"
+    # )
+    # )
+    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
     # print([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
 
     # Script source selection (Walk)
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
-    dropdown = driver.find_element(By.ID,
-                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    # dropdown = driver.find_element(By.ID,
+    #                                "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+    dropdown = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
     dropdown.find_element(By.XPATH, "//option[. = 'Walk']").click()
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle").click()
     # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle").send_keys("Test")
-    element = driver.find_element_by_id(
-        "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+    # element = driver.find_element_by_id(
+    #     "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
 
     # Deselect Headers amd Breaks
+<<<<<<< Updated upstream
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
     driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
@@ -333,34 +347,59 @@ def print_list(driver, listName):
     # Sort Order 4
     driver.find_element(By.ID,
                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+=======
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+
+    # Sort Order 4
+    #driver.find_element(By.ID,"ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+>>>>>>> Stashed changes
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
-    pause("Double Check that selections are correct")
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
+    # driver.find_element(By.ID,
+    #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+    pause("Double Check that selections are correct").click()
+    #driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     driver.find_element(By.LINK_TEXT, "My PDF Files").click()
 
 def return_to_folder(driver):
     driver.find_element(By.LINK_TEXT, "Home").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
+    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
     driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
 #Close everything and cleanup
@@ -408,4 +447,29 @@ def disable_print():
 def display_to_console(x):
     enable_print()
     print(x)
+<<<<<<< Updated upstream
     disable_print()
+=======
+    disable_print()
+
+
+# def expect_by_id_and_click(driver, id_tag):
+#     # handle expected conditions by id
+#     expect_by_id(driver,id_tag).click() 
+#     print(f'clicked Expected ID {id_tag}')
+
+def expect_by_id(driver, id_tag):
+    # handle expected conditions by id
+    wait_no_longer_than = 30
+    print(f'Expecting {id_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.ID, id_tag)))
+    return element
+
+def expect_by_XPATH(driver, XPATH):
+    wait_no_longer_than = 30
+    print(f'Expecting {id_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.XPATH, XPATH)))
+    return element
+>>>>>>> Stashed changes
