@@ -321,18 +321,24 @@ def print_list(driver, listName):
     element.send_keys(listName)
 
     # Deselect Headers amd Breaks
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
-    driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Header1")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4")
+    expect_by_id_and_click("ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4")
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder1_Break1").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Header2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder2_Break2").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Break3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder3_Header3").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Header4").click()
+    # driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
 
     # Sort Order 4
-    driver.find_element(By.ID,
-                        "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+    driver.find_element(By.ID,"ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
     dropdown = Select(driver.find_element_by_id(
         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
@@ -409,3 +415,14 @@ def display_to_console(x):
     enable_print()
     print(x)
     disable_print()
+
+
+def expect_by_id_and_click(driver, id_tag):
+    # handle expected conditions by id
+    wait_no_longer_than = 30
+    print(f'Expecting {id_tag}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.presence_of_element_located((By.ID, id_tag)))
+    print(f'trying to click expected ID {id_tag}') # now that I know how these work, the click should be above and wouldn't need this. just had element for debugging
+    driver.find_element(By.ID, id_tag).click() 
+    print(f'clicked Expected ID {id_tag}')
