@@ -14,7 +14,7 @@ def printNowButton():
         if (no_name_warning_text.winfo_ismapped()):
             no_name_warning_text.pack_forget()
         list_name_entry.delete(0, tk.END)
-        print_list(driver, list_name)
+        print_controller(driver, list_name)
         continue_instructions.pack()
         continue_button.pack()
 
