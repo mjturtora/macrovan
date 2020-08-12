@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.remote.command import Command
 import ctypes  # for windows message pop-up
+import pandas as pd
 
 def get_os():
     # print(sys.platform)
@@ -504,4 +505,14 @@ def expect_by_link_text(driver, link_text):
         EC.presence_of_element_located((By.LINK_TEXT, link_text)))
     return element
 
-
+def get_turfs():
+    # Read data from excel file into tuples
+    fname = r"..\io\Input\Turf List.xlsx"
+    df = pd.read_excel(fname, sheet_name="Sheet1")
+    turfs = []
+    count = 0
+    for turf in df['Turf Name'].values:
+        building = df['Building Name'].values[count]
+        turfs.append((turf, building))
+        count += 1
+    return turfs
