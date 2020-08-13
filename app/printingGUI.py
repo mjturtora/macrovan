@@ -15,7 +15,7 @@ def printNowButton():
         if (no_name_warning_text.winfo_ismapped()):
             no_name_warning_text.pack_forget()
         list_name_entry.delete(0, tk.END)
-        print_list(driver, list_name)
+        print_controller(driver, list_name)
         continue_instructions.pack()
         continue_button.pack()
 
@@ -35,7 +35,7 @@ def continueButton():
 if __name__ == '__main__':
 
     #Suppress all print statements
-    disable_print()
+    #disable_print()
 
     window = tk.Tk()
     window.title('GUIvan')
@@ -46,11 +46,11 @@ if __name__ == '__main__':
     get_page(driver)
     driver.implicitly_wait(10)
     # take out login for release
-    #login_to_page(driver)
+    login_to_page(driver)
 
 
     #Override the exit button of the tk window.
-    window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
+    #window.wm_protocol("WM_DELETE_WINDOW", lambda: exit_program(window, driver))
 
     # Create GUI
     #Create custom font to adjust size
@@ -126,5 +126,5 @@ if __name__ == '__main__':
     # continue_button.pack()
     # exit_instructions.pack()
     # exit_button.pack()
-    window.after(1500,lambda: check_browser(window, driver))
+    #window.after(1500,lambda: check_browser(window, driver))
     window.mainloop()
