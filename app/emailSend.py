@@ -184,8 +184,40 @@ def input_choice():
         print("Please enter (Y/N):")
         return input_choice()
 
+#Dont use
 def send_all_files_no_stepping():
-
+    #Add everybody to the CC list
+    cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
+    print("==================================================")
+    turfs = get_entries()
+    session = initialize_session()
+    success = True
+    for turf in turfs:
+        print("-------------------------------------------")
+        first_name = turf[0]
+        last_name = turf[1]
+        turf_name = turf[2]
+        building_name = turf[3]
+        receiver_address = turf[4]
+        filename = turf_name + building_name      
+        print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
+        print("Expected filename: " + filename)
+        print("Found filename: " + find_file(filename, True))
+        email = create_email(receiver_address, [filename], first_name, last_name)
+        add_cc(email, cc_list)
+        if not testMode:
+            if email != False:
+                if send_email(receiver_address, email, session) != False:
+                    print("Email to " + first_name + " " + last_name + " sent")
+                else:
+                    print("Email to " + first_name + " " + last_name + " not sent")
+                    success = False
+    session.quit()
+    if success:
+        print("All emails sent!")
+    else:
+        print("At least one email not sent!")
+    print("==================================================")
 
 
 def send_files():
