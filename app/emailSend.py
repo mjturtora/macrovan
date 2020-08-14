@@ -187,7 +187,7 @@ def input_choice():
 #Dont use
 def send_all_files_no_stepping():
     #Add everybody to the CC list
-    cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
+    cc_list = ["gboicheff@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     session = initialize_session()
