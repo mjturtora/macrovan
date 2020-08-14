@@ -251,7 +251,8 @@ def send_files():
         else:
             print("Email to " + first_name + " " + last_name + " not sent")
             success = False
-    session.quit()
+    if not testMode:
+        session.quit()
     if success:
         print("All emails sent!")
     else:
