@@ -516,3 +516,23 @@ def get_turfs():
         turfs.append((turf, building))
         count += 1
     return turfs
+
+
+def get_entries():
+    fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Turf List.xlsx"
+    df = pd.read_excel(fname, sheet_name="Sheet1",skiprows=[0])
+    df = df[0:68]
+    turfs = []
+    count = 0
+    entryCount = 0
+    for turf in df['Turf Name'].values:
+        first_name = df['First Name'].values[count]
+        last_name = df['Last Name'].values[count]
+        turf_name = df['Turf Name'].values[count]
+        building = df['Building Name'].values[count]
+        email_address = df['BC Email Address'].values[count]
+        if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building):
+            turfs.append([first_name, last_name, turf_name, building, email_address])
+            entryCount+=1
+        count += 1
+    return turfs
