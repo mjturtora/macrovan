@@ -223,6 +223,7 @@ def send_all_files_no_stepping():
 def send_files():
     #Add everybody to the CC list
     cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
+    #cc_list = ["jeffcoxesq@gmail.com", "gboicheff@gmail.com", "janeathom@aol.com", "mjturtora@gmail.com", "juliamckay0613@gmail.com", "fahygotv@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     session = initialize_session()
@@ -240,14 +241,17 @@ def send_files():
         print("Found filename: " + find_file(filename, True))
         if input_choice():
             email = create_email(receiver_address, [filename], first_name, last_name)
-            add_cc(email, cc_list)
             if not testMode:
                 if email != False:
+                    add_cc(email, cc_list)
                     if send_email(receiver_address, email, session) != False:
                         print("Email to " + first_name + " " + last_name + " sent")
                     else:
                         print("Email to " + first_name + " " + last_name + " not sent")
                         success = False
+                else:
+                    success = False
+                    print("Email to " + first_name + " " + last_name + " not sent")
         else:
             print("Email to " + first_name + " " + last_name + " not sent")
             success = False
