@@ -97,7 +97,7 @@ def create_email(receiver_address, filenames, first_name, last_name):
     message = MIMEMultipart()
     message['From'] = sender_address
     message['Subject'] = emailSubject
-    emailBody = "Hello " + first_name + " " + last_name + ", \n \n Your PDF is attached." 
+    emailBody = "Hello " + first_name + ", \n \nYour PDF is attached." 
     email = receiver_address
     message['To'] = email
     message.attach(MIMEText(emailBody, 'plain'))
@@ -109,7 +109,7 @@ def create_email(receiver_address, filenames, first_name, last_name):
         return False
 
 def add_cc(email, email_addresses):
-    email['Cc'] = email_addresses
+    email['Cc'] = ", ".join(email_addresses)
 
 def send_email(receiver_address, email, session):
     if not testMode:
@@ -156,29 +156,47 @@ def attachpdfs(file_names, email):
                     numFiles += 1
                     break
             # Expected on left, found on right
-            print(expectedFileName + " : " + foundFileName)
+            print("Expected: " + expectedFileName + "    :    " + "Found: " + foundFileName)
     return numFiles
 
 
+#Locate a file in the output folder.  Can toggle ignoring spaces
+def find_file(filename, ignore_spaces):
+    filename = filename + "*" + ".pdf"
+    if ignore_spaces:
+        filename = filename.replace(" ", "")
+    for file in os.listdir(path):
+        if ignore_spaces:
+            foundFile = file.replace(" ", "")
+        if fnmatch.fnmatch(foundFile, filename):
+            return file
+    return "NOT FOUND"
+            
+
 def input_choice():
+    print("Enter (Y/N):")
     choice = input()
     if(choice == "Y" or choice == "y"):
         return True
     elif(choice == "N" or choice == "n"):
         return False
     else:
-        print("Please enter (Y/N)")
+        print("Please enter (Y/N):")
         return input_choice()
 
+def send_all_files_no_stepping():
+
+
+
 def send_files():
-    cc_list = ["gboicheff@gmail.com"]
+    #Add everybody to the CC list
+    cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     session = initialize_session()
     success = True
     for turf in turfs:
         print("-------------------------------------------")
-        #need to be filled in once the sheet is made
         first_name = turf[0]
         last_name = turf[1]
         turf_name = turf[2]
@@ -186,17 +204,18 @@ def send_files():
         receiver_address = turf[4]
         filename = turf_name + building_name      
         print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
-        print("With filename: " + filename)
-        print("Enter (Y/N)")
+        print("Expected filename: " + filename)
+        print("Found filename: " + find_file(filename, True))
         if input_choice():
             email = create_email(receiver_address, [filename], first_name, last_name)
-            #add_cc(email, cc_list)
-            if email != False:
-                if send_email(receiver_address, email, session) != False:
-                    print("Email to " + first_name + " " + last_name + " sent")
-                else:
-                    print("Email to " + first_name + " " + last_name + " not sent")
-                    success = False
+            add_cc(email, cc_list)
+            if not testMode:
+                if email != False:
+                    if send_email(receiver_address, email, session) != False:
+                        print("Email to " + first_name + " " + last_name + " sent")
+                    else:
+                        print("Email to " + first_name + " " + last_name + " not sent")
+                        success = False
         else:
             print("Email to " + first_name + " " + last_name + " not sent")
             success = False
