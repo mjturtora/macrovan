@@ -529,18 +529,22 @@ def get_entries():
         coordinator = df['August GOTV Coord'].values[count]
         if coordinator == "Jane":
             email_address = "janeathom@aol.com"
-            first_name = df['First Name'].values[count] + "(Email for Jane)"
-            last_name = df['Last Name'].values[count]
             building = df['Condo/Apt Name'].values[count]
             turf_name = df['Turf Name'].values[count]
+            first_name = turf_name
+            last_name = ""
+            if not pd.isnull(first_name) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(coordinator):
+                turfs.append([first_name, last_name, turf_name, building, email_address])
+                entryCount+=1
         elif coordinator == "Yes" or coordinator == "yes":
             first_name = df['First Name'].values[count]
             last_name = df['Last Name'].values[count]
             turf_name = df['Turf Name'].values[count]
             building = df['Condo/Apt Name'].values[count]
             email_address = df["Vol Email Address"].values[count]
-        if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(coordinator):
-            turfs.append([first_name, last_name, turf_name, building, email_address])
-            entryCount+=1
+            if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(coordinator):
+                turfs.append([first_name, last_name, turf_name, building, email_address])
+                entryCount+=1
         count += 1
+    print(turfs)
     return turfs
