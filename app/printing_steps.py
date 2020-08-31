@@ -119,6 +119,6 @@ def print_controller(driver, listName):
     headers_and_pagebreaks(driver)
     # pause('click ok when done')
     sort_orders(driver)
-    # final_selections_submit(driver)
+    final_selections_submit(driver)
 
 #     #ACTION ID BUTTON FAIL
