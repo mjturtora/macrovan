@@ -1,5 +1,6 @@
 #! python3
-# read_pdf.py - finds index numbers from all pdf's in a folder
+# read_pdf.py - finds List numbers from all pdf's in a folder
+# Gets number from third page by finding string following substring "List"
 # plagiarized from https://automatetheboringstuff.com/chapter13/
 
 import PyPDF2
@@ -22,5 +23,7 @@ if __name__ == '__main__':
     pdf_files = get_fnames(path)
     for filename in pdf_files:
         print(filename)
-        # pdfFileObj = open(filename, 'rb')
-        # pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        pdfFileObj = open(r'D:\Stuff\Projects\Pol\macrovan\io\Output\\' + filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        page = pdfReader.getPage(2).extractText()
+        print(page.split("List", 1)[1])
