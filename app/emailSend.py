@@ -5,104 +5,73 @@ from email.mime.application import MIMEApplication
 from secrets import *
 import os
 import fnmatch
-from utils import get_all_turfs
+from utils import *
 
 path = "../macrovan/io/Output/"
 emailBody = '''Your PDFs are attached'''
-emailSubject = "Turf PDFs"
-sender_address = emailAddress
-sender_pass = emailPassword
+emailSubject = "Turf PDF"
+sender_address = email_address
+sender_pass = email_password
 
 # Set this to False to actually send the emails
 testMode = True
 
-# sendAllEmails will send emails to all the organizers in the secrets file
-def sendAllEmails():
-    sendEmails(emailsAndDirPaths.keys())
 
-# sendEmails to a list of organizers
-def sendEmails(organizers):
-    # Iterate through the organizer email address and email them their specific zip file
-    numFiles = 0
-    expectedFileCount = 0
+def initialize_session():
     if not testMode:
         session = smtplib.SMTP('smtp.gmail.com', 587) 
         session.starttls() 
-        session.login(sender_address, sender_pass) 
-        # Iterate through each organizer creating their emails and calling the attachPDFs function to attach their files
-        for organizer in organizers:
-            organizerTurfCount = len(turf_dict[organizer])
-            expectedFileCount += organizerTurfCount
-            #Create the email        
-            message = MIMEMultipart()
-            message['From'] = emailAddress
-            message['Subject'] = emailSubject
-            lastName = organizer[1]
-            fullName = organizer[0] + " " + organizer[1]
-            emailBody = "Hello " + organizer[0] + " " + lastName + ", \n \n Your PDFs are attached.  Click the download all attachments button to download them in one go." 
-            email = emailsAndDirPaths[organizer]
-            message['To'] = email
-            receiver_address = email
-            message.attach(MIMEText(emailBody, 'plain'))
-
-            # attachPDFs attaches the PDFs and returns the number of PDFs it attached
-            numAttachedFiles = attachPDFs(organizer, message) 
-            numFiles += numAttachedFiles
-
-            text = message.as_string()
-            
-            # Check that the organizer had all of their files attached.  The email will not be sent if all the files were not attached
-            if(numAttachedFiles == organizerTurfCount and numAttachedFiles != 0):
-                try:
-                    session.sendmail(sender_address, receiver_address, text)
-                except smtplib.SMTPException:
-                    print("Email failed to send to: " + fullName)
-                else:
-                    print("Email sent to: " + fullName + " : " + str(numAttachedFiles) + " files successfully attached")
-            else:
-                print("Email failed to send to: " + fullName)
-            print()               
-        session.quit()
-        # Compare the total count of attached files to the amount of turfs
-        if numFiles == expectedFileCount:
-            print("All " + str(numFiles) + " files successfully attached!")
-        else:
-            difference = expectedFileCount - numFiles
-            print(expectedFileCount)
-            print("Failed to attach " + str(difference) + " files.....")
-
-    # In test mode the files will still be searched for and found filenames will be displayed
+        session.login(sender_address, sender_pass)
+        return session
     else:
-        print("Test Mode")
-        print("=========================================")
-        print("=====EXPECTED=================FOUND======")
-        print("=========================================")
-        for organizer in organizers:
-            print(organizer[0] + " " + organizer[1])
-            print(emailsAndDirPaths[organizer])
-            print("Files that will be sent: ")
-            numFiles += attachPDFs(organizer,0)
-            print("=========================================")
+        print("Session not started.  Test mode is on.")
+
+def create_email(receiver_addresses, filenames, first_name, last_name, cc_list):
+    message = MIMEMultipart()
+    message['From'] = sender_address
+    message['Subject'] = emailSubject
+    emailBody = "Hello " + first_name + ", \n \nYour PDF is attached." 
+    message['To'] = ",".join(receiver_addresses)
+    if(len(cc_list) > 0):
+        message['Cc'] = ",".join(cc_list)
+    message.attach(MIMEText(emailBody, 'plain'))
+    numAttachedFiles = attachpdfs(filenames, message)
+    if(numAttachedFiles == len(filenames)):
+        return message
+    else:
+        print("Failed to create email for " + first_name + " " + last_name + "." + "  Email will not be sent.")
+        return False
+
+def send_email(receiver_addresses, email, session):
+    if not testMode:
+        text = email.as_string()
+        try:
+            session.sendmail(sender_address, receiver_addresses, text)
+        except:
+            return False
+        else:
+            return True
+    else:
+        print("Test mode is on.  Email not sent")
 
 
-# Ignore spaces in the filename
-def attachPDFs(organizer, message):
+def attachpdfs(file_names, email):
     numFiles = 0
-    for file in turf_dict[organizer]:
-        expectedFileName = file[0] + " " + file[1] + ".pdf"
-        fileName = file[0] + " " + file[1] + "*" + ".pdf"
+    for file_to_attach in file_names:
+        expectedFileName = file_to_attach + ".pdf"
+        fileName = file_to_attach + "*" + ".pdf"
         fileName = fileName.replace(" ", "")
-        outFileName= file[0] + " " + file[1] + ".pdf"
+        outFileName = file_to_attach + ".pdf"
         if not testMode:  
             # Search the directory for a file that matches the fileName
             for file in os.listdir(path):
                 foundFile = file.replace(" ", "")
                 if fnmatch.fnmatch(foundFile, fileName):
-                    print(file)
                     pdf = MIMEApplication(open(path + file, 'rb').read())
                     pdf.add_header('Content-Disposition','attachment', filename=outFileName)
-                    message.attach(pdf)
+                    email.attach(pdf)
                     numFiles+=1
+                    print("Attached " + file)
                     break
                     
         # Testing mode
@@ -110,6 +79,7 @@ def attachPDFs(organizer, message):
             foundFile = "FILE NOT FOUND-------------------------------------F"
             for file in os.listdir(path):
                 foundFile = file.replace(" ", "")
+                foundFileName = "NOT FOUND"
                 if fnmatch.fnmatch(foundFile, fileName):
                     foundFileName = file
                     test = open(path + file, 'rb')
@@ -117,11 +87,91 @@ def attachPDFs(organizer, message):
                     numFiles += 1
                     break
             # Expected on left, found on right
-            print(expectedFileName + " : " + foundFileName)
+            print("Expected: " + expectedFileName + "    :    " + "Found: " + foundFileName)
     return numFiles
 
+
+#Locate a file in the output folder.  Can toggle ignoring spaces
+def find_file(filename, ignore_spaces):
+    filename = filename + "*" + ".pdf"
+    if ignore_spaces:
+        filename = filename.replace(" ", "")
+    for file in os.listdir(path):
+        if ignore_spaces:
+            foundFile = file.replace(" ", "")
+        if fnmatch.fnmatch(foundFile, filename):
+            return file
+    return "NOT FOUND"            
+
+def input_choice():
+    print("Enter (Y/N):")
+    choice = input()
+    if(choice == "Y" or choice == "y"):
+        return True
+    elif(choice == "N" or choice == "n"):
+        return False
+    else:
+        print("Please enter (Y/N):")
+        return input_choice()
+
+
+def send_files():
+    #Add everybody to the CC list
+    cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
+    #cc_list = ["jeffcoxesq@gmail.com", "gboicheff@gmail.com", "janeathom@aol.com", "mjturtora@gmail.com", "juliamckay0613@gmail.com", "fahygotv@gmail.com"]
+    print("==================================================")
+    turfs = get_entries()
+    session = initialize_session()
+    success = True
+    for turf in turfs:
+        print("-------------------------------------------")
+        first_name = turf[0]
+        last_name = turf[1]
+        turf_name = turf[2]
+        building_name = turf[3]
+        receiver_address = turf[4]
+        filename = turf_name + building_name      
+        print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
+        print("Expected filename: " + filename)
+        print("Found filename: " + find_file(filename, True))
+        if input_choice():
+            email = create_email([receiver_address], [filename], first_name, last_name, cc_list)
+            if not testMode:
+                if email != False:
+                    if send_email([receiver_address], email, session) != False:
+                        print("Email to " + first_name + " " + last_name + " sent")
+                    else:
+                        print("Email to " + first_name + " " + last_name + " not sent")
+                        success = False
+                else:
+                    success = False
+                    print("Email to " + first_name + " " + last_name + " not sent")
+        else:
+            print("Email to " + first_name + " " + last_name + " not sent")
+            success = False
+    if not testMode:
+        session.quit()
+    if success:
+        print("All emails sent!")
+    else:
+        print("At least one email not sent!")
+    print("==================================================")
     
 
+def test_cc():
+    session = initialize_session()
+    cc_list = ["gbangler@gmail.com", "mjturtora@gmail.com"]
+    to_address = ["juliamckay0613@gmail.com"]
+    file_name = "blank"
+    first_name = "Test"
+    last_name = "Test"
+    email = create_email(to_address, ["blank"], first_name, last_name, cc_list)
+    all_to_addresses = to_address + cc_list
+    print(all_to_addresses)
+    send_email(all_to_addresses, email, session)
+    if not testMode:
+        session.quit()
+
 if __name__ == '__main__':    
-    # sendAllEmails()
-    sendEmails([("Kate", "Steinway"), ("Charles", "Walston")])
+    #send_files()
+    test_cc()
