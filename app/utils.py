@@ -15,6 +15,7 @@ from selenium.webdriver.remote.command import Command
 import ctypes  # for windows message pop-up
 import pandas as pd
 
+
 def get_os():
     # print(sys.platform)
     if "win" in sys.platform:
@@ -37,6 +38,7 @@ def teardown():
             print(path)
             shutil.rmtree(path)
     print('Teardown complete')
+
 
 def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
@@ -62,9 +64,9 @@ def start_driver():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
-    #display_to_console("Loading...")
+    # display_to_console("Loading...")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    #display_to_console("Finished loading!")
+    # display_to_console("Finished loading!")
     return driver
 
 
@@ -83,7 +85,7 @@ def login_to_page(driver):
     # login and initialize:
     # Click ActionID Button to open login
     element = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
-    #print(f'ELEMENT = {element}')
+    # print(f'ELEMENT = {element}')
 
     # driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     expect_by_XPATH(driver, "//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
@@ -101,7 +103,7 @@ def login_to_page(driver):
 def remember_this(driver):
     expect_by_class(driver, "checkbox").click()
     # wait at least long enough to enter code and pin
-    #driver.implicitly_wait(25)
+    # driver.implicitly_wait(25)
 
 
 def list_folders(driver):
@@ -113,15 +115,17 @@ def list_folders(driver):
 def select_folder(driver):
     """select folder"""
     print('Select Folder')
-    #driver.find_element_by_xpath('//*[text()="District 68 2020 3/17 Primary/Municipals"]').click()
-    #expect_by_XPATH(driver, '//*[text()="2020 District 68"]').click()
+    # driver.find_element_by_xpath('//*[text()="District 68 2020 3/17 Primary/Municipals"]').click()
+    # expect_by_XPATH(driver, '//*[text()="2020 District 68"]').click()
     expect_by_XPATH(driver, '//*[text()="2020 District 68 November"]').click()
     print_title(driver)
 
 
 def select_turf(driver, turf_name):
     print('Select Saved Search')
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(turf_name)
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(
+        turf_name)
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
     expect_by_XPATH(driver, '//*[text()="' + turf_name + '"]').click()
 
@@ -229,23 +233,30 @@ def print_list(driver, listName):
     # Select Report Format Option
     # Locate the Sector and create a Select object
     print('Select Print Format Option')
-    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
+    select_element = Select(expect_by_id(driver,
+                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
-    select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
+    select_element = Select(expect_by_id(driver,
+                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
     # print([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
 
     # Script source selection (Walk)
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
-    dropdown = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    dropdown = expect_by_id(driver,
+                            "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
     expect_by_XPATH(driver, "//option[. = 'Walk']").click()
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
-    element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+    element = expect_by_id(driver,
+                           "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
 
@@ -260,32 +271,41 @@ def print_list(driver, listName):
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_Break4").click()
 
     # Sort Order 4
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
-    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+    dropdown = Select(expect_by_id(driver,
+                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
-    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+    dropdown = Select(expect_by_id(driver,
+                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
-    dropdown = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+    dropdown = Select(expect_by_id(driver,
+                                   "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
-    pause("Double Check that selections are correct").click()
+    expect_by_id(driver,
+                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+    pause("Double Check that selections are correct").click()  #todo: test removal of .click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_link_text(driver, "My PDF Files").click()
+
 
 def return_to_folder(driver):
     expect_by_link_text(driver, "Home").click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
     expect_by_css(driver, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
-#Close everything and cleanup
+
+# Close everything and cleanup
 def exit_program(window, driver):
     try:
         window.destroy()
@@ -298,7 +318,7 @@ def exit_program(window, driver):
         driver.close
         driver.quit()
     except:
-        print("Driver does not exist!")    
+        print("Driver does not exist!")
     else:
         print("Driver closed!")
 
@@ -306,13 +326,15 @@ def exit_program(window, driver):
         teardown()
     except:
         print("Teardown failed!")
-    #else:
-        #print("Teardown successfully ran!")
+    # else:
+    # print("Teardown successfully ran!")
 
-#Checks if the chrome browser is open or not closes everything if the chrome browser closed.
+
+# Checks if the chrome browser is open or not closes everything if the chrome browser closed.
 def check_browser(window, driver):
     if len(driver.get_log('driver')) > 0:
-        if driver.get_log('driver')[0]['message'] == "Unable to evaluate script: disconnected: not connected to DevTools\n":
+        if driver.get_log('driver')[0]['message'] == \
+                "Unable to evaluate script: disconnected: not connected to DevTools\n":
             exit_program(window, driver)
     else:
         window.after(1500, lambda: check_browser(window, driver))
@@ -322,10 +344,12 @@ def enable_print():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
 
+
 def disable_print():
     text_trap = io.StringIO()
     sys.stdout = text_trap
     sys.stderr = text_trap
+
 
 def display_to_console(x):
     enable_print()
@@ -388,12 +412,13 @@ def get_turfs():
 
 
 def get_entries():
-    #Had to use full path to get it to work for me.
+    # Had to use full path to get it to work for me.
     fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Turf List.xlsx"
-    df = pd.read_excel(fname, sheet_name="Sheet1",skiprows=[0])
+    df = pd.read_excel(fname, sheet_name="Sheet1", skiprows=[0])
     turfs = []
     count = 0
-    entryCount = 0
+    entry_count = 0
+    # todo: fix count and unused turf iterator
     for turf in df['Turf Name'].values:
         coordinator = df['August GOTV Coord'].values[count]
         if coordinator == "Jane":
@@ -402,18 +427,21 @@ def get_entries():
             turf_name = df['Turf Name'].values[count]
             first_name = turf_name
             last_name = ""
-            if not pd.isnull(first_name) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(coordinator):
+            if not pd.isnull(first_name) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
+                    coordinator):
                 turfs.append([first_name, last_name, turf_name, building, email_address])
-                entryCount+=1
+                entry_count += 1
         elif coordinator == "Yes" or coordinator == "yes":
             first_name = df['First Name'].values[count]
             last_name = df['Last Name'].values[count]
             turf_name = df['Turf Name'].values[count]
             building = df['Condo/Apt Name'].values[count]
             email_address = df["Vol Email Address"].values[count]
-            if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(coordinator):
+            if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(
+                    email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
+                    coordinator):
                 turfs.append([first_name, last_name, turf_name, building, email_address])
-                entryCount+=1
+                entry_count += 1
         count += 1
     print(turfs)
     return turfs
