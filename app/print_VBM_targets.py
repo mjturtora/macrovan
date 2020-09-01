@@ -54,7 +54,7 @@ if __name__ == '__main__':
     for turf in turfs:
         turf_name = turf[0]
 
-        if (type(turf_name) != 'str'):
+        if (type(turf_name) != type('str')):
             continue
         else:
             print_list_name = turf[0] + " " + turf[1]
