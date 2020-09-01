@@ -299,10 +299,8 @@ def print_list(driver, listName):
     expect_by_link_text(driver, "My PDF Files").click()
 
 
-def return_to_folder(driver):
+def return_to_home(driver):
     expect_by_link_text(driver, "Home").click()
-    expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists").click()
-    expect_by_css(driver, "tr:nth-child(1) > td:nth-child(1) .grid-result").click()
 
 
 # Close everything and cleanup
