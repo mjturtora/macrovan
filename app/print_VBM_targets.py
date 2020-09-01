@@ -15,7 +15,8 @@ def get_vbm_turfs(df):
     for turf in df['Name in VAN'].values:
         building = df['suffix'].values[count]
         print_type = df['Label/List'].values[count]
-        turfs.append((turf, building, print_type))
+        print_script = df['Script'].values[count]
+        turfs.append((turf, building, print_type, print_script))
         count += 1
     return turfs
 
@@ -47,18 +48,31 @@ if __name__ == '__main__':
     list_folders(driver)
     select_folder(driver)
 
-    driver.implicitly_wait(30)
-    print_labels(driver, "Test1")
+    data = read_vbm_excel()
+    turfs = get_vbm_turfs(data)
 
-    # data = read_vbm_excel()
-    # turfs = get_vbm_turfs(data)
-    #
-    # for turf in turfs:
-    #     turf_name = turf[0]
-    #     print_list_name = turf[0] + " " + turf[1]
-    #     select_turf(driver, turf_name)
-    #     handle_alert(driver)
-    #     print_controller(driver, print_list_name)
-    #     driver.implicitly_wait(30)
-    #     return_to_folder(driver)
-    #     driver.implicitly_wait(30)
+    for turf in turfs:
+        turf_name = turf[0]
+
+        if (type(turf_name) != 'str'):
+            continue
+        else:
+            print_list_name = turf[0] + " " + turf[1]
+            script_name = "*" + turf[3]
+            select_turf(driver, turf_name)
+            handle_alert(driver)
+
+            if (turf[2] == "List"):
+                print_controller(driver, print_list_name, script_name)
+                driver.implicitly_wait(15)
+                return_to_home(driver)
+                driver.implicitly_wait(15)
+                list_folders(driver)
+                select_folder(driver)
+            else:
+                print_labels(driver, print_list_name)
+                driver.implicitly_wait(15)
+                return_to_home(driver)
+                driver.implicitly_wait(15)
+                list_folders(driver)
+                select_folder(driver)
