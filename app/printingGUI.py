@@ -15,7 +15,8 @@ def printNowButton():
         if (no_name_warning_text.winfo_ismapped()):
             no_name_warning_text.pack_forget()
         list_name_entry.delete(0, tk.END)
-        print_controller(driver, list_name)
+        script_name = "*2020 D68 Aug Primary"
+        print_controller(driver, list_name, script_name)
         continue_instructions.pack()
         continue_button.pack()
 
