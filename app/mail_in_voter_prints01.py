@@ -4,7 +4,6 @@ from printing_steps import *
 path = os.getcwd()
 print(f"The current working directory is {path}")
 
-
 if __name__ == '__main__':
 
     teardown()
