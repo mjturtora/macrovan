@@ -138,7 +138,8 @@ def send_files():
             email = create_email([receiver_address], [filename], first_name, last_name, cc_list)
             if not testMode:
                 if email != False:
-                    if send_email([receiver_address], email, session) != False:
+                    all_to_addresses = receiver_address + cc_list
+                    if send_email(all_to_addresses, email, session) != False:
                         print("Email to " + first_name + " " + last_name + " sent")
                     else:
                         print("Email to " + first_name + " " + last_name + " not sent")
@@ -173,5 +174,4 @@ def test_cc():
         session.quit()
 
 if __name__ == '__main__':    
-    #send_files()
-    test_cc()
+    send_files()
