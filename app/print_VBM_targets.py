@@ -5,7 +5,7 @@ path = os.getcwd()
 
 def read_vbm_excel():
     # Read VBM turfs to be printed from excel file
-    fname = r"..\io\Input\Nov 2020 Tracking Non voters .xlsx"
+    fname = r"..\io\Input\Nov 2020 Tracking Non voters.xlsx"
     df = pd.read_excel(fname, sheet_name="Print Reports")
     return df
 
@@ -13,10 +13,10 @@ def get_vbm_turfs(df):
     turfs = []
     count = 0
     for turf in df['Name in VAN'].values:
-        building = df['suffix'].values[count]
+        suffix = df['suffix'].values[count] + " " + df['suffix 2'].values[count]
         print_type = df['Label/List'].values[count]
         print_script = df['Script'].values[count]
-        turfs.append((turf, building, print_type, print_script))
+        turfs.append((turf, suffix, print_type, print_script))
         count += 1
     return turfs
 
