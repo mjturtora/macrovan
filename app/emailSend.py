@@ -117,28 +117,39 @@ def input_choice():
 
 def send_files():
     #Add everybody to the CC list
+    coordinator_emails = {
+        "Carol Cason" : "cpcason23@gmail.com",
+        "Denny Robertson" : "Denny88@aol.com",
+        "Walt Gigli" : "zeekman320@gmail.com",
+        "Tom Kimler" : "tkim55-8@hotmail.com"
+    }
     cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
-    #cc_list = ["jeffcoxesq@gmail.com", "gboicheff@gmail.com", "janeathom@aol.com", "mjturtora@gmail.com", "juliamckay0613@gmail.com", "fahygotv@gmail.com"]
+    #cc_list = ["gboicheff@gmail.com", "janeathom@aol.com", "mjturtora@gmail.com", "juliamckay0613@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     session = initialize_session()
     success = True
     for turf in turfs:
         print("-------------------------------------------")
+        list_dict = extract_list_nums()
         first_name = turf[0]
         last_name = turf[1]
         turf_name = turf[2]
         building_name = turf[3]
         receiver_address = turf[4]
+        coordinator_name = turf[5]
+        coordinator_email = coordinator_emails[coordinator_name]
+        final_cc_list = cc_list + [coordinator_email]
         filename = turf_name + building_name      
         print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
+        print("CCing: " + str(final_cc_list))
         print("Expected filename: " + filename)
         print("Found filename: " + find_file(filename, True))
         if input_choice():
-            email = create_email([receiver_address], [filename], first_name, last_name, cc_list)
+            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list)
             if not testMode:
                 if email != False:
-                    all_to_addresses = receiver_address + cc_list
+                    all_to_addresses = receiver_address + final_cc_list
                     if send_email(all_to_addresses, email, session) != False:
                         print("Email to " + first_name + " " + last_name + " sent")
                     else:
@@ -175,3 +186,4 @@ def test_cc():
 
 if __name__ == '__main__':    
     send_files()
+    #print(get_entries())

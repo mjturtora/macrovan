@@ -2,6 +2,7 @@ from secrets import *
 import os
 import io
 import sys
+import PyPDF2
 import glob
 import shutil
 from selenium import webdriver
@@ -417,29 +418,46 @@ def get_entries():
     count = 0
     entry_count = 0
     # todo: fix count and unused turf iterator
-    for turf in df['Turf Name'].values:
+    for turf in df['VAN Turf Name'].values:
         coordinator = df['August GOTV Coord'].values[count]
-        if coordinator == "Jane":
-            email_address = "janeathom@aol.com"
-            building = df['Condo/Apt Name'].values[count]
-            turf_name = df['Turf Name'].values[count]
-            first_name = turf_name
-            last_name = ""
-            if not pd.isnull(first_name) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
-                    coordinator):
-                turfs.append([first_name, last_name, turf_name, building, email_address])
-                entry_count += 1
-        elif coordinator == "Yes" or coordinator == "yes":
+        precinct_coordinator = df['Precinct Coordinators'].values[count]
+        if not pd.isnull(precinct_coordinator):
             first_name = df['First Name'].values[count]
             last_name = df['Last Name'].values[count]
-            turf_name = df['Turf Name'].values[count]
-            building = df['Condo/Apt Name'].values[count]
-            email_address = df["Vol Email Address"].values[count]
+            turf_name = df['VAN Turf Name'].values[count]
+            building = df['Building Name'].values[count]
+            email_address = df['Vol Email Address'].values[count]
+            precinct_coordinator = df['Precinct Coordinators'].values[count]
             if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(
                     email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
                     coordinator):
-                turfs.append([first_name, last_name, turf_name, building, email_address])
+                turfs.append([first_name, last_name, turf_name, building, email_address, precinct_coordinator])
                 entry_count += 1
         count += 1
     print(turfs)
     return turfs
+
+def get_fnames(path):
+    # Get all the PDF filenames.
+    pdf_files = []
+    for filename in os.listdir(path):
+        #print(filename)
+        if filename.endswith('.pdf'):
+            pdf_files.append(filename)
+    pdf_files.sort(key=str.lower)
+    #print(pdf_files)
+    return pdf_files
+
+def extract_list_nums():
+    # Loop through all the PDF files.
+    path = r'io\Output'
+    pdf_files = get_fnames(path)
+    list_dict = {}
+    for filename in pdf_files:
+        #print(filename)
+        pdfFileObj = open(r'io\Output\\' + filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        page = pdfReader.getPage(2).extractText()
+        lname, lnum = page.split("List", 1)
+        list_dict[lname] = lnum
+    return list_dict
