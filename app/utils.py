@@ -448,16 +448,44 @@ def get_fnames(path):
     #print(pdf_files)
     return pdf_files
 
-def extract_list_nums():
+def extract_list_info():
     # Loop through all the PDF files.
     path = r'io\Output'
     pdf_files = get_fnames(path)
     list_dict = {}
     for filename in pdf_files:
-        #print(filename)
         pdfFileObj = open(r'io\Output\\' + filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        page = pdfReader.getPage(0).extractText()
+        first_part, doors = page.split("Doors:", 1)
+        second_part, people = page.split("People:", 1)
+        doors = doors.split("Affiliation")[0]
+        people = people.split("Affiliation")[0].split()[0]
+
         page = pdfReader.getPage(2).extractText()
         lname, lnum = page.split("List", 1)
-        list_dict[lname] = lnum
+        list_dict[lname] = {
+            'list_number' : lnum,
+            'door_count' : doors,
+            'person_count' : people
+        }
     return list_dict
+
+
+
+    # for filename in pdf_files:
+    #     #print(filename)
+    #     pdfFileObj = open(r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFExports_20200901125934_35_files\\' + filename, 'rb')
+    #     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+    #     page = pdfReader.getPage(0).extractText()
+    #     first_part, lnum = page.split("Doors:", 1)
+    #     doors = lnum.split("Affiliation")[0]
+    #     #print(doors)
+
+    #     page = pdfReader.getPage(2).extractText()
+    #     lname, lnum = page.split("List", 1)
+    #     lists.append([lname, lnum, doors])
+
+    # print([element[2] for element in lists])
+    # write_path = r'..\io\Output\PDFExports_20200901125934_35_files\List Numbers.xlsx'
+    # excel_write(write_path, lists)
