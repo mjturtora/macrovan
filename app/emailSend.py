@@ -5,6 +5,7 @@ from email.mime.application import MIMEApplication
 from secrets import *
 import os
 import fnmatch
+import datetime
 from utils import *
 
 path = "../macrovan/io/Output/"
@@ -31,14 +32,24 @@ def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, 
     message['From'] = sender_address
     message['Subject'] = emailSubject
     list_number = " - ".join(list_dict['list_number'].split("-"))
+    doors = list_dict['door_count']
+    people = list_dict['person_count']
+    date = list_dict['date_generated']
+    date_1 = datetime.datetime.strptime(date, "%m/%d/%y")
+    dt = date_1 + datetime.timedelta(days=30)
+    end_date = '{0}/{1}/{2:02}'.format(dt.month, dt.day, dt.year % 100)
     emailBody = \
-        "Hello " + first_name + ", \n\n \
+        "Hello " + first_name + ",\n\n\
             \
-        Your PDF is attached.\n\n \
+        Your PDF is attached.\n\n\
             \
         Your list number is: "+ list_number + "\n\n\
             \
-        You may be able to copy/paste this directly from your phone's email app into MiniVan.\n\n\
+        You may be able to copy/paste this directly from your phone's email app into MiniVan. This code will expire on " + end_date + ".\n\n\
+            \
+        Number of doors: " + doors + "\n\n\
+            \
+        Number of people: " + people + "\n\n\
             \
         As a courtesy, please confirm that the file looks right to you with a reply-all to let us know that all is well.\n\n\
             \
@@ -129,7 +140,7 @@ def input_choice():
 
 def send_files():
     #Add everybody to the CC list
-    dev_cc_list = ["gboicheff@gmail.com", "mjturtora@gmail.com"]
+    dev_cc_list = ["gboicheff@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     list_dict = extract_list_info()
@@ -147,7 +158,9 @@ def send_files():
         bc_email = turf['bc_email_address']
         organizer_email = turf['organizer_email_address']
         final_cc_list = dev_cc_list + [bc_email, organizer_email]
-        filename = turf_name + building_name     
+        turf_name_s = turf_name.split()
+        print(turf_name)
+        filename = turf_name_s[0] + " 2020 Nov " + turf_name_s[1] + " " + turf_name_s[2]  
         print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
         print("CCing: " + str(final_cc_list))
         print("Expected filename: " + filename)
@@ -189,5 +202,5 @@ def send_files():
     
 
 if __name__ == '__main__':
-    #print(extract_list_info())  
-    print(get_entries())
+    send_files()
+    #print(extract_list_info())
