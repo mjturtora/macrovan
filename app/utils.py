@@ -485,7 +485,8 @@ def extract_list_info():
             'list_number' : lnum,
             'door_count' : doors,
             'person_count' : people,
-            'date_generated' : date
+            'date_generated' : date,
+            'turf_name' : lname
         }
     return list_dict
 
