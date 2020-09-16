@@ -444,7 +444,8 @@ def get_entries():
                     "bc_name" : bc_name,
                     "bc_email_address" : bc_email_address,
                     "organizer_email_address" : organizer,
-                    "turf_name" : turf_name
+                    "turf_name" : turf_name,
+                    "building_name" : building
                 })
         count += 1
     return turfs
