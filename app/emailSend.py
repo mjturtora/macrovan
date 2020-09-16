@@ -184,5 +184,6 @@ def send_files():
         print(entry)
     
 
-if __name__ == '__main__':    
-    send_files()
+if __name__ == '__main__':
+    print(extract_list_info())    
+    #send_files()
