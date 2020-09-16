@@ -31,9 +31,18 @@ def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, 
     message['From'] = sender_address
     message['Subject'] = emailSubject
     list_number = " - ".join(list_dict['list_number'].split("-"))
-    emailBody = "Hello " + first_name + ", \n\nYour PDF is attached.\n\nYour list number is: "+ list_number + "\n\nYou may be able to copy\
-        /paste this directly from you phone's email app into MiniVan.\n\nAs a courtesy, please confirm that the file looks right to you with\
-             a reply-all to let us know that all is well.\n\nWarm Regards,\nYour GOTV-Pinellas Software Development Team!"
+    emailBody = \
+        "Hello " + first_name + ", \n\n \
+            \
+        Your PDF is attached.\n\n \
+            \
+        Your list number is: "+ list_number + "\n\n\
+            \
+        You may be able to copy/paste this directly from your phone's email app into MiniVan.\n\n\
+            \
+        As a courtesy, please confirm that the file looks right to you with a reply-all to let us know that all is well.\n\n\
+            \
+        Warm Regards,\nYour GOTV-Pinellas Software Development Team!"
     message['To'] = ",".join(receiver_addresses)
     if(len(cc_list) > 0):
         message['Cc'] = ",".join(cc_list)
@@ -120,32 +129,24 @@ def input_choice():
 
 def send_files():
     #Add everybody to the CC list
-    coordinator_emails = {
-        "Carol Cason" : "cpcason23@gmail.com",
-        "Denny Robertson" : "Denny88@aol.com",
-        "Walt Gigli" : "zeekman320@gmail.com",
-        "Tom Kimler" : "tkim55-8@hotmail.com"
-    }
-
     dev_cc_list = ["gboicheff@gmail.com", "mjturtora@gmail.com"]
     print("==================================================")
     turfs = get_entries()
+    list_dict = extract_list_info()
     session = initialize_session()
     success = True
     sent_count = 0
     sent_list = []
     for turf in turfs:
         print("-------------------------------------------")
-        list_dict = extract_list_info()
-        first_name = turf[0]
-        last_name = turf[1]
-        turf_name = turf[2]
-        building_name = turf[3]
-        receiver_address = turf[4]
-        coordinator_name = turf[5]
-        coordinator_email = coordinator_emails[coordinator_name]
-        final_cc_list = cc_list + [coordinator_email]
-        #final_cc_list = cc_list
+        first_name = turf['first_name']
+        last_name = turf['last_name']
+        turf_name = turf['turf_name']
+        building_name = turf['building_name']
+        receiver_address = turf['email_address']
+        bc_email = turf['bc_email_address']
+        organizer_email = turf['organizer_email_address']
+        final_cc_list = dev_cc_list + [bc_email, organizer_email]
         filename = turf_name + building_name     
         print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
         print("CCing: " + str(final_cc_list))
@@ -153,7 +154,7 @@ def send_files():
         foundFile = find_file(filename, True)
         print("Found filename: " + find_file(filename, True))
         if input_choice():
-            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list, list_dict[foundFile])
+            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list, list_dict[turf_name])
             if not testMode:
                 if email != False:
                     all_to_addresses = [receiver_address] + final_cc_list
