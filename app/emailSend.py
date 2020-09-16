@@ -16,7 +16,9 @@ sender_pass = email_password
 
 # Set this to False to actually send the emails
 testMode = False
-
+print(os.listdir("."))
+with open("app/email_body.txt", "r") as body:
+    email_body = body.read()
 
 def initialize_session():
     if not testMode:
@@ -30,7 +32,7 @@ def initialize_session():
 def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, list_dict):
     message = MIMEMultipart()
     message['From'] = sender_address
-    message['Subject'] = emailSubject
+    message['Subject'] = list_dict['turf_name'] + " PDF"
     list_number = " - ".join(list_dict['list_number'].split("-"))
     doors = list_dict['door_count']
     people = list_dict['person_count']
@@ -38,26 +40,11 @@ def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, 
     date_1 = datetime.datetime.strptime(date, "%m/%d/%y")
     dt = date_1 + datetime.timedelta(days=30)
     end_date = '{0}/{1}/{2:02}'.format(dt.month, dt.day, dt.year % 100)
-    emailBody = \
-        "Hello " + first_name + ",\n\n\
-            \
-        Your PDF is attached.\n\n\
-            \
-        Your list number is: "+ list_number + "\n\n\
-            \
-        You may be able to copy/paste this directly from your phone's email app into MiniVan. This code will expire on " + end_date + ".\n\n\
-            \
-        Number of doors: " + doors + "\n\n\
-            \
-        Number of people: " + people + "\n\n\
-            \
-        As a courtesy, please confirm that the file looks right to you with a reply-all to let us know that all is well.\n\n\
-            \
-        Warm Regards,\nYour GOTV-Pinellas Software Development Team!"
+    body = email_body.format(first_name, list_number, end_date, doors, people)
     message['To'] = ",".join(receiver_addresses)
     if(len(cc_list) > 0):
         message['Cc'] = ",".join(cc_list)
-    message.attach(MIMEText(emailBody, 'plain'))
+    message.attach(MIMEText(body, 'plain'))
     numAttachedFiles = attachpdfs(filenames, message)
     if(numAttachedFiles == len(filenames)):
         return message
@@ -140,7 +127,8 @@ def input_choice():
 
 def send_files():
     #Add everybody to the CC list
-    dev_cc_list = ["gboicheff@gmail.com"]
+    dev_cc_list = ["gboicheff@gmail.com", "mjturtora@gmail.com"]
+    #dev_cc_list = ["gboicheff@gmail.com"]
     print("==================================================")
     turfs = get_entries()
     list_dict = extract_list_info()
