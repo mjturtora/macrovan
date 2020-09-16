@@ -412,29 +412,41 @@ def get_turfs():
 
 def get_entries():
     # Had to use full path to get it to work for me.
-    fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Turf List.xlsx"
-    df = pd.read_excel(fname, sheet_name="Sheet1", skiprows=[0])
+    fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020 -Tracking All Voters.xlsx"
+    df = pd.read_excel(fname, sheet_name="Sheet1")
     turfs = []
     count = 0
-    entry_count = 0
     # todo: fix count and unused turf iterator
-    for turf in df['VAN Turf Name'].values:
-        coordinator = df['August GOTV Coord'].values[count]
-        precinct_coordinator = df['Precinct Coordinators'].values[count]
-        if not pd.isnull(precinct_coordinator):
-            first_name = df['First Name'].values[count]
-            last_name = df['Last Name'].values[count]
-            turf_name = df['VAN Turf Name'].values[count]
-            building = df['Building Name'].values[count]
-            email_address = df['Vol Email Address'].values[count]
-            precinct_coordinator = df['Precinct Coordinators'].values[count]
-            if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(
-                    email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
-                    coordinator):
-                turfs.append([first_name, last_name, turf_name, building, email_address, precinct_coordinator])
-                entry_count += 1
+    for turf in df['Organizer'].values:
+        organizer = df['Organizer'].values[count]
+        if organizer == "STOP":
+            break
+        if not pd.isnull(organizer):
+            name = df['suffix'].values[count]
+            name_split = name.split(" ")
+            bc_name = df['BC Name'].values[count]
+            first_name = name_split[0]
+            if(len(name_split) > 1):
+                last_name = name_split[1]
+            else:
+                last_name = ""
+            turf_name = df['Name in VAN'].values[count]
+            building = "test"
+            # building = df['Bldg Name'].values[count]
+            bc_email_address = df['BC Email'].values[count]
+            email_address = df['Email to:'].values[count]
+            if not pd.isnull(name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
+                    organizer) and not pd.isnull(bc_name) and not pd.isnull(bc_email_address):
+                turfs.append({
+                    "first_name" : first_name,
+                    "last_name" : last_name,
+                    "email_address" : email_address,
+                    "bc_name" : bc_name,
+                    "bc_email_address" : bc_email_address,
+                    "organizer_email_address" : organizer,
+                    "turf_name" : turf_name
+                })
         count += 1
-    print(turfs)
     return turfs
 
 def get_fnames(path):
@@ -472,20 +484,3 @@ def extract_list_info():
     return list_dict
 
 
-
-    # for filename in pdf_files:
-    #     #print(filename)
-    #     pdfFileObj = open(r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFExports_20200901125934_35_files\\' + filename, 'rb')
-    #     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    #     page = pdfReader.getPage(0).extractText()
-    #     first_part, lnum = page.split("Doors:", 1)
-    #     doors = lnum.split("Affiliation")[0]
-    #     #print(doors)
-
-    #     page = pdfReader.getPage(2).extractText()
-    #     lname, lnum = page.split("List", 1)
-    #     lists.append([lname, lnum, doors])
-
-    # print([element[2] for element in lists])
-    # write_path = r'..\io\Output\PDFExports_20200901125934_35_files\List Numbers.xlsx'
-    # excel_write(write_path, lists)
