@@ -411,6 +411,12 @@ def get_turfs():
 
 
 def get_entries():
+    type_dict = {
+        'Full' : "This is a list of all the targeted voters in your turf.  They are high scoring Democrats and NPAs.",
+        'VBM' : "This is a list of all voters in your turf who have already registered to Vote by Mail.  We want to encourage them to return their ballot as soon as possible.  We'd also like to encourage them to volunteer.",
+        'non-VBM' : "This is a list of all voters in your turf who have NOT registered to Vote by Mail.  We want to encourage them to sign up for VBM as soon as possible.",
+        "Inc" : "This is a list of Inconsistent voters in your turf.  They did not vote in August or in the 2018, or 2016 election.  We want to encourage them to vote."
+    }
     # Had to use full path to get it to work for me.
     fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020 -Tracking All Voters.xlsx"
     df = pd.read_excel(fname, sheet_name="Sheet1")
@@ -431,12 +437,13 @@ def get_entries():
             else:
                 last_name = ""
             turf_name = df['Name in VAN'].values[count]
+            pdf_type = df['suffix 2'].values[count]
             building = "test"
             # building = df['Bldg Name'].values[count]
             bc_email_address = df['BC Email'].values[count]
             email_address = df['Email to:'].values[count]
             if not pd.isnull(name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
-                    organizer) and not pd.isnull(bc_name) and not pd.isnull(bc_email_address):
+                    organizer) and not pd.isnull(bc_name) and not pd.isnull(bc_email_address) and not pd.isnull(pdf_type):
                 turfs.append({
                     "first_name" : first_name,
                     "last_name" : last_name,
@@ -445,7 +452,8 @@ def get_entries():
                     "bc_email_address" : bc_email_address,
                     "organizer_email_address" : organizer,
                     "turf_name" : turf_name,
-                    "building_name" : building
+                    "building_name" : building,
+                    "message" : type_dict[pdf_type]
                 })
         count += 1
     return turfs

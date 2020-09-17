@@ -29,7 +29,7 @@ def initialize_session():
     else:
         print("Session not started.  Test mode is on.")
 
-def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, list_dict):
+def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, list_dict, type_message):
     message = MIMEMultipart()
     message['From'] = sender_address
     message['Subject'] = list_dict['turf_name'] + " PDF"
@@ -40,7 +40,7 @@ def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, 
     date_1 = datetime.datetime.strptime(date, "%m/%d/%y")
     dt = date_1 + datetime.timedelta(days=30)
     end_date = '{0}/{1}/{2:02}'.format(dt.month, dt.day, dt.year % 100)
-    body = email_body.format(first_name, list_number, end_date, doors, people)
+    body = email_body.format(first_name, list_number, end_date, doors, people, type_message)
     message['To'] = ",".join(receiver_addresses)
     if(len(cc_list) > 0):
         message['Cc'] = ",".join(cc_list)
@@ -145,6 +145,7 @@ def send_files():
         receiver_address = turf['email_address']
         bc_email = turf['bc_email_address']
         organizer_email = turf['organizer_email_address']
+        type_message = turf['message']
         final_cc_list = dev_cc_list + [bc_email, organizer_email]
         turf_name_s = turf_name.split()
         print(turf_name)
@@ -155,7 +156,7 @@ def send_files():
         foundFile = find_file(filename, True)
         print("Found filename: " + find_file(filename, True))
         if input_choice():
-            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list, list_dict[turf_name])
+            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list, list_dict[turf_name], type_message)
             if not testMode:
                 if email != False:
                     all_to_addresses = [receiver_address] + final_cc_list
