@@ -471,24 +471,27 @@ def get_fnames(path):
     return pdf_files
 
 
-def write_excel(path, lists):
+def write_excel(path, list_dict):
     """export to excel worksheet"""
-    df = pd.DataFrame({'List Name': [element[0] for element in lists],
-                       'List Number': [element[1] for element in lists],
-                       'Doors': [element[2] for element in lists]
-                       })
+    # df = pd.DataFrame({'List Name': [element[0] for element in lists],
+    #                    'List Number': [element[1] for element in lists],
+    #                    'Doors': [element[2] for element in lists]
+    #                    })
+    df = pd.DataFrame(list_dict).transpose()
     writer = pd.ExcelWriter(path, engine='xlsxwriter')
     df.to_excel(writer, sheet_name='List Numbers', index=False)
     writer.save()
 
 
-def extract_list_info():
+def extract_list_info(path=r'io\Output'):
     # Loop through all the PDF files.
-    path = r'io\Output'
+    #path = r'io\Output'
+    print(path)
     pdf_files = get_fnames(path)
     list_dict = {}
     for filename in pdf_files:
-        pdfFileObj = open(r'io\Output\\' + filename, 'rb')
+        #pdfFileObj = open(r'io\Output\\' + filename, 'rb')
+        pdfFileObj = open(path + '\\' + filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
         page = pdfReader.getPage(0).extractText()
         first_part, doors = page.split("Doors:", 1)

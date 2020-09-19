@@ -12,24 +12,27 @@ from utils import *
 if __name__ == '__main__':
     # Loop through all the PDF files.
     #path = r'D:\Stuff\Projects\Pol\macrovan\io\Output'
-    path = r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFExports_20200901125934_35_files'
+    #path = r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFs\PDFExports_20200901125934_35_files'
+    path = r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFs\PDFExports_20200919022945_20_files'
     pdf_files = get_fnames(path)
-    lists = []
-    for filename in pdf_files:
-        #print(filename)
-        pdfFileObj = open(r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFExports_20200901125934_35_files\\' + filename, 'rb')
-        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-        page = pdfReader.getPage(0).extractText()
-        first_part, lnum = page.split("Doors:", 1)
-        doors = lnum.split("Affiliation")[0]
-        #print(doors)
+    #lists = []
+    list_dict = extract_list_info(path)
 
-        page = pdfReader.getPage(2).extractText()
-        lname, lnum = page.split("List", 1)
-        lists.append([lname, lnum, doors])
-
-    print([element[2] for element in lists])
-    write_path = r'..\io\Output\PDFExports_20200901125934_35_files\List Numbers.xlsx'
-    write_excel(write_path, lists)
+    #for filename in pdf_files:
+    #     #print(filename)
+    #     pdfFileObj = open(r'D:\Stuff\Projects\Pol\macrovan\io\Output\PDFs\PDFExports_20200919022945_20_files\\' + filename, 'rb')
+    #     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+    #     page = pdfReader.getPage(0).extractText()
+    #     first_part, lnum = page.split("Doors:", 1)
+    #     doors = lnum.split("Affiliation")[0]
+    #     #print(doors)
+    #
+    #     page = pdfReader.getPage(2).extractText()
+    #     lname, lnum = page.split("List", 1)
+    #     lists.append([lname, lnum, doors])
+    #
+    # print([element[2] for element in lists])
+    write_path = r'..\io\Output\PDFs\PDFExports_20200919022945_20_files\List Numbers.xlsx'
+    write_excel(write_path, list_dict)
 
 
