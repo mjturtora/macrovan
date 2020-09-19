@@ -498,13 +498,14 @@ def extract_list_info(path=r'io\Output'):
         date, people = page.split("People:", 1)
         date = date.split("Generated")[1]
         date = date.split(" ")[1]
-        doors = doors.split("Affiliation")[0]
-        people = people.split("Affiliation")[0].split()[0]
+        doors = int(doors.split("Affiliation")[0])
+        people = int(people.split("Affiliation")[0].split()[0])
         page = pdfReader.getPage(2).extractText()
         lname, lnum = page.split("List", 1)
         lnum = lnum.split(" ")[1]
-        lname_s = lname.split(" ")
-        lname = lname_s[0] + " " + lname_s[3] + " " + lname_s[4]
+        #lname_s = lname.split(" ")
+        #print(lname_s)
+        #lname = lname_s[0] + " " + lname_s[3] + " " + lname_s[4]
         list_dict[lname] = {
             'list_number' : lnum,
             'door_count' : doors,
