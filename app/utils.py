@@ -458,6 +458,7 @@ def get_entries():
         count += 1
     return turfs
 
+
 def get_fnames(path):
     # Get all the PDF filenames.
     pdf_files = []
@@ -468,6 +469,18 @@ def get_fnames(path):
     pdf_files.sort(key=str.lower)
     #print(pdf_files)
     return pdf_files
+
+
+def write_excel(path, lists):
+    """export to excel worksheet"""
+    df = pd.DataFrame({'List Name': [element[0] for element in lists],
+                       'List Number': [element[1] for element in lists],
+                       'Doors': [element[2] for element in lists]
+                       })
+    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='List Numbers', index=False)
+    writer.save()
+
 
 def extract_list_info():
     # Loop through all the PDF files.
@@ -497,5 +510,3 @@ def extract_list_info():
             'turf_name' : lname
         }
     return list_dict
-
-
