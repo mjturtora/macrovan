@@ -58,6 +58,7 @@ if __name__ == '__main__':
             continue
         else:
             print_list_name = turf[0] + " " + turf[1]
+            print_list_name = print_list_name.translate(print_list_name.maketrans('', '', '.!*\\'))
             script_name = "*" + turf[3]
             select_turf(driver, turf_name)
             handle_alert(driver)
