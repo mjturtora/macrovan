@@ -119,6 +119,7 @@ def print_controller(driver, listName, script_name):
     headers_and_pagebreaks(driver)
     # pause('click ok when done')
     sort_orders(driver)
+    driver.implicitly_wait(20)
     final_selections_submit(driver)
 
 #     #ACTION ID BUTTON FAIL
