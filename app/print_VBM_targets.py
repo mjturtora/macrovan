@@ -5,8 +5,10 @@ path = os.getcwd()
 
 def read_vbm_excel():
     # Read VBM turfs to be printed from excel file
-    fname = r"..\io\Input\Nov 2020 Tracking Non voters .xlsx"
-    df = pd.read_excel(fname, sheet_name="Print Reports")
+    #fname = r"..\io\Input\Nov 2020 Tracking Non voters .xlsx"
+    fname = r"..\io\Input\Nov 2020 -Tracking All Voters.xlsx"
+    #df = pd.read_excel(fname, sheet_name="Print Reports")
+    df = pd.read_excel(fname, sheet_name="Ready to run Reports")
     return df
 
 def get_vbm_turfs(df):
