@@ -2,6 +2,7 @@ from secrets import *
 import os
 import io
 import sys
+import PyPDF2
 import glob
 import shutil
 from selenium import webdriver
@@ -410,36 +411,107 @@ def get_turfs():
 
 
 def get_entries():
+    type_dict = {
+        'Full' : "This is a list of all the targeted voters in your turf.  They are high scoring Democrats and NPAs.",
+        'VBM' : "This is a list of all voters in your turf who have already registered to Vote by Mail.  We want to encourage them to return their ballot as soon as possible.  We'd also like to encourage them to volunteer.",
+        'non-VBM' : "This is a list of all voters in your turf who have NOT registered to Vote by Mail.  We want to encourage them to sign up for VBM as soon as possible.",
+        "Inc" : "This is a list of Inconsistent voters in your turf.  They did not vote in August or in the 2018, or 2016 election.  We want to encourage them to vote."
+    }
     # Had to use full path to get it to work for me.
-    fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Turf List.xlsx"
-    df = pd.read_excel(fname, sheet_name="Sheet1", skiprows=[0])
+    fname = r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020 -Tracking All Voters.xlsx"
+    df = pd.read_excel(fname, sheet_name="Sheet1")
     turfs = []
     count = 0
-    entry_count = 0
     # todo: fix count and unused turf iterator
-    for turf in df['Turf Name'].values:
-        coordinator = df['August GOTV Coord'].values[count]
-        if coordinator == "Jane":
-            email_address = "janeathom@aol.com"
-            building = df['Condo/Apt Name'].values[count]
-            turf_name = df['Turf Name'].values[count]
-            first_name = turf_name
-            last_name = ""
-            if not pd.isnull(first_name) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
-                    coordinator):
-                turfs.append([first_name, last_name, turf_name, building, email_address])
-                entry_count += 1
-        elif coordinator == "Yes" or coordinator == "yes":
-            first_name = df['First Name'].values[count]
-            last_name = df['Last Name'].values[count]
-            turf_name = df['Turf Name'].values[count]
-            building = df['Condo/Apt Name'].values[count]
-            email_address = df["Vol Email Address"].values[count]
-            if not pd.isnull(first_name) and not pd.isnull(last_name) and not pd.isnull(
-                    email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
-                    coordinator):
-                turfs.append([first_name, last_name, turf_name, building, email_address])
-                entry_count += 1
+    for turf in df['Organizer'].values:
+        organizer = df['Organizer'].values[count]
+        if organizer == "STOP":
+            break
+        if not pd.isnull(organizer):
+            name = df['suffix'].values[count]
+            name_split = name.split(" ")
+            bc_name = df['BC Name'].values[count]
+            first_name = name_split[0]
+            if(len(name_split) > 1):
+                last_name = name_split[1]
+            else:
+                last_name = ""
+            turf_name = df['Name in VAN'].values[count]
+            pdf_type = df['suffix 2'].values[count]
+            building = "test"
+            # building = df['Bldg Name'].values[count]
+            bc_email_address = df['BC Email'].values[count]
+            email_address = df['Email to:'].values[count]
+            if not pd.isnull(name) and not pd.isnull(email_address) and not pd.isnull(turf_name) and not pd.isnull(building) and not pd.isnull(
+                    organizer) and not pd.isnull(bc_name) and not pd.isnull(bc_email_address) and not pd.isnull(pdf_type):
+                turfs.append({
+                    "first_name" : first_name,
+                    "last_name" : last_name,
+                    "email_address" : email_address,
+                    "bc_name" : bc_name,
+                    "bc_email_address" : bc_email_address,
+                    "organizer_email_address" : organizer,
+                    "turf_name" : turf_name,
+                    "building_name" : building,
+                    "message" : type_dict[pdf_type]
+                })
         count += 1
-    print(turfs)
     return turfs
+
+
+def get_fnames(path):
+    # Get all the PDF filenames.
+    pdf_files = []
+    for filename in os.listdir(path):
+        #print(filename)
+        if filename.endswith('.pdf'):
+            pdf_files.append(filename)
+    pdf_files.sort(key=str.lower)
+    #print(pdf_files)
+    return pdf_files
+
+
+def write_excel(path, df):
+    """export to excel worksheet"""
+    # todo: parameterize sheet_name
+    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='List Numbers', index=False)
+    writer.save()
+
+
+def extract_list_info(path=r'io\Output'):
+    # Loop through all the PDF files.
+    #path = r'io\Output'
+    print(path)
+    pdf_files = get_fnames(path)
+    list_dict = {}
+    for filename in pdf_files:
+        #pdfFileObj = open(r'io\Output\\' + filename, 'rb')
+        pdfFileObj = open(path + '\\' + filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        page = pdfReader.getPage(0).extractText()
+        first_part, doors = page.split("Doors:", 1)
+        date, people = page.split("People:", 1)
+        date = date.split("Generated")[1]
+        date = date.split(" ")[1]
+        doors = int(doors.split("Affiliation")[0])
+        people = int(people.split("Affiliation")[0].split()[0])
+        page = pdfReader.getPage(2).extractText()
+        print('Page =', page)
+        if people != 0:
+            lname, lnum = page.split("List", 1)
+            lnum = lnum.split(" ")[1]
+        else:
+            lnum = '0-0'
+            lname, date_part = filename.split("_2020", 1)
+            print(filename, '\n', lname, '\n', date_part, '\n', page, '\n')
+            #exit(2)
+
+        list_dict[lname] = {
+            'list_number' : lnum,
+            'door_count' : doors,
+            'person_count' : people,
+            'date_generated' : date,
+            'turf_name' : lname
+        }
+    return list_dict

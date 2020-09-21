@@ -5,8 +5,10 @@ path = os.getcwd()
 
 def read_vbm_excel():
     # Read VBM turfs to be printed from excel file
-    fname = r"..\io\Input\Nov 2020 Tracking Non voters.xlsx"
-    df = pd.read_excel(fname, sheet_name="Print Reports")
+    #fname = r"..\io\Input\Nov 2020 Tracking Non voters .xlsx"
+    fname = r"..\io\Input\Nov 2020 -Tracking All Voters.xlsx"
+    #df = pd.read_excel(fname, sheet_name="Print Reports")
+    df = pd.read_excel(fname, sheet_name="Ready to run Reports")
     return df
 
 def get_vbm_turfs(df):
@@ -69,8 +71,9 @@ if __name__ == '__main__':
                 print_list_name = turf[0] + " " + turf[1]
             else:
                 print_list_name = turf[0]
-            print_list_name = replace_characters(print_list_name)
+            print_list_name = print_list_name.translate(print_list_name.maketrans('', '', "'.!*\\"))
             script_name = turf[3]
+
             select_turf(driver, turf_name)
             handle_alert(driver)
 
