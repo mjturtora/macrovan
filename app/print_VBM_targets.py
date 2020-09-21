@@ -15,10 +15,10 @@ def get_vbm_turfs(df):
     turfs = []
     count = 0
     for turf in df['Name in VAN'].values:
-        building = df['suffix'].values[count]
+        suffix = df['suffix'].values[count]
         print_type = df['Label/List'].values[count]
         print_script = df['Script'].values[count]
-        turfs.append((turf, building, print_type, print_script))
+        turfs.append((turf, suffix, print_type, print_script))
         count += 1
     return turfs
 
@@ -40,6 +40,14 @@ def print_labels(driver, list_name):
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_link_text(driver, "My PDF Files").click()
 
+def replace_characters(list_name):
+    chars_to_remove = ['.', '\'']
+    list_name_new = list_name
+    for char in chars_to_remove:
+        if char in list_name_new:
+            list_name_new = list_name_new.replace(char, ' ')
+    return list_name_new
+
 
 if __name__ == '__main__':
     # teardown()
@@ -59,9 +67,13 @@ if __name__ == '__main__':
         if (type(turf_name) != type('str')):
             continue
         else:
-            print_list_name = turf[0] + " " + turf[1]
+            if (type(turf[1]) == type('str')):
+                print_list_name = turf[0] + " " + turf[1]
+            else:
+                print_list_name = turf[0]
             print_list_name = print_list_name.translate(print_list_name.maketrans('', '', "'.!*\\"))
-            script_name = "*" + turf[3]
+            script_name = turf[3]
+
             select_turf(driver, turf_name)
             handle_alert(driver)
 

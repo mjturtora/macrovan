@@ -358,7 +358,7 @@ def display_to_console(x):
 
 def expect_by_id(driver, id_tag):
     # handle expected conditions by id
-    wait_no_longer_than = 30
+    wait_no_longer_than = 120
     print(f'Expecting {id_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.ID, id_tag)))
@@ -366,7 +366,7 @@ def expect_by_id(driver, id_tag):
 
 
 def expect_by_XPATH(driver, XPATH):
-    wait_no_longer_than = 30
+    wait_no_longer_than = 120
     print(f'Expecting {XPATH}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.XPATH, XPATH)))
@@ -374,7 +374,7 @@ def expect_by_XPATH(driver, XPATH):
 
 
 def expect_by_class(driver, class_tag):
-    wait_no_longer_than = 30
+    wait_no_longer_than = 120
     print(f'Expecting {class_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.CLASS_NAME, class_tag)))
@@ -382,7 +382,7 @@ def expect_by_class(driver, class_tag):
 
 
 def expect_by_css(driver, css_tag):
-    wait_no_longer_than = 30
+    wait_no_longer_than = 120
     print(f'Expecting {css_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, css_tag)))
@@ -390,7 +390,7 @@ def expect_by_css(driver, css_tag):
 
 
 def expect_by_link_text(driver, link_text):
-    wait_no_longer_than = 30
+    wait_no_longer_than = 120
     print(f'Expecting {link_text}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.LINK_TEXT, link_text)))
