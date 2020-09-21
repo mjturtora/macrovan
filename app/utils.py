@@ -471,13 +471,9 @@ def get_fnames(path):
     return pdf_files
 
 
-def write_excel(path, list_dict):
+def write_excel(path, df):
     """export to excel worksheet"""
-    # df = pd.DataFrame({'List Name': [element[0] for element in lists],
-    #                    'List Number': [element[1] for element in lists],
-    #                    'Doors': [element[2] for element in lists]
-    #                    })
-    df = pd.DataFrame(list_dict).transpose()
+    # todo: parameterize sheet_name
     writer = pd.ExcelWriter(path, engine='xlsxwriter')
     df.to_excel(writer, sheet_name='List Numbers', index=False)
     writer.save()
@@ -501,11 +497,16 @@ def extract_list_info(path=r'io\Output'):
         doors = int(doors.split("Affiliation")[0])
         people = int(people.split("Affiliation")[0].split()[0])
         page = pdfReader.getPage(2).extractText()
-        lname, lnum = page.split("List", 1)
-        lnum = lnum.split(" ")[1]
-        #lname_s = lname.split(" ")
-        #print(lname_s)
-        #lname = lname_s[0] + " " + lname_s[3] + " " + lname_s[4]
+        print('Page =', page)
+        if people != 0:
+            lname, lnum = page.split("List", 1)
+            lnum = lnum.split(" ")[1]
+        else:
+            lnum = '0-0'
+            lname, date_part = filename.split("_2020", 1)
+            print(filename, '\n', lname, '\n', date_part, '\n', page, '\n')
+            #exit(2)
+
         list_dict[lname] = {
             'list_number' : lnum,
             'door_count' : doors,
