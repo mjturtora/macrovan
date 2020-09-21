@@ -5,6 +5,7 @@ from email.mime.application import MIMEApplication
 from secrets import *
 import os
 import fnmatch
+import datetime
 from utils import *
 
 path = "../macrovan/io/Output/"
@@ -14,8 +15,10 @@ sender_address = email_address
 sender_pass = email_password
 
 # Set this to False to actually send the emails
-testMode = True
-
+testMode = False
+print(os.listdir("."))
+with open("app/email_body.txt", "r") as body:
+    email_body = body.read()
 
 def initialize_session():
     if not testMode:
@@ -26,15 +29,22 @@ def initialize_session():
     else:
         print("Session not started.  Test mode is on.")
 
-def create_email(receiver_addresses, filenames, first_name, last_name, cc_list):
+def create_email(receiver_addresses, filenames, first_name, last_name, cc_list, list_dict, type_message):
     message = MIMEMultipart()
     message['From'] = sender_address
-    message['Subject'] = emailSubject
-    emailBody = "Hello " + first_name + ", \n \nYour PDF is attached." 
+    message['Subject'] = list_dict['turf_name'] + " PDF"
+    list_number = " - ".join(list_dict['list_number'].split("-"))
+    doors = list_dict['door_count']
+    people = list_dict['person_count']
+    date = list_dict['date_generated']
+    date_1 = datetime.datetime.strptime(date, "%m/%d/%y")
+    dt = date_1 + datetime.timedelta(days=30)
+    end_date = '{0}/{1}/{2:02}'.format(dt.month, dt.day, dt.year % 100)
+    body = email_body.format(first_name, list_number, end_date, doors, people, type_message)
     message['To'] = ",".join(receiver_addresses)
     if(len(cc_list) > 0):
         message['Cc'] = ",".join(cc_list)
-    message.attach(MIMEText(emailBody, 'plain'))
+    message.attach(MIMEText(body, 'plain'))
     numAttachedFiles = attachpdfs(filenames, message)
     if(numAttachedFiles == len(filenames)):
         return message
@@ -117,61 +127,69 @@ def input_choice():
 
 def send_files():
     #Add everybody to the CC list
-    cc_list = ["gboicheff@gmail.com", "gbangler@gmail.com"]
-    #cc_list = ["jeffcoxesq@gmail.com", "gboicheff@gmail.com", "janeathom@aol.com", "mjturtora@gmail.com", "juliamckay0613@gmail.com", "fahygotv@gmail.com"]
+    dev_cc_list = ["gboicheff@gmail.com", "mjturtora@gmail.com"]
+    #dev_cc_list = ["gboicheff@gmail.com"]
     print("==================================================")
     turfs = get_entries()
+    list_dict = extract_list_info()
     session = initialize_session()
     success = True
+    sent_count = 0
+    sent_list = []
     for turf in turfs:
         print("-------------------------------------------")
-        first_name = turf[0]
-        last_name = turf[1]
-        turf_name = turf[2]
-        building_name = turf[3]
-        receiver_address = turf[4]
-        filename = turf_name + building_name      
+        first_name = turf['first_name']
+        last_name = turf['last_name']
+        turf_name = turf['turf_name']
+        building_name = turf['building_name']
+        receiver_address = turf['email_address']
+        bc_email = turf['bc_email_address']
+        organizer_email = turf['organizer_email_address']
+        type_message = turf['message']
+        final_cc_list = dev_cc_list + [bc_email, organizer_email]
+        turf_name_s = turf_name.split()
+        print(turf_name)
+        filename = turf_name_s[0] + " 2020 Nov " + turf_name_s[1] + " " + turf_name_s[2]  
         print("Send email to " + first_name + " " + last_name + " at " + receiver_address)
+        print("CCing: " + str(final_cc_list))
         print("Expected filename: " + filename)
+        foundFile = find_file(filename, True)
         print("Found filename: " + find_file(filename, True))
         if input_choice():
-            email = create_email([receiver_address], [filename], first_name, last_name, cc_list)
+            email = create_email([receiver_address], [filename], first_name, last_name, final_cc_list, list_dict[turf_name], type_message)
             if not testMode:
                 if email != False:
-                    if send_email([receiver_address], email, session) != False:
+                    all_to_addresses = [receiver_address] + final_cc_list
+                    if send_email(all_to_addresses, email, session) != False:
                         print("Email to " + first_name + " " + last_name + " sent")
+                        sent_list += [first_name + " " + last_name + " " + receiver_address + " EMAIL SENT" + "filename: " + foundFile]
+                        sent_count+=1
                     else:
                         print("Email to " + first_name + " " + last_name + " not sent")
+                        sent_list += [first_name + " " + last_name + " " +  receiver_address + " EMAIL NOT SENT"]
                         success = False
                 else:
                     success = False
                     print("Email to " + first_name + " " + last_name + " not sent")
+                    sent_list += [first_name + " " + last_name + " " + receiver_address + " EMAIL NOT SENT"]
+            else:
+                sent_count+=1
+                sent_list += [first_name + " " + last_name +  "  " + receiver_address + " EMAIL NOT SENT"]
         else:
             print("Email to " + first_name + " " + last_name + " not sent")
+            sent_list += [first_name + " " + last_name + " " + receiver_address + " EMAIL NOT SENT"]
             success = False
     if not testMode:
         session.quit()
     if success:
-        print("All emails sent!")
+        print("All " + str(sent_count) + "emails sent!")
     else:
         print("At least one email not sent!")
     print("==================================================")
+    for entry in sent_list:
+        print(entry)
     
 
-def test_cc():
-    session = initialize_session()
-    cc_list = ["gbangler@gmail.com", "mjturtora@gmail.com"]
-    to_address = ["juliamckay0613@gmail.com"]
-    file_name = "blank"
-    first_name = "Test"
-    last_name = "Test"
-    email = create_email(to_address, ["blank"], first_name, last_name, cc_list)
-    all_to_addresses = to_address + cc_list
-    print(all_to_addresses)
-    send_email(all_to_addresses, email, session)
-    if not testMode:
-        session.quit()
-
-if __name__ == '__main__':    
-    #send_files()
-    test_cc()
+if __name__ == '__main__':
+    send_files()
+    #print(extract_list_info())

@@ -1,0 +1,16 @@
+Hello {0},
+
+Your PDF is attached.
+
+{5}
+
+Your list number is: {1}
+
+You may be able to copy/paste this directly from your phone's email app into MiniVan. This code will expire on {2}.
+
+Number of doors: {3}
+
+Number of people: {4}
+
+Warm Regards,
+Your GOTV-Pinellas Software Development Team!
