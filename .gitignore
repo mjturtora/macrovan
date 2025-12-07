@@ -1,5 +1,5 @@
 # Root ignore file
-
+doc/
 # some python experiments
 test_func.py
 tests.py
