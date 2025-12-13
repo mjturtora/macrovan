@@ -138,3 +138,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 emails.txt
+
+# Poetry specific
+poetry.lock
+
+# Voter data automation logs
+voter_data_automation.log
+
+# VSCode
+.vscode/

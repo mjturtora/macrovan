@@ -21,6 +21,51 @@ The VoterData automation performs the following tasks:
 
 ## Installation
 
+### Option 1: Using Poetry (Recommended)
+
+[Poetry](https://python-poetry.org/) is a modern dependency management and packaging tool for Python. It's the recommended way to set up the environment for Macrovan.
+
+1. Run the setup script:
+
+   **On Windows:**
+   ```
+   setup_environment.bat
+   ```
+
+   **On macOS/Linux:**
+   ```
+   ./setup_environment.sh
+   ```
+
+   This script will:
+   - Install Poetry if it's not already installed
+   - Install all dependencies
+   - Create `secrets.py` from the template if it doesn't exist
+   - Run the installation test
+
+2. Edit `app/secrets.py` to add your VAN credentials.
+
+3. Run the automation:
+   ```
+   poetry run macrovan
+   ```
+
+4. Additional Poetry commands:
+   ```
+   # Run the installation test
+   poetry run test-install
+   
+   # Test the Poetry environment setup
+   poetry run test-poetry
+   
+   # Run all tests
+   poetry run pytest
+   ```
+
+### Option 2: Manual Installation
+
+If you prefer not to use Poetry, you can set up the environment manually:
+
 1. Ensure all dependencies are installed:
    ```
    pip install -r requirements.txt
