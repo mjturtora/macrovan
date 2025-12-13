@@ -1,0 +1,21 @@
+{
+  "api": {
+    "base_url": "https://vat.flddc.org/API/VoterData/",
+    "file_ids": ["G01", "G02", "G03", "G04", "G05", "G06", "G07", "G08", "G09", "G10"]
+  },
+  "van": {
+    "url": "https://www.votebuilder.com/Default.aspx",
+    "folders": {
+      "search_folder": "VAT Searches",
+      "list_folder": "VAT Lists (xx)"
+    }
+  },
+  "files": {
+    "output_directory": "../io/Input",
+    "log_file": "voter_data_automation.log"
+  },
+  "selenium": {
+    "implicit_wait": 10,
+    "explicit_wait": 120
+  }
+}

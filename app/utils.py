@@ -80,9 +80,16 @@ def print_title(driver):
     print("Driver title is: \n", driver.title)
 
 
-def get_page(driver):
+def get_page(driver, url='https://www.votebuilder.com/Default.aspx'):
+    """
+    Navigate to a webpage.
+    
+    Args:
+        driver: The Selenium WebDriver instance.
+        url (str): The URL to navigate to. Defaults to VoteBuilder login page.
+    """
     # Get webpage
-    driver.get('https://www.votebuilder.com/Default.aspx')
+    driver.get(url)
     print_title(driver)
     return
 
