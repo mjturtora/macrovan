@@ -7,7 +7,7 @@ It logs into webpage, pulls a list, modifies it, and prints using some options.
 
 import utils
 import os
-from secrets import user_name, pass_word
+from van_credentials import user_name, pass_word
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By

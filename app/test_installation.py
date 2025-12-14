@@ -114,9 +114,9 @@ def main():
         if not check_file_exists(logger, file_path):
             all_files_ok = False
     
-    # Check if secrets.py exists, if not, remind the user to create it
-    if not check_file_exists(logger, "secrets.py"):
-        logger.warning("⚠ secrets.py does not exist. Please copy secrets_template.py to secrets.py and fill in your credentials.")
+    # Check if van_credentials.py exists, if not, remind the user to create it
+    if not check_file_exists(logger, "van_credentials.py"):
+        logger.warning("⚠ van_credentials.py does not exist. Please copy van_credentials_template.py to van_credentials.py and fill in your credentials.")
         all_files_ok = False
     
     # Print summary

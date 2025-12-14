@@ -7,7 +7,7 @@ import PyPDF2
 import os
 import pandas as pd
 from utils import *
-from secrets import *
+from van_credentials import *
 
 if __name__ == '__main__':
     # Loop through all the PDF files.

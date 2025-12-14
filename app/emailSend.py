@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from secrets import *
+from van_credentials import *
 import os
 import fnmatch
 import datetime

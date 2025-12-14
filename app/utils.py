@@ -1,4 +1,4 @@
-from secrets import *
+from van_credentials import *
 import os
 import io
 import sys

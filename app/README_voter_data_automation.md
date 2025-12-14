@@ -40,10 +40,10 @@ The VoterData automation performs the following tasks:
    This script will:
    - Install Poetry if it's not already installed
    - Install all dependencies
-   - Create `secrets.py` from the template if it doesn't exist
+   - Create `van_credentials.py` from the template if it doesn't exist
    - Run the installation test
 
-2. Edit `app/secrets.py` to add your VAN credentials.
+2. Edit `app/van_credentials.py` to add your VAN credentials.
 
 3. Run the automation:
    ```
@@ -73,10 +73,10 @@ If you prefer not to use Poetry, you can set up the environment manually:
 
 2. Make sure Chrome is installed on your system.
 
-3. Copy `secrets_template.py` to `secrets.py` and fill in your VAN credentials:
+3. Copy `van_credentials_template.py` to `van_credentials.py` and fill in your VAN credentials:
    ```
-   cp secrets_template.py secrets.py
-   # Then edit secrets.py with your credentials
+   cp van_credentials_template.py van_credentials.py
+   # Then edit van_credentials.py with your credentials
    ```
 
 4. Run the installation test to verify everything is set up correctly:
