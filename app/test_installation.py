@@ -38,17 +38,17 @@ def check_dependency(logger, module_name, import_name=None):
             # Import a specific name from the module
             module = importlib.import_module(module_name)
             getattr(module, import_name)
-            logger.info(f"✓ Successfully imported {import_name} from {module_name}")
+            logger.info(f"[+] Successfully imported {import_name} from {module_name}")
         else:
             # Import the module itself
             importlib.import_module(module_name)
-            logger.info(f"✓ Successfully imported {module_name}")
+            logger.info(f"[+] Successfully imported {module_name}")
         return True
     except ImportError:
-        logger.error(f"✗ Failed to import {module_name}")
+        logger.error(f"[-] Failed to import {module_name}")
         return False
     except AttributeError:
-        logger.error(f"✗ Failed to import {import_name} from {module_name}")
+        logger.error(f"[-] Failed to import {import_name} from {module_name}")
         return False
 
 def check_file_exists(logger, file_path):
@@ -64,10 +64,10 @@ def check_file_exists(logger, file_path):
     """
     import os
     if os.path.exists(file_path):
-        logger.info(f"✓ File exists: {file_path}")
+        logger.info(f"[+] File exists: {file_path}")
         return True
     else:
-        logger.error(f"✗ File does not exist: {file_path}")
+        logger.error(f"[-] File does not exist: {file_path}")
         return False
 
 def main():
@@ -83,7 +83,7 @@ def main():
         ("selenium.webdriver.chrome.options", "Options"),
         ("selenium.webdriver.common.by", "By"),
         ("selenium.webdriver.support.ui", "WebDriverWait"),
-        ("selenium.webdriver.support", "expected_conditions"),
+        ("selenium.webdriver.support.expected_conditions", None),
         ("webdriver_manager.chrome", "ChromeDriverManager"),
         ("requests", None),
         ("pandas", None),
@@ -116,15 +116,15 @@ def main():
     
     # Check if van_credentials.py exists, if not, remind the user to create it
     if not check_file_exists(logger, "van_credentials.py"):
-        logger.warning("⚠ van_credentials.py does not exist. Please copy van_credentials_template.py to van_credentials.py and fill in your credentials.")
+        logger.warning("[!] van_credentials.py does not exist. Please copy van_credentials_template.py to van_credentials.py and fill in your credentials.")
         all_files_ok = False
     
     # Print summary
     if all_dependencies_ok and all_files_ok:
-        logger.info("✅ All dependencies and files are installed and working!")
+        logger.info("[SUCCESS] All dependencies and files are installed and working!")
         return 0
     else:
-        logger.error("❌ Some dependencies or files are missing or not working.")
+        logger.error("[ERROR] Some dependencies or files are missing or not working.")
         return 1
 
 if __name__ == "__main__":
