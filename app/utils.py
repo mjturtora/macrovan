@@ -70,6 +70,11 @@ def start_driver():
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
+    
+    # Add options to fix "DevToolsActivePort file doesn't exist" error
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--remote-debugging-port=9222")
     # display_to_console("Loading...")
     driver = webdriver.Chrome(service=webdriver.chrome.service.Service(ChromeDriverManager().install()), options=chrome_options)
     # display_to_console("Finished loading!")
