@@ -31,11 +31,17 @@ class VoterDataAutomation:
         self.config = self._load_config(config_path)
         
         # Configure logging
+        log_path = os.path.join(
+            self.config["files"]["logs_directory"],
+            self.config["files"]["log_files"]["voter_data_automation"]
+        )
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler(self.config["files"]["log_file"]),
+                logging.FileHandler(log_path),
                 logging.StreamHandler()
             ]
         )

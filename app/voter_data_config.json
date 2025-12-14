@@ -12,7 +12,12 @@
   },
   "files": {
     "output_directory": "../io/Input",
-    "log_file": "voter_data_automation.log"
+    "logs_directory": "../io/logs",
+    "log_files": {
+      "voter_data_automation": "voter_data_automation.log",
+      "download_voter_data": "download_voter_data.log",
+      "run_voter_data_automation": "run_voter_data_automation.log"
+    }
   },
   "selenium": {
     "implicit_wait": 10,

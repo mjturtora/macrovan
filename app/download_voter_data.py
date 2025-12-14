@@ -11,13 +11,19 @@ import json
 import logging
 from voter_data_downloader import VoterDataDownloader
 
-def setup_logging():
+def setup_logging(config):
     """Set up logging configuration."""
+    log_path = os.path.join(
+        config["files"]["logs_directory"],
+        config["files"]["log_files"]["download_voter_data"]
+    )
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler("download_voter_data.log"),
+            logging.FileHandler(log_path),
             logging.StreamHandler()
         ]
     )
@@ -49,13 +55,15 @@ def load_config(config_path="voter_data_config.json"):
 
 def main():
     """Run the download process."""
-    logger = setup_logging()
+    # Load configuration
+    config = load_config()
+    
+    # Setup logging with config
+    logger = setup_logging(config)
     
     logger.info("Starting VoterData download process")
     
     try:
-        # Load configuration
-        config = load_config()
         
         # Create downloader
         downloader = VoterDataDownloader(
