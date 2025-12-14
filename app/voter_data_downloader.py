@@ -1,6 +1,9 @@
 import os
 import requests
 import logging
+import datetime
+import json
+from pathlib import Path
 
 class VoterDataDownloader:
     """
@@ -77,9 +80,39 @@ class VoterDataDownloader:
             self.logger.error(f"IO error saving {file_id}: {e}")
             raise
     
+    def should_download_file(self, file_id):
+        """
+        Check if a file should be downloaded based on its last modification date.
+        
+        Args:
+            file_id (str): The ID of the file to check.
+            
+        Returns:
+            bool: True if the file should be downloaded, False otherwise.
+        """
+        output_path = os.path.join(self.output_directory, f"{file_id}_VoterData.csv")
+        
+        # If the file doesn't exist, it should be downloaded
+        if not os.path.exists(output_path):
+            self.logger.info(f"File {file_id} does not exist, will download")
+            return True
+        
+        # Get the file's last modification time
+        mod_time = datetime.datetime.fromtimestamp(os.path.getmtime(output_path))
+        today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # If the file was modified today, don't download it again
+        if mod_time >= today:
+            self.logger.info(f"File {file_id} was already downloaded today ({mod_time.strftime('%Y-%m-%d')}), skipping")
+            return False
+        
+        # If the file is older than today, download it
+        self.logger.info(f"File {file_id} is outdated (last modified: {mod_time.strftime('%Y-%m-%d')}), will download")
+        return True
+    
     def download_all_files(self, file_ids):
         """
-        Download multiple VoterData files.
+        Download multiple VoterData files, but only if they haven't been downloaded today.
         
         Args:
             file_ids (list): A list of file IDs to download.
@@ -90,19 +123,27 @@ class VoterDataDownloader:
         Raises:
             Exception: If any download fails, the exception is propagated.
         """
-        self.logger.info(f"Starting download of {len(file_ids)} files")
+        self.logger.info(f"Starting download of up to {len(file_ids)} files")
         downloaded_files = []
+        skipped_files = []
         
         for file_id in file_ids:
             try:
-                file_path = self.download_file(file_id)
-                downloaded_files.append(file_path)
+                # Check if the file should be downloaded
+                if self.should_download_file(file_id):
+                    file_path = self.download_file(file_id)
+                    downloaded_files.append(file_path)
+                else:
+                    # If the file shouldn't be downloaded, add it to the list of skipped files
+                    skipped_files.append(os.path.join(self.output_directory, f"{file_id}_VoterData.csv"))
             except Exception as e:
                 self.logger.error(f"Error downloading file {file_id}: {e}")
                 raise
         
-        self.logger.info(f"Successfully downloaded {len(downloaded_files)} files")
-        return downloaded_files
+        self.logger.info(f"Successfully downloaded {len(downloaded_files)} files, skipped {len(skipped_files)} files")
+        
+        # Return both downloaded and skipped files
+        return downloaded_files + skipped_files
     
     def _ensure_output_directory(self):
         """
