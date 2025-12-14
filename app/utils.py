@@ -5,8 +5,10 @@ import sys
 import PyPDF2
 import glob
 import shutil
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -76,7 +78,8 @@ def start_driver():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")
     # display_to_console("Loading...")
-    driver = webdriver.Chrome(service=webdriver.chrome.service.Service(ChromeDriverManager().install()), options=chrome_options)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     # display_to_console("Finished loading!")
     return driver
 
@@ -99,22 +102,132 @@ def get_page(driver, url='https://www.votebuilder.com/Default.aspx'):
     return
 
 
-def login_to_page(driver):
-    # login and initialize:
-    # Click ActionID Button to open login
-    element = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
-    # print(f'ELEMENT = {element}')
+def interact_with_field(driver, field_xpath, value, field_name, locator_type=By.XPATH, wait_time=15):
+    """
+    Safely interact with a form field by waiting for it to be clickable, clicking it, and entering a value.
+    
+    Args:
+        driver: The Selenium WebDriver instance
+        field_xpath: The locator string (XPATH, ID, etc.)
+        value: The value to enter into the field
+        field_name: A descriptive name for the field (for logging)
+        locator_type: The type of locator (By.XPATH, By.ID, etc.)
+        wait_time: Maximum time to wait for the element
+        
+    Returns:
+        The WebElement that was interacted with
+    """
+    print(f"Looking for {field_name} field and waiting until it's clickable")
+    field = WebDriverWait(driver, wait_time).until(
+        EC.element_to_be_clickable((locator_type, field_xpath))
+    )
+    print(f"Found clickable {field_name} field")
+    
+    print(f"Clicking on {field_name} field")
+    field.click()
+    
+    print(f"Entering {field_name} value")
+    field.clear()
+    field.send_keys(value)
+    return field
 
-    # driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
-    expect_by_XPATH(driver, "//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
-    print('After ActionID Button')
-    print_title(driver)
-    expect_by_id(driver, 'username')
-    username = expect_by_id(driver, "username")
-    username.send_keys(user_name)
-    password = expect_by_id(driver, "password")
-    password.send_keys(pass_word)
-    expect_by_class(driver, "btn-blue").click()
+
+def click_button(driver, button_xpath, button_name, locator_type=By.XPATH, wait_time=15):
+    """
+    Safely click a button by waiting for it to be clickable.
+    
+    Args:
+        driver: The Selenium WebDriver instance
+        button_xpath: The locator string (XPATH, ID, etc.)
+        button_name: A descriptive name for the button (for logging)
+        locator_type: The type of locator (By.XPATH, By.ID, etc.)
+        wait_time: Maximum time to wait for the element
+        
+    Returns:
+        The WebElement that was clicked
+    """
+    print(f"Looking for {button_name} button")
+    button = WebDriverWait(driver, wait_time).until(
+        EC.element_to_be_clickable((locator_type, button_xpath))
+    )
+    print(f"Found {button_name} button")
+    
+    print(f"Clicking {button_name} button")
+    button.click()
+    return button
+
+
+def fill_login_form(driver, user_name, pass_word):
+    """
+    Fill out the Auth0 login form with username and password.
+    
+    Args:
+        driver: The Selenium WebDriver instance
+        user_name: The username/email to enter
+        pass_word: The password to enter
+    """
+    interact_with_field(driver, '//*[@id="1-email"]', user_name, "email")
+    interact_with_field(driver, '//*[@id="1-password"]', pass_word, "password")
+    click_button(driver, '//button[@type="submit"]', "login")
+    
+    # Wait for a while to see what happens
+    print("Waiting after login...")
+    time.sleep(10)
+    
+    # Log the page title again
+    print(f"Page title after login: {driver.title}")
+
+
+def login_to_page(driver):
+    """
+    Login to the VoteBuilder website using either direct login or ActionID button.
+    
+    Args:
+        driver: The Selenium WebDriver instance
+    """
+    # Get credentials
+    from van_credentials import user_name, pass_word
+    
+    # First check if we're already at the login form
+    print("Checking if we're already at the login form")
+    try:
+        # Try direct login approach
+        fill_login_form(driver, user_name, pass_word)
+        print("Direct login successful")
+    except Exception as e:
+        print(f"Error with direct login form: {e}")
+        
+        # If we couldn't find the login form directly, try clicking the ActionID button
+        try:
+            print("Looking for ActionID button as fallback")
+            action_id_button = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
+            print("Found ActionID button, clicking it")
+            action_id_button.click()
+            
+            # Wait for the Auth0 login form to appear
+            print("Waiting for Auth0 login form")
+            time.sleep(5)  # Give it some time to load
+            
+            # Try login again
+            fill_login_form(driver, user_name, pass_word)
+            print("ActionID login successful")
+            
+        except Exception as e:
+            print(f"Error with ActionID button approach: {e}")
+            
+            # Fall back to the traditional login form as a last resort
+            try:
+                print("Trying traditional login form as last resort")
+                username = expect_by_id(driver, "username")
+                username.send_keys(user_name)
+                password = expect_by_id(driver, "password")
+                password.send_keys(pass_word)
+                expect_by_class(driver, "btn-blue").click()
+                print("Traditional login successful")
+            except Exception as e:
+                print(f"All login methods failed: {e}")
+                raise Exception("Unable to login with any method")
+    
     return
 
 
@@ -312,7 +425,7 @@ def print_list(driver, listName):
     # Submit
     expect_by_id(driver,
                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
-    pause("Double Check that selections are correct").click()  #todo: test removal of .click()
+    pause("Double Check that selections are correct")  #todo: test removal of .click()
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_link_text(driver, "My PDF Files").click()
 
