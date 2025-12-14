@@ -28,10 +28,10 @@ class TestVANFileManager(unittest.TestCase):
         mock_expect_by_xpath.return_value = mock_element
         
         # Call the method
-        self.file_manager.navigate_to_file_folder("VAT Lists (xx)")
+        self.file_manager.navigate_to_file_folder("VAT Lists (MT)")
         
         # Assertions
-        mock_expect_by_xpath.assert_called_with(self.mock_driver, "//a[contains(text(), 'VAT Lists (xx)')]")
+        mock_expect_by_xpath.assert_called_with(self.mock_driver, "//a[contains(text(), 'VAT Lists (MT)')]")
         mock_element.click.assert_called_once()
     
     @patch('utils.expect_by_id')

@@ -40,17 +40,17 @@ def check_dependency(logger, module_name, import_name=None):
             # Import a specific name from the module
             module = importlib.import_module(module_name)
             getattr(module, import_name)
-            logger.info(f"✓ Successfully imported {import_name} from {module_name}")
+            logger.info(f"[SUCCESS] Successfully imported {import_name} from {module_name}")
         else:
             # Import the module itself
             importlib.import_module(module_name)
-            logger.info(f"✓ Successfully imported {module_name}")
+            logger.info(f"[SUCCESS] Successfully imported {module_name}")
         return True
     except ImportError:
-        logger.error(f"✗ Failed to import {module_name}")
+        logger.error(f"[ERROR] Failed to import {module_name}")
         return False
     except AttributeError:
-        logger.error(f"✗ Failed to import {import_name} from {module_name}")
+        logger.error(f"[ERROR] Failed to import {import_name} from {module_name}")
         return False
 
 def check_poetry_environment(logger):
@@ -68,14 +68,14 @@ def check_poetry_environment(logger):
             text=True, 
             check=True
         )
-        logger.info("✓ Running in a Poetry environment")
+        logger.info("[SUCCESS] Running in a Poetry environment")
         logger.info(result.stdout)
         return True
     except subprocess.CalledProcessError:
-        logger.error("✗ Not running in a Poetry environment")
+        logger.error("[ERROR] Not running in a Poetry environment")
         return False
     except FileNotFoundError:
-        logger.error("✗ Poetry is not installed or not in PATH")
+        logger.error("[ERROR] Poetry is not installed or not in PATH")
         return False
 
 def main():
@@ -98,7 +98,7 @@ def main():
         ("selenium.webdriver.chrome.options", "Options"),
         ("selenium.webdriver.common.by", "By"),
         ("selenium.webdriver.support.ui", "WebDriverWait"),
-        ("selenium.webdriver.support", "expected_conditions"),
+        ("selenium.webdriver.support.expected_conditions", None),
         ("webdriver_manager.chrome", "ChromeDriverManager"),
         ("requests", None),
         ("pandas", None),
@@ -116,10 +116,10 @@ def main():
     
     # Print summary
     if all_dependencies_ok:
-        logger.info("✅ Poetry environment is set up correctly!")
+        logger.info("[SUCCESS] Poetry environment is set up correctly!")
         return 0
     else:
-        logger.error("❌ Some dependencies are missing or not working.")
+        logger.error("[ERROR] Some dependencies are missing or not working.")
         logger.error("Try running 'poetry install' to install all dependencies.")
         return 1
 

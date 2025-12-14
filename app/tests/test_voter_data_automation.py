@@ -89,7 +89,7 @@ class TestVoterDataAutomation(unittest.TestCase):
         
         # Assertions
         self.mock_downloader.download_all_files.assert_called_once_with(file_ids)
-        self.mock_file_manager.navigate_to_file_folder.assert_called_with("VAT Lists (xx)")
+        self.mock_file_manager.navigate_to_file_folder.assert_called_with("VAT Lists (MT)")
         self.mock_file_manager.delete_files.assert_called_once()
         self.mock_file_manager.bulk_upload_files.assert_called_once_with(downloaded_files)
         self.mock_file_manager.verify_upload_success.assert_called_once()
@@ -101,10 +101,10 @@ class TestVoterDataAutomation(unittest.TestCase):
         
         # Assertions
         self.mock_search_list_manager.process_all_searches.assert_called_once_with(
-            "VAT Searches", "VAT Lists (xx)"
+            "VAT Searches", "VAT Lists (MT)"
         )
         self.mock_search_list_manager.process_all_lists.assert_called_once_with(
-            "VAT Lists (xx)"
+            "VAT Lists (MT)"
         )
     
     @patch.object(VoterDataAutomation, 'initialize')

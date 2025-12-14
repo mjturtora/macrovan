@@ -79,7 +79,7 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_expect_by_xpath.return_value = mock_folder_option
         
         # Call the method
-        self.search_list_manager.save_list("Test List", "VAT Lists (xx)", True)
+        self.search_list_manager.save_list("Test List", "VAT Lists (MT)", True)
         
         # Assertions
         mock_expect_by_id.assert_any_call(self.mock_driver, "saveListButton")
@@ -89,7 +89,7 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_list_name_input.send_keys.assert_called_once_with("Test List")
         mock_expect_by_id.assert_any_call(self.mock_driver, "folderDropdown")
         mock_folder_dropdown.click.assert_called_once()
-        mock_expect_by_xpath.assert_called_with(self.mock_driver, "//option[contains(text(), 'VAT Lists (xx)')]")
+        mock_expect_by_xpath.assert_called_with(self.mock_driver, "//option[contains(text(), 'VAT Lists (MT)')]")
         mock_folder_option.click.assert_called_once()
         mock_expect_by_id.assert_any_call(self.mock_driver, "replaceExistingCheckbox")
         mock_replace_checkbox.click.assert_called_once()
@@ -105,7 +105,7 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_expect_by_xpath.return_value = mock_list_link
         
         # Call the method
-        self.search_list_manager.load_list("Test List", "VAT Lists (xx)")
+        self.search_list_manager.load_list("Test List", "VAT Lists (MT)")
         
         # Assertions
         mock_expect_by_xpath.assert_called_with(self.mock_driver, "//a[contains(text(), 'Test List')]")
@@ -123,7 +123,7 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_get_search_names.return_value = search_names
         
         # Call the method
-        self.search_list_manager.process_all_searches("VAT Searches", "VAT Lists (xx)")
+        self.search_list_manager.process_all_searches("VAT Searches", "VAT Lists (MT)")
         
         # Assertions
         mock_navigate.assert_called_once_with("VAT Searches")
@@ -132,9 +132,9 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_load_search.assert_has_calls([call("Search1"), call("Search2"), call("Search3")])
         self.assertEqual(mock_save_list.call_count, 3)
         mock_save_list.assert_has_calls([
-            call("Search1", "VAT Lists (xx)", True),
-            call("Search2", "VAT Lists (xx)", True),
-            call("Search3", "VAT Lists (xx)", True)
+            call("Search1", "VAT Lists (MT)", replace_existing=True),
+            call("Search2", "VAT Lists (MT)", replace_existing=True),
+            call("Search3", "VAT Lists (MT)", replace_existing=True)
         ])
     
     @patch('van_search_list_manager.VANSearchListManager.navigate_to_search_folder')
@@ -148,22 +148,22 @@ class TestVANSearchListManager(unittest.TestCase):
         mock_get_list_names.return_value = list_names
         
         # Call the method
-        self.search_list_manager.process_all_lists("VAT Lists (xx)")
+        self.search_list_manager.process_all_lists("VAT Lists (MT)")
         
         # Assertions
-        mock_navigate.assert_called_once_with("VAT Lists (xx)")
+        mock_navigate.assert_called_once_with("VAT Lists (MT)")
         mock_get_list_names.assert_called_once()
         self.assertEqual(mock_load_list.call_count, 3)
         mock_load_list.assert_has_calls([
-            call("List1", "VAT Lists (xx)"),
-            call("List2", "VAT Lists (xx)"),
-            call("List3", "VAT Lists (xx)")
+            call("List1", "VAT Lists (MT)"),
+            call("List2", "VAT Lists (MT)"),
+            call("List3", "VAT Lists (MT)")
         ])
         self.assertEqual(mock_save_list.call_count, 3)
         mock_save_list.assert_has_calls([
-            call("List1", "VAT Lists (xx)", True),
-            call("List2", "VAT Lists (xx)", True),
-            call("List3", "VAT Lists (xx)", True)
+            call("List1", "VAT Lists (MT)", replace_existing=True),
+            call("List2", "VAT Lists (MT)", replace_existing=True),
+            call("List3", "VAT Lists (MT)", replace_existing=True)
         ])
     
     @patch('utils.expect_by_XPATH')

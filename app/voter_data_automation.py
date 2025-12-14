@@ -125,7 +125,7 @@ class VoterDataAutomation:
         Download VoterData files and upload them to VAN.
         
         This method downloads the VoterData files from the API, deletes any existing
-        files in the "VAT Lists (xx)" folder in VAN, and uploads the downloaded files.
+        files in the "VAT Lists (MT)" folder in VAN, and uploads the downloaded files.
         
         Raises:
             Exception: If download or upload fails.
@@ -168,8 +168,8 @@ class VoterDataAutomation:
         Process searches and lists in VAN.
         
         This method loads each search in the "VAT Searches" folder, saves the resulting
-        list in the "VAT Lists (xx)" folder, and then loads and saves each list in the
-        "VAT Lists (xx)" folder to replace the bulk uploaded version.
+        list in the "VAT Lists (MT)" folder, and then loads and saves each list in the
+        "VAT Lists (MT)" folder to replace the bulk uploaded version.
         
         Raises:
             Exception: If processing fails.
