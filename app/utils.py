@@ -2,7 +2,7 @@ from van_credentials import *
 import os
 import io
 import sys
-import PyPDF2
+import pypdf  # Updated from PyPDF2 which is deprecated
 import glob
 import shutil
 import time
@@ -666,9 +666,9 @@ def get_fnames(path):
 def write_excel(path, df):
     """export to excel worksheet"""
     # todo: parameterize sheet_name
-    writer = pd.ExcelWriter(path, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='List Numbers', index=False)
-    writer.save()
+    with pd.ExcelWriter(path, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='List Numbers', index=False)
+        # writer.save() is called automatically when using with statement
 
 
 def extract_pdf_info(path=r'io\Output'):
@@ -685,15 +685,15 @@ def extract_pdf_info(path=r'io\Output'):
         #print('pdf filename = ', filename)
         #pdfFileObj = open(r'io\Output\\' + filename, 'rb')
         pdfFileObj = open(path + '\\' + filename, 'rb')
-        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-        page = pdfReader.getPage(0).extractText()
+        pdfReader = pypdf.PdfReader(pdfFileObj)  # Updated from PyPDF2.PdfFileReader
+        page = pdfReader.pages[0].extract_text()  # Updated from getPage(0).extractText()
         first_part, doors = page.split("Doors:", 1)
         date, people = page.split("People:", 1)
         date = date.split("Generated")[1]
         date = date.split(" ")[1]
         doors = int(doors.split("Affiliation")[0])
         people = int(people.split("Affiliation")[0].split()[0])
-        page = pdfReader.getPage(2).extractText()
+        page = pdfReader.pages[2].extract_text()  # Updated from getPage(2).extractText()
         # print('Page =', page)
         if people != 0:
             pdf_file_name, lnum = page.split("List", 1)
