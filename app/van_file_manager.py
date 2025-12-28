@@ -42,10 +42,20 @@ class VANFileManager:
         self.logger.info(f"Navigating to folder: {folder_name}")
         
         try:
-            # Find and click the folder link
+            # First click on "View my folders" link
+            self.logger.info("Clicking on 'View my folders' link")
+            view_folders_link = utils.expect_by_XPATH(
+                self.driver,
+                "//*[@id='ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists']"
+            )
+            view_folders_link.click()
+            self.logger.info("Successfully clicked on 'View my folders' link")
+            
+            # Now find and click the folder link using the span with the folder name
+            self.logger.info(f"Looking for folder: {folder_name}")
             folder_element = utils.expect_by_XPATH(
-                self.driver, 
-                f"//a[contains(text(), '{folder_name}')]"
+                self.driver,
+                f"//span[@class='grid-result no-break' and contains(text(), '{folder_name}')]"
             )
             folder_element.click()
             self.logger.info(f"Successfully navigated to folder: {folder_name}")

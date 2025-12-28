@@ -4,15 +4,16 @@ version = "0.1.0"
 description = "Macrovan automation tools for voter data management"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-packages = [{include = "app"}]
+# This allows Poetry to find modules in both the root and the app folder
+packages = [{include = "app"}, {include = "test_poetry_setup.py"}]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.9"
 pandas = "2.0.0"
 numpy = "1.24.0"
 selenium = "^4.10.0"
 requests = "^2.31.0"
-PyPDF2 = "^3.0.0"
+pypdf = "^6.5.0"
 openpyxl = "^3.1.0"
 python-dotenv = "^1.0.0"
 webdriver-manager = "^4.0.0"
@@ -28,7 +29,12 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-macrovan = "app.macrovan:main"
-test-poetry = "app.test_poetry_setup:main"
-voter-data = "app.voter_data_automation:main"
+# Verification
+test-poetry = "test_poetry_setup:main"
+
+# Primary Orchestration
+run-all-van-updates = "app.run_voter_data_automation:main"
+
+# Specialized Tasks
 vbm-targets = "app.print_VBM_targets:main"
+mail-prints = "app.mail_in_voter_prints:main"

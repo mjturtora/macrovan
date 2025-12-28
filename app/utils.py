@@ -185,11 +185,21 @@ def login_to_page(driver):
     Args:
         driver: The Selenium WebDriver instance
     """
+    # First check if we're already logged in
+    print("Checking if already logged in")
+    try:
+        # Try to find the "View my folders" link which is only visible when logged in
+        driver.find_element(By.XPATH, "//*[@id='ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists']")
+        print("Already logged in, skipping login process")
+        return
+    except:
+        print("Not logged in yet, proceeding with login")
+    
     # Get credentials
     from van_credentials import user_name, pass_word
     
-    # First check if we're already at the login form
-    print("Checking if we're already at the login form")
+    # Now check if we're at the login form
+    print("Checking if we're at the login form")
     try:
         # Try direct login approach
         fill_login_form(driver, user_name, pass_word)

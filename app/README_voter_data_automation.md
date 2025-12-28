@@ -99,13 +99,12 @@ automation.run_full_process()
 ```
 
 The automation will:
-1. Start a Chrome browser
-2. Present you with the VAN login screen
-3. Wait for you to complete the login and 2FA
-4. Download the VoterData files
-5. Manage the files in VAN
-6. Process searches and lists
-7. Clean up resources
+1. Download the VoterData files once per day from the API
+2. Start a Chrome browser
+3. Complete the VAN login screen
+4. Wait for you to complete the 2FA from the code sent to your phone
+5. Process searches and lists
+6. Clean up resources
 
 ## Components
 
