@@ -71,17 +71,41 @@ class VoterDataAutomation:
             with open(config_path, 'r') as f:
                 return json.load(f)
     
-    def initialize(self):
+    def download_files_from_api(self):
         """
-        Initialize the automation components.
-        
-        This method starts the WebDriver, initializes the downloader, file manager,
-        and search list manager, and navigates to the VoteBuilder website.
+        Download VoterData files from API.
+        This operation is independent of VAN/browser and runs first.
         
         Raises:
-            Exception: If initialization fails.
+            Exception: If download fails.
         """
-        self.logger.info("Initializing automation components")
+        self.logger.info("Phase 1: Downloading files from API")
+        
+        try:
+            # Initialize downloader (doesn't need browser)
+            self.downloader = VoterDataDownloader(
+                base_url=self.config["api"]["base_url"],
+                output_directory=self.config["files"]["output_directory"]
+            )
+            
+            # Download all files
+            file_ids = self.get_file_ids()
+            self.downloaded_files = self.downloader.download_all_files(file_ids)
+            
+            self.logger.info(f"Successfully downloaded/verified {len(self.downloaded_files)} files")
+        except Exception as e:
+            self.logger.error(f"Error downloading files from API: {e}")
+            raise
+    
+    def initialize_browser(self):
+        """
+        Initialize browser and login to VAN.
+        Only called AFTER API downloads are complete.
+        
+        Raises:
+            Exception: If browser initialization or login fails.
+        """
+        self.logger.info("Phase 2: Initializing browser and logging in")
         
         try:
             # Start the WebDriver
@@ -96,21 +120,13 @@ class VoterDataAutomation:
             # Login to VoteBuilder (user will complete 2FA)
             utils.login_to_page(self.driver)
             
-            # Initialize the downloader
-            self.downloader = VoterDataDownloader(
-                base_url=self.config["api"]["base_url"],
-                output_directory=self.config["files"]["output_directory"]
-            )
-            
-            # Initialize the file manager
+            # Initialize the file manager and search list manager
             self.file_manager = VANFileManager(self.driver)
-            
-            # Initialize the search list manager
             self.search_list_manager = VANSearchListManager(self.driver)
             
-            self.logger.info("Automation components initialized successfully")
+            self.logger.info("Browser initialization and login completed successfully")
         except Exception as e:
-            self.logger.error(f"Error initializing automation components: {e}")
+            self.logger.error(f"Error initializing browser: {e}")
             # Clean up if initialization fails
             if self.driver:
                 self.driver.quit()
@@ -126,29 +142,22 @@ class VoterDataAutomation:
         # Get file IDs from config
         return self.config["api"]["file_ids"]
     
-    def download_and_upload_files(self):
+    def upload_files_to_van(self):
         """
-        Download VoterData files and upload them to VAN.
-        
-        This method downloads the VoterData files from the API, deletes any existing
-        files in the "VAT Lists (MT)" folder in VAN, and uploads the downloaded files.
+        Upload previously downloaded files to VAN.
+        Requires browser to be initialized and downloaded_files to be available.
         
         Raises:
-            Exception: If download or upload fails.
+            Exception: If upload fails.
         """
-        self.logger.info("Starting download and upload process")
+        self.logger.info("Phase 3: Uploading files to VAN")
         
         try:
-            # Get the file IDs
+            # Get configuration
+            list_folder = self.config["van"]["folders"]["list_folder"]
             file_ids = self.get_file_ids()
             
-            # Download all files
-            self.logger.info(f"Downloading {len(file_ids)} files")
-            downloaded_files = self.downloader.download_all_files(file_ids)
-            self.logger.info(f"Successfully downloaded {len(downloaded_files)} files")
-            
-            # Navigate to the list folder specified in config
-            list_folder = self.config["van"]["folders"]["list_folder"]
+            # Navigate to the list folder
             self.logger.info(f"Navigating to {list_folder} folder")
             self.file_manager.navigate_to_file_folder(list_folder)
             
@@ -158,7 +167,7 @@ class VoterDataAutomation:
             
             # Upload the downloaded files
             self.logger.info("Uploading files")
-            self.file_manager.bulk_upload_files(downloaded_files)
+            self.file_manager.bulk_upload_files(self.downloaded_files)
             
             # Verify upload success
             if self.file_manager.verify_upload_success():
@@ -166,7 +175,7 @@ class VoterDataAutomation:
             else:
                 self.logger.warning("Could not verify upload success")
         except Exception as e:
-            self.logger.error(f"Error in download and upload process: {e}")
+            self.logger.error(f"Error uploading files to VAN: {e}")
             raise
     
     def process_searches_and_lists(self):
@@ -204,8 +213,11 @@ class VoterDataAutomation:
         """
         Run the full automation process.
         
-        This method coordinates the entire process of downloading VoterData files,
-        managing them in VAN, and processing searches and lists.
+        This method coordinates the entire process following the architectural plan:
+        1. Download files from API (no browser needed)
+        2. Initialize browser and login
+        3. Upload files to VAN
+        4. Process searches and lists
         
         Raises:
             Exception: If any part of the process fails.
@@ -213,13 +225,16 @@ class VoterDataAutomation:
         self.logger.info("Starting full automation process")
         
         try:
-            # Initialize components
-            self.initialize()
+            # Phase 1: Download from API (no browser needed)
+            self.download_files_from_api()
             
-            # Download and upload files
-            self.download_and_upload_files()
+            # Phase 2: Initialize browser and login
+            self.initialize_browser()
             
-            # Process searches and lists
+            # Phase 3: Upload files to VAN
+            self.upload_files_to_van()
+            
+            # Phase 4: Process searches and lists
             self.process_searches_and_lists()
             
             self.logger.info("Full automation process completed successfully")
@@ -253,3 +268,4 @@ if __name__ == "__main__":
         automation.run_full_process()
     except Exception as e:
         print(f"Error: {e}")
+        

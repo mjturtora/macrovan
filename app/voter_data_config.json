@@ -11,7 +11,7 @@
     }
   },
   "files": {
-    "output_directory": "../io/Input",
+    "output_directory": "../io/api_downloads",
     "logs_directory": "../io/logs",
     "log_files": {
       "voter_data_automation": "voter_data_automation.log",

@@ -13,7 +13,7 @@ class VoterDataDownloader:
     saving them to a local directory, and managing the download process.
     """
     
-    def __init__(self, base_url="https://vat.flddc.org/API/VoterData/", output_directory="../io/Input"):
+    def __init__(self, base_url="https://vat.flddc.org/API/VoterData/", output_directory="../io/api_downloads"):
         """
         Initialize the VoterDataDownloader.
         
