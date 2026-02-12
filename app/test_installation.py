@@ -106,7 +106,7 @@ def main():
         "voter_data_downloader.py",
         "van_file_manager.py",
         "van_search_list_manager.py",
-        "voter_data_config.json",
+        "macrovan_config.json",
     ]
     
     all_files_ok = True

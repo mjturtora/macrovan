@@ -7,11 +7,14 @@ downloading VoterData files, managing them in VAN, and processing searches and l
 """
 
 import os
+import sys
 import json
 import logging
+
+
 from voter_data_automation import VoterDataAutomation
 
-def load_config(config_path="voter_data_config.json"):
+def load_config(config_path="macrovan_config.json"):
     """
     Load configuration from a JSON file.
     
@@ -39,7 +42,7 @@ def setup_logging(config):
     """Set up logging configuration."""
     log_path = os.path.join(
         config["files"]["logs_directory"],
-        config["files"]["log_files"]["run_voter_data_automation"]
+        config["files"]["log_files"]["macrovat"]
     )
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     
@@ -65,7 +68,7 @@ def main():
     
     try:
         # Initialize the automation
-        automation = VoterDataAutomation(config_path="voter_data_config.json")
+        automation = VoterDataAutomation(config_path="macrovan_config.json")
         
         # Run the full process
         automation.run_full_process()

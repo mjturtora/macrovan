@@ -14,7 +14,7 @@ class VoterDataAutomation:
     managing them in VAN, and processing searches and lists.
     """
     
-    def __init__(self, config_path="voter_data_config.json"):
+    def __init__(self, config_path="macrovan_config.json"):
         """
         Initialize the VoterDataAutomation object.
         
@@ -33,7 +33,7 @@ class VoterDataAutomation:
         # Configure logging
         log_path = os.path.join(
             self.config["files"]["logs_directory"],
-            self.config["files"]["log_files"]["voter_data_automation"]
+            self.config["files"]["log_files"]["vat_automation"]
         )
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         

@@ -6,10 +6,10 @@ Macrovan is a Robotic Process Automation (RPA) toolkit designed to automate vari
 
 Macrovan provides automation for several critical campaign operations:
 
-### VoterData Automation
+### VAT Automation
 - Downloads VoterData files (G01-G10) from the API
 - Manages files in VAN (VoteBuilder) including deletion and bulk uploads
-- Processes saved searches and updates lists in the "VAT Lists (xx)" folder
+- Processes saved searches and updates lists in the "VAT Lists (MT)" folder
 
 ### Vote-By-Mail (VBM) Targeting
 - Automates the printing of VBM target lists and labels
@@ -56,25 +56,23 @@ Macrovan provides automation for several critical campaign operations:
 
 2. Edit `app/van_credentials.py` to add your VAN credentials.
 
-3. Run the automation:
-   ```
-   poetry run macrovan
+3. Run the VAT (Voter Analysis Tool) automation from the `app` directory:
+   ```bash
+   cd app
+   poetry run vat
    ```
 
 4. Additional Poetry commands:
-   ```
-   # Run the installation test
-   poetry run test-install
-   
+   ```bash
    # Test the Poetry environment setup
    poetry run test-poetry
    
    # Run all tests
    poetry run pytest
    
-   # Run specific automation modules
-   poetry run vbm-targets  # Run Vote-By-Mail targeting
-   poetry run voter-data   # Run VoterData automation
+   # Run other automation modules
+   poetry run print-lists  # Vote-By-Mail list printing
+   poetry run mail-prints  # Email PDFs to organizers
    ```
 
 ### Option 2: Manual Installation
@@ -115,14 +113,15 @@ automation = VoterDataAutomation()
 automation.run_full_process()
 ```
 
-The VoterData automation will:
-1. Start a Chrome browser
-2. Present you with the VAN login screen
-3. Wait for you to complete the login and 2FA
-4. Download the VoterData files
-5. Manage the files in VAN
-6. Process searches and lists
-7. Clean up resources
+The VAT automation will:
+1. Download VoterData files from API (cached daily in io/api_downloads/)
+2. Start a Chrome browser
+3. Navigate to VAN and present you with the login screen
+4. Wait for you to complete login and 2FA
+5. Upload files to "VAT Lists (MT)" folder in VAN
+6. Process all searches in "VAT Searches" folder
+7. Update all lists in "VAT Lists (MT)"
+8. Clean up resources
 
 ### Vote-By-Mail (VBM) Targeting
 
@@ -139,6 +138,29 @@ The VBM targeting will:
 3. Generate lists or labels for each turf
 4. Organize output PDFs by organizer
 5. Clean up temporary files
+
+## Directory Structure
+
+```
+macrovan/
+├── app/                      # Main application code
+│   ├── macrovat.py          # VAT automation entry point
+│   ├── voter_data_automation.py    # VAT orchestration
+│   ├── voter_data_downloader.py    # API downloads
+│   ├── van_file_manager.py         # VAN file operations
+│   ├── van_search_list_manager.py  # VAN search/list operations
+│   ├── print_VBM_targets.py        # VBM list printing
+│   ├── mail_in_voter_prints.py     # Email automation
+│   ├── utils.py                    # Shared utilities
+│   ├── van_credentials.py          # VAN login (create from template)
+│   └── macrovan_config.json        # Configuration
+├── io/
+│   ├── api_downloads/       # Downloaded voter data files from API
+│   ├── logs/                # Log files
+│   └── Output/              # Generated PDFs and outputs
+├── doc/                     # Documentation
+└── pyproject.toml           # Poetry configuration
+```
 
 ## Components
 

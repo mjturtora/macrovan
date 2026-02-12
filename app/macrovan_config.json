@@ -14,9 +14,9 @@
     "output_directory": "../io/api_downloads",
     "logs_directory": "../io/logs",
     "log_files": {
-      "voter_data_automation": "voter_data_automation.log",
-      "download_voter_data": "download_voter_data.log",
-      "run_voter_data_automation": "run_voter_data_automation.log"
+      "vat_automation": "vat_automation.log",
+      "vat_downloader": "vat_downloader.log",
+      "macrovat": "macrovat.log"
     }
   },
   "selenium": {

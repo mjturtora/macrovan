@@ -15,7 +15,7 @@ def setup_logging(config):
     """Set up logging configuration."""
     log_path = os.path.join(
         config["files"]["logs_directory"],
-        config["files"]["log_files"]["download_voter_data"]
+        config["files"]["log_files"]["vat_downloader"]
     )
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     
@@ -29,7 +29,7 @@ def setup_logging(config):
     )
     return logging.getLogger("download_voter_data")
 
-def load_config(config_path="voter_data_config.json"):
+def load_config(config_path="macrovan_config.json"):
     """
     Load configuration from a JSON file.
     

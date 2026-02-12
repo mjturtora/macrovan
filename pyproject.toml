@@ -29,12 +29,10 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-# Verification
+# Testing
 test-poetry = "test_poetry_setup:main"
 
-# Primary Orchestration
-run-all-van-updates = "app.run_voter_data_automation:main"
-
-# Specialized Tasks
-vbm-targets = "app.print_VBM_targets:main"
+# VoteBuilder Automations
+vat = "app.macrovat:main"
+print-lists = "app.print_VBM_targets:main"
 mail-prints = "app.mail_in_voter_prints:main"
