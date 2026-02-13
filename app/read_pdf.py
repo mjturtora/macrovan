@@ -3,7 +3,7 @@
 # Gets number from third page by finding string following substring "List"
 # plagiarized from https://automatetheboringstuff.com/chapter13/
 
-import PyPDF2
+import pypdf #PyPDF2
 import os
 import pandas as pd
 from utils import *
