@@ -1,4 +1,4 @@
-from van_credentials import *
+
 import os
 import io
 import sys
@@ -17,8 +17,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.remote.command import Command
 import ctypes  # for windows message pop-up
 import pandas as pd
-import re
 import fnmatch
+
+from auth import username, password
 
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 500)
@@ -157,17 +158,17 @@ def click_button(driver, button_xpath, button_name, locator_type=By.XPATH, wait_
     return button
 
 
-def fill_login_form(driver, user_name, pass_word):
+def fill_login_form(driver, username, password):
     """
     Fill out the Auth0 login form with username and password.
     
     Args:
         driver: The Selenium WebDriver instance
-        user_name: The username/email to enter
-        pass_word: The password to enter
+        username: The username/email to enter
+        password: The password to enter
     """
-    interact_with_field(driver, '//*[@id="1-email"]', user_name, "email")
-    interact_with_field(driver, '//*[@id="1-password"]', pass_word, "password")
+    interact_with_field(driver, '//*[@id="1-email"]', username, "email")
+    interact_with_field(driver, '//*[@id="1-password"]', password, "password")
     click_button(driver, '//button[@type="submit"]', "login")
     
     # Wait for a while to see what happens
@@ -195,14 +196,11 @@ def login_to_page(driver):
     except:
         print("Not logged in yet, proceeding with login")
     
-    # Get credentials
-    from van_credentials import user_name, pass_word
-    
     # Now check if we're at the login form
     print("Checking if we're at the login form")
     try:
         # Try direct login approach
-        fill_login_form(driver, user_name, pass_word)
+        fill_login_form(driver, username, password)
         print("Direct login successful")
     except Exception as e:
         print(f"Error with direct login form: {e}")
@@ -219,7 +217,7 @@ def login_to_page(driver):
             time.sleep(5)  # Give it some time to load
             
             # Try login again
-            fill_login_form(driver, user_name, pass_word)
+            fill_login_form(driver, username, password)
             print("ActionID login successful")
             
         except Exception as e:
@@ -228,10 +226,10 @@ def login_to_page(driver):
             # Fall back to the traditional login form as a last resort
             try:
                 print("Trying traditional login form as last resort")
-                username = expect_by_id(driver, "username")
-                username.send_keys(user_name)
-                password = expect_by_id(driver, "password")
-                password.send_keys(pass_word)
+                user_field = expect_by_id(driver, "username")
+                user_field.send_keys(username)
+                pass_field = expect_by_id(driver, "password")
+                pass_field.send_keys(password) # pyright: ignore[reportArgumentType]
                 expect_by_class(driver, "btn-blue").click()
                 print("Traditional login successful")
             except Exception as e:

@@ -5,7 +5,8 @@ test_func.py
 tests.py
 
 # passwords and other secrets
-app/secrets.py
+secrets.py
+van_credentials.py
 
 # Selenium IDE
 side/

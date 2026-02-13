@@ -32,14 +32,9 @@ REM Install dependencies
 echo Installing dependencies with Poetry...
 poetry install
 
-REM Create secrets.py from template if it doesn't exist
-if not exist "app\secrets.py" (
-    echo Creating secrets.py from template...
-    copy app\secrets_template.py app\secrets.py
-    echo Please edit app\secrets.py to add your VAN credentials.
-) else (
-    echo app\secrets.py already exists.
-)
+REM Credentials setup
+echo Configuration: Secure keyring storage enabled.
+echo Note: You will be prompted for your VAN credentials on the first run.
 
 REM Run the installation tests
 echo Running installation tests...
@@ -47,8 +42,11 @@ poetry run python app/test_installation.py
 poetry run python test_poetry_setup.py
 
 echo.
-echo Setup complete! You can now run the VoterData automation with:
-echo poetry run python app/run_voter_data_automation.py
+echo Setup complete!
 echo.
-echo Or activate the virtual environment with:
-echo poetry shell
+echo To run the VoterData automation:
+echo poetry run vat
+echo.
+echo To reset or change credentials:
+echo poetry run vat --reset
+echo.

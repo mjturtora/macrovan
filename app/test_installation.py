@@ -114,11 +114,6 @@ def main():
         if not check_file_exists(logger, file_path):
             all_files_ok = False
     
-    # Check if van_credentials.py exists, if not, remind the user to create it
-    if not check_file_exists(logger, "van_credentials.py"):
-        logger.warning("[!] van_credentials.py does not exist. Please copy van_credentials_template.py to van_credentials.py and fill in your credentials.")
-        all_files_ok = False
-    
     # Print summary
     if all_dependencies_ok and all_files_ok:
         logger.info("[SUCCESS] All dependencies and files are installed and working!")

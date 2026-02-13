@@ -29,12 +29,12 @@ print("Driver title is: \n", driver.title)
 # Click ActionID Button to open login
 driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click();
 print("Driver title is: \n", driver.title)
-user_name = "***************"
-pass_word = "****************"
+username = "***************"
+password = "****************"
 username = driver.find_element_by_id("username")
-username.send_keys(user_name)
+username.send_keys(username)
 password = driver.find_element_by_id("password")
-password.send_keys(pass_word)
+password.send_keys(password)
 driver.find_element_by_class_name("btn-blue").click()
 
 # driver.implicitly_wait(500)

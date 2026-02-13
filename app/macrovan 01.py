@@ -7,7 +7,7 @@ It logs into webpage, pulls a list, modifies it, and prints using some options.
 
 import utils
 import os
-from van_credentials import user_name, pass_word
+from auth import username, password
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -55,9 +55,9 @@ def login_to_page(driver):
     driver.find_element_by_xpath("//a[@href='/OpenIdConnectLoginInitiator.ashx?ProviderID=4']").click()
     print("Driver title is: \n", driver.title)
     username = driver.find_element_by_id("username")
-    username.send_keys(user_name)
+    username.send_keys(username)
     password = driver.find_element_by_id("password")
-    password.send_keys(pass_word)
+    password.send_keys(password)
     driver.find_element_by_class_name("btn-blue").click()
     return
 

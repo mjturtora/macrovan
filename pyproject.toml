@@ -15,6 +15,7 @@ requests = "^2.31.0"
 pypdf = "^6.5.0"
 webdriver-manager = "^4.0.0"
 numpy = "<2.0"
+keyring = "^25.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"

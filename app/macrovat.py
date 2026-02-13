@@ -11,7 +11,7 @@ import sys
 import json
 import logging
 
-
+from auth import username, password
 from voter_data_automation import VoterDataAutomation
 
 def load_config(config_path="macrovan_config.json"):
@@ -54,7 +54,7 @@ def setup_logging(config):
             logging.StreamHandler()
         ]
     )
-    return logging.getLogger("run_voter_data_automation")
+    return logging.getLogger("macrovat")
 
 def main():
     """Run the full VoterData automation process."""
