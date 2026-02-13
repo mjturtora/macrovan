@@ -11,6 +11,9 @@ import sys
 import json
 import logging
 
+# Add the current script's directory (app/) to the search path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from auth import username, password
 from voter_data_automation import VoterDataAutomation
 

@@ -4,7 +4,7 @@ MacroVan is a Robotic Process Automation (RPA) toolkit designed to automate vote
 
 ## 🎮 Quick Usage Reference
 
-Run these commands from the project app folder using Poetry.
+Run these commands from the project root folder using Poetry.
 
 | Command | Description |
 | :--- | :--- |
@@ -74,9 +74,13 @@ macrovan/
 ├── pyproject.toml                 # Poetry environment & dependencies
 └── setup_environment.bat          # Automated setup script
 ```
+---
 
-
-
+## 🛠️ Developer Note: Import Resolution
+To support running automation modules from the project root, all entry points (e.g., `macrovat.py`, `print_VBM_targets.py`) must include the following path resolution at the very top:
+`import sys, os; sys.path.append(os.path.dirname(os.path.abspath(__file__)))`
+This ensures sibling modules like `auth.py` are discoverable regardless of the execution context.
+Only the VAT process meets this requirement in 2/2026.
 
 ---
 
