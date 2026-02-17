@@ -1,11 +1,12 @@
 # Root ignore file
-
+doc/
 # some python experiments
 test_func.py
 tests.py
 
 # passwords and other secrets
-app/secrets.py
+secrets.py
+van_credentials.py
 
 # Selenium IDE
 side/
@@ -16,6 +17,8 @@ chromedriver*.*
 # chrome user profile
 chrome-data/
 
+#Organizers folders
+Organizers
 # pycharm project file
 .idea/
 
@@ -135,3 +138,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+emails.txt
+
+# Voter data automation logs
+voter_data_automation.log
+
+# VSCode
+.vscode/

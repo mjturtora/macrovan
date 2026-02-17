@@ -1,4 +1,5 @@
 from utils import *
+import time
 
 def open_print(driver):
     # Click the Print List Button
@@ -12,7 +13,7 @@ def open_print(driver):
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
     print('just clicked print icon might need another EC')
 
-def top_selections(driver, listName):
+def top_selections(driver, listName, script_name):
     # Select Report Format Option
     # Locate the Sector and create a Select object
     print('Select Print Format Option')
@@ -20,7 +21,7 @@ def top_selections(driver, listName):
     #     'ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo'
     #     ))
     select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
-    element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
+    element = select_element.select_by_visible_text(script_name)
     # Select Script Option
     # Locate the Sector and create a Select object
     # select_element = Select(driver.find_element_by_id(
@@ -28,7 +29,7 @@ def top_selections(driver, listName):
     #     )
     #                         )
     select_element = Select(expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
-    element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
+    element = select_element.select_by_visible_text(script_name)
 
     # driver.find_element(By.ID,
     #                     "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
@@ -53,6 +54,10 @@ def top_selections(driver, listName):
     element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
+    print()
+    print(f'listName: {listName}')
+    time.sleep(2)
+
 
 def headers_and_pagebreaks(driver):
     # Deselect headers and page breaks for sort order 1-4
@@ -111,14 +116,16 @@ def final_selections_submit(driver):
     # driver.find_element(By.LINK_TEXT, "My PDF Files").click()
     expect_by_link_text(driver, "My PDF Files").click()
 
-def print_controller(driver, listName):
+def print_controller(driver, listName, script_name):
     #Print a List
     open_print(driver)
-    top_selections(driver, listName)
+    top_selections(driver, listName, script_name)
     # pause('click ok when done')
     headers_and_pagebreaks(driver)
     # pause('click ok when done')
     sort_orders(driver)
-    # final_selections_submit(driver)
+    driver.implicitly_wait(20)
+    time.sleep(1.5)
+    final_selections_submit(driver)
 
 #     #ACTION ID BUTTON FAIL
