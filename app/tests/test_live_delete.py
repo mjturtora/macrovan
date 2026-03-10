@@ -93,5 +93,5 @@ def test_delete_files(num_files=3):
 
 
 if __name__ == "__main__":
-    """Allow running directly: python tests/test_live_delete.py"""
+    """Allow running directly: poetry run python tests/test_live_delete.py"""
     test_delete_files(num_files=10)

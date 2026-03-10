@@ -106,5 +106,5 @@ def test_upload_three_files():
 
 
 if __name__ == "__main__":
-    """Allow running directly: python tests/test_live_upload.py"""
+    """Allow running directly: poetry run python tests/test_live_upload.py"""
     test_upload_three_files()
