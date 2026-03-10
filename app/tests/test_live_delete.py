@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 """
+todo: Need to add a test for the case where the named file is not found and van displays:
+No Results Found
+Try broadening your search.
+
+
 Live integration test for deleting files from VAN.
 
 This test actually connects to VoteBuilder and deletes files.
@@ -20,14 +25,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from voter_data_automation import VoterDataAutomation
 
 
-def test_delete_three_files():
+def test_delete_files(num_files=3):
     """
-    Live test: Delete 3 files from VAN using the existing automation infrastructure.
+    Live test: Delete num_files files from VAN using the existing automation infrastructure.
     
     This test leverages the VoterDataAutomation class to:
     1. Load configuration from macrovan_config.json
     2. Initialize browser and login
-    3. Delete only the first 3 files from the configured file_ids
+    3. Delete only the first num_files files from the configured file_ids
     4. Clean up
     
     Note: This deletes REAL files. Only run when those files exist and 
@@ -43,8 +48,8 @@ def test_delete_three_files():
         list_folder = automation.config["van"]["folders"]["list_folder"]
         all_file_ids = automation.config["api"]["file_ids"]
         
-        # TEST MODIFICATION: Only use first 3 files instead of all 10
-        test_file_ids = all_file_ids[:3]
+        # TEST MODIFICATION: Only use first num_files files instead of all 10
+        test_file_ids = all_file_ids[:num_files]
         
         automation.logger.info("=" * 60)
         automation.logger.info("LIVE DELETE TEST - WILL DELETE REAL FILES")
@@ -62,7 +67,7 @@ def test_delete_three_files():
         automation.logger.info(f"Navigating to {list_folder}...")
         automation.file_manager.navigate_to_file_folder(list_folder)
         
-        # Delete only the test files (first 3)
+        # Delete only the test files (first num_files)
         file_patterns = [f"{file_id}_VoterData" for file_id in test_file_ids]
         automation.logger.info(f"Deleting files: {file_patterns}")
         automation.file_manager.delete_files(file_patterns)
@@ -89,4 +94,4 @@ def test_delete_three_files():
 
 if __name__ == "__main__":
     """Allow running directly: python tests/test_live_delete.py"""
-    test_delete_three_files()
+    test_delete_files(num_files=10)
