@@ -1,7 +1,10 @@
 import os
 import logging
+import time
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import utils
 
 class VANFileManager:
@@ -70,46 +73,85 @@ class VANFileManager:
         """
         Delete files in VAN that match the specified patterns.
         
+        Uses the filter field to search for each file individually, then deletes them
+        one at a time. Skips files that don't exist (prevents timeout issues).
+        
         Args:
             file_patterns (list): A list of file name patterns to match for deletion.
         
         Raises:
-            TimeoutException: If elements cannot be found.
-            NoSuchElementException: If elements cannot be found.
+            TimeoutException: If critical elements cannot be found.
         """
         self.logger.info(f"Deleting files matching patterns: {file_patterns}")
         
-        try:
-            # For each file pattern, find matching files and select them
-            for pattern in file_patterns:
-                self.logger.info(f"Selecting files matching pattern: {pattern}")
-                checkbox = utils.expect_by_XPATH(
+        # CSS selector for the filter input field
+        filter_selector = "input#ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName"
+        
+        deleted_count = 0
+        skipped_count = 0
+        
+        for filename in file_patterns:
+            self.logger.info(f"Attempting to delete: {filename}")
+            
+            try:
+                # Wait for and interact with the filter field
+                # Convert CSS selector to XPath (input#id -> //input[@id='id'])
+                filter_xpath = f"//input[@id='{filter_selector.split('#')[1]}']"
+                filter_field = utils.expect_by_XPATH(self.driver, filter_xpath)
+                filter_field.send_keys(filename)
+                filter_field.send_keys("\n")  # Submit the filter
+                
+                # Wait briefly for filter to apply
+                import time
+                time.sleep(1)
+                
+                # Try to find the Edit button for this file (short timeout for existence check)
+                edit_button_xpath = f"//tr[contains(., '{filename}')]//span[contains(text(), 'Edit')]"
+                
+                try:
+                    # Use WebDriverWait directly with a short timeout (5 seconds)
+                    edit_button = WebDriverWait(self.driver, 5).until(
+                        EC.presence_of_element_located((By.XPATH, edit_button_xpath))
+                    )
+                    edit_button.click()
+                    self.logger.info(f"Clicked Edit button for {filename}")
+                except TimeoutException:
+                    self.logger.warning(f"File {filename} not found - skipping")
+                    skipped_count += 1
+                    continue
+                
+                # Now we're on the detail page - click the delete button
+                # Now we're on the detail page - click the delete button (use standard timeout)
+                delete_button = utils.expect_by_XPATH(
                     self.driver,
-                    f"//td[contains(text(), '{pattern}')]/preceding-sibling::td/input[@type='checkbox']"
+                    "//input[@id='ctl00_ContentPlaceHolderVANPage_ButtonDeleteList']"
                 )
-                checkbox.click()
-            
-            # Click the delete button
-            delete_button = utils.expect_by_id(self.driver, "deleteButton")
-            delete_button.click()
-            
-            # Confirm deletion
-            confirm_button = utils.expect_by_id(self.driver, "confirmDeleteButton")
-            confirm_button.click()
-            
-            # Handle any alert that might appear
-            utils.handle_alert(self.driver)
-            
-            self.logger.info("Files deleted successfully")
-        except TimeoutException as e:
-            self.logger.error(f"Timeout while deleting files: {e}")
-            raise
-        except NoSuchElementException as e:
-            self.logger.error(f"Element not found while deleting files: {e}")
-            raise
-        except Exception as e:
-            self.logger.error(f"Error deleting files: {e}")
-            raise
+                delete_button.click()
+                
+                # Wait for alert and accept it
+                time.sleep(1.5)
+                try:
+                    self.driver.switch_to.alert.accept()
+                    self.logger.info(f"Confirmed deletion for {filename}")
+                except:
+                    self.logger.warning(f"No alert appeared for {filename}")
+                
+                # Wait for return to the list view (filter field appears again)
+                filter_xpath = f"//input[@id='{filter_selector.split('#')[1]}']"
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, filter_xpath))
+                )
+                
+                deleted_count += 1
+                self.logger.info(f"Successfully deleted {filename}")
+                
+            except Exception as e:
+                self.logger.error(f"Error deleting {filename}: {e}")
+                # Continue with next file instead of failing completely
+                skipped_count += 1
+                continue
+        
+        self.logger.info(f"Deletion complete: {deleted_count} deleted, {skipped_count} skipped")
     
     def bulk_upload_files(self, file_paths):
         """
