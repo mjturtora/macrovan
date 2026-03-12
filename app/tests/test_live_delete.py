@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from voter_data_automation import VoterDataAutomation
 
 
-def test_delete_files(num_files=3):
+def test_delete_files(start_file=0, num_files=3):
     """
     Live test: Delete num_files files from VAN using the existing automation infrastructure.
     
@@ -49,7 +49,7 @@ def test_delete_files(num_files=3):
         all_file_ids = automation.config["api"]["file_ids"]
         
         # TEST MODIFICATION: Only use first num_files files instead of all 10
-        test_file_ids = all_file_ids[:num_files]
+        test_file_ids = all_file_ids[start_file:num_files]
         
         automation.logger.info("=" * 60)
         automation.logger.info("LIVE DELETE TEST - WILL DELETE REAL FILES")
@@ -94,4 +94,4 @@ def test_delete_files(num_files=3):
 
 if __name__ == "__main__":
     """Allow running directly: poetry run python tests/test_live_delete.py"""
-    test_delete_files(num_files=10)
+    test_delete_files(start_file=0,num_files=10)

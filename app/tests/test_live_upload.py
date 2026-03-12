@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Live integration test for uploading files to VAN.
+Live integration test for uploading files to VAN (default: 3 files).
 
-This test actually connects to VoteBuilder and uploads files from local storage.
+This test connects to VoteBuilder and uploads files from local storage.
 Use with caution - it performs real uploads on the live system.
 
 Usage:
@@ -20,14 +20,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from voter_data_automation import VoterDataAutomation
 
 
-def test_upload_three_files():
+def test_upload_files(num_files=3):
     """
-    Live test: Upload 3 files to VAN from local storage.
+    Live test: Upload test files to VAN from local storage.
     
     This test leverages the VoterDataAutomation class to:
     1. Load configuration from macrovan_config.json
     2. Initialize browser and login
-    3. Upload only the first 3 CSV files from api_downloads directory
+    3. Upload test CSV files from api_downloads directory
     4. Clean up
     
     Note: This uploads REAL files to the live VAN system.
@@ -43,8 +43,8 @@ def test_upload_three_files():
         all_file_ids = automation.config["api"]["file_ids"]
         downloads_dir = automation.config["files"]["output_directory"]
         
-        # TEST MODIFICATION: Only use first 3 files instead of all 10
-        test_file_ids = all_file_ids[:3]
+        # TEST MODIFICATION: Only use first num_files files instead of all 10
+        test_file_ids = all_file_ids[:num_files]
         
         # Build file paths from local storage
         file_paths = []
@@ -107,4 +107,4 @@ def test_upload_three_files():
 
 if __name__ == "__main__":
     """Allow running directly: poetry run python tests/test_live_upload.py"""
-    test_upload_three_files()
+    test_upload_files(num_files=3)
