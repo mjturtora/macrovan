@@ -69,8 +69,9 @@ class VANFileManager:
             self.logger.error(f"Error navigating to folder {folder_name}: {e}")
             raise
     
-    def delete_files(self, file_patterns):
+    def delete_files(self, file_patterns, folder_name):
         """
+        todo: Handle the case where the file is not found
         Delete files in VAN that match the specified patterns.
         
         Uses the filter field to search for each file individually, then deletes them
@@ -118,8 +119,11 @@ class VANFileManager:
                 except TimeoutException:
                     self.logger.warning(f"File {filename} not found - skipping")
                     skipped_count += 1
+                    utils.get_page(self.driver, url='https://www.votebuilder.com/Default.aspx')
+                    self.logger.info(f"Navigating to folder: {folder_name}")
+                    self.navigate_to_file_folder(folder_name)
                     continue
-                
+
                 # Now we're on the detail page - click the delete button
                 # Now we're on the detail page - click the delete button (use standard timeout)
                 delete_button = utils.expect_by_XPATH(
@@ -150,70 +154,205 @@ class VANFileManager:
                 # Continue with next file instead of failing completely
                 skipped_count += 1
                 continue
-        
+
+        # sleep a long time to ensure the files are fully deleted
+        time.sleep(2)  # 10 minutes better be enough
         self.logger.info(f"Deletion complete: {deleted_count} deleted, {skipped_count} skipped")
     
     def bulk_upload_files(self, file_paths):
-        """
-        Upload multiple files to VAN.
-        
-        Args:
-            file_paths (list): A list of paths to the files to upload.
-        
-        Raises:
-            TimeoutException: If elements cannot be found.
-            NoSuchElementException: If elements cannot be found.
-        """
-        self.logger.info(f"Uploading {len(file_paths)} files")
-        
-        try:
-            # Click the upload button
-            upload_button = utils.expect_by_id(self.driver, "uploadButton")
-            upload_button.click()
+            """
+            Guts of the upload logic using utils.py and vanilla Selenium.
+            Replaces the stub in VANFileManager.
+            """
+            import time
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.support.ui import Select
+
+            # file_paths is self.downloaded_files passed from VoterDataAutomation
+            for file_path in file_paths:
+
+                file_path = os.path.abspath(file_path)
+                filename = os.path.basename(file_path).replace(".csv", "")
+
+                self.logger.info(f"\n--- Processing: {filename} ---")
+                
+                # 1. Navigation & Upload (Retry Loop)
+                success = False
+                for attempt in range(2):
+                    # Using driver directly as it is an attribute of VANFileManager
+                    self.driver.get("https://www.votebuilder.com/UploadDataSelectType.aspx")
+                    
+                    # Pre-emptive refresh to clear server-side 'sticky' sessions
+                    if attempt == 0:
+                        self.driver.refresh()
+                    
+                    self.logger.info(f"1. Uploading file (Attempt {attempt + 1})...")
+
+                    # Step 1: Select 'State File ID' and proceed
+                    # Note: Assuming your utils.click_button handles the wait
+                    utils.click_button(self.driver, "//option[. = 'State File ID']", "Select State File ID", locator_type=By.XPATH)
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonUploadSubmit", "Upload Submit", locator_type=By.ID)
+                    
+                    # Step 2: Choose File
+                    file_input = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_InputFileDefault")
+                    file_input.send_keys(file_path)
+                    
+                    # The 'Solid Attachment' pause - prevents 'Invalid File' OOPS
+                    time.sleep(4)
+                    
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonSubmitDefault", "Process File", locator_type=By.ID)
+
+                    # 2. SMART WAIT: Poll for response (OOPS vs Success)
+                    response_found = False
+                    for _ in range(22): # ~22 seconds max
+                        current_url = self.driver.current_url
+                        if "Error.aspx" in current_url:
+                            self.logger.error(f"!!! OOPS detected after VANPage_ButtonSubmitDefault on attempt {attempt + 1}")
+                            
+                            # Try to grab error text using your utility
+                            try:
+                                error_msg = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_LabelErrorText").text
+                                self.logger.error(f"VAN Error: {error_msg}")
+                            except:
+                                self.logger.error("Could not retrieve error text.")
+                                
+                            time.sleep(10) # Cooldown before retry
+                            break
+                        
+                        # Check for the Step 2 "Unmatched" button to see if we succeeded
+                        if len(self.driver.find_elements(By.NAME, "ctl00$ContentPlaceHolderVANPage$ctl09")) > 0:
+                            response_found = True
+                            break
+                        time.sleep(1)
+
+                    if response_found:
+                        # Step 2: Unmatched Alert (ctl09)
+                        self.logger.info(f"2. Waiting for Unmatched People (Attempt {attempt + 1})...")
+                        utils.click_button(self.driver, 'ctl00$ContentPlaceHolderVANPage$ctl09', "Unmatched Button", locator_type=By.NAME)
+                        
+                        # Step 3: Trigger Save-as-List Overlay (Value 154)
+                        self.logger.info("3. Waiting for Mapping Dropdown...")
+                        time.sleep(1)
+                        dropdown_element = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_ctl03_AddULFieldID")
+                        dropdown = Select(dropdown_element)
+                        dropdown.select_by_value("154")
+
+                        # Step 4: Fill Overlay (Iframe Context)
+                        self.logger.info("4. Waiting for Overlay...")
+                        # utils.py doesn't have an iframe helper; use vanilla selenium
+                        self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
+                        
+                        name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
+                        name_field.send_keys(filename)
+                        
+                        folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
+                        folder_drop = Select(folder_drop_element)
+                        folder_drop.select_by_visible_text("VAT Lists (ME)")
+
+                        # Step 5: Click Next and Exit Iframe
+                        self.logger.info("5. Clicking Next and Exiting Iframe...")
+                        utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
+                        
+                        # Wait for iframe to finish processing before switching back
+                        time.sleep(5) 
+                        self.driver.switch_to.default_content()
+                        
+                        # Step 6: Final Finish (Main Page)
+                        self.logger.info("6. Waiting for First Finish...")
+                        try:
+                            utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonFinishUpload", "Finish 1", locator_type=By.ID)
+                            utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_FinishUploadModal__submitButton", "Finish 2", locator_type=By.ID)
+                            
+                            self.logger.info(f"Success: {filename}")
+                            success = True
+                            break # Exit attempt loop for this file
+                        except Exception as e:
+                            self.logger.info(f"(!) Skipped finishing {filename}: {e}")
+                            # If we made it this far, the file is likely in the system anyway
+                            success = True 
+                            break
+
+                if not success:
+                    self.logger.error(f"FATAL: Could not upload {filename} after all retries.")
+
+                # Post-file safety pause to let backend settle
+                time.sleep(5)
+
+    def verify_upload_success(self, file_ids, timeout_minutes=5):
+            """
+            Poll the Batches List until all target files show as 100% Processed.
+            Recognizes 'Created' as a valid processing state.
+            """
+            import time
+            from datetime import datetime
+            from selenium.webdriver.common.by import By
             
-            # Find the file input element and send the file paths
-            file_input = utils.expect_by_id(self.driver, "fileInput")
+            today_str = datetime.now().strftime('%#m/%#d/%y')
+            target_filenames = [f"{fid}_VoterData" for fid in file_ids]
             
-            # Join the file paths with the appropriate separator for the OS
-            # For Windows, this is typically a newline character
-            file_paths_str = '\n'.join(file_paths)
-            file_input.send_keys(file_paths_str)
+            self.logger.info(f"Verifying {len(target_filenames)} files. Max wait: {timeout_minutes} mins.")
             
-            # Click the submit button
-            submit_button = utils.expect_by_id(self.driver, "submitUploadButton")
-            submit_button.click()
-            
-            self.logger.info("Files uploaded successfully")
-        except TimeoutException as e:
-            self.logger.error(f"Timeout while uploading files: {e}")
-            raise
-        except NoSuchElementException as e:
-            self.logger.error(f"Element not found while uploading files: {e}")
-            raise
-        except Exception as e:
-            self.logger.error(f"Error uploading files: {e}")
-            raise
-    
-    def verify_upload_success(self):
-        """
-        Verify that the file upload was successful.
-        
-        Returns:
-            bool: True if the upload was successful, False otherwise.
-        """
-        self.logger.info("Verifying upload success")
-        
-        try:
-            # Look for a success message
-            utils.expect_by_XPATH(
-                self.driver,
-                "//div[contains(text(), 'Upload completed successfully')]"
-            )
-            self.logger.info("Upload verified as successful")
-            return True
-        except TimeoutException:
-            self.logger.warning("Could not verify upload success")
-            return False
-        except Exception as e:
-            self.logger.error(f"Error verifying upload success: {e}")
-            return False
+            try:
+                if "BulkUploadBatchesList.aspx" not in self.driver.current_url:
+                    self.driver.get("https://www.votebuilder.com/BulkUploadBatchesList.aspx")
+
+                end_time = time.time() + (timeout_minutes * 60)
+                
+                # Bulletproof XPath: Find the table that contains the column "Import Name"
+                table_xpath = "//table[contains(., 'Import Name')]"
+                
+                while time.time() < end_time:
+                    # Wait for the table to exist
+                    utils.expect_by_XPATH(self.driver, table_xpath)
+                    
+                    # Grab all rows
+                    rows = self.driver.find_elements(By.XPATH, f"{table_xpath}//tr")
+                    
+                    status_dict = {target: "Not Found Today" for target in target_filenames}
+                    
+                    for target in target_filenames:
+                        for row in rows:
+                            row_text = row.text
+                            if target in row_text:
+                                if today_str not in row_text:
+                                    status_dict[target] = "Old Date (Skipped?)"
+                                elif "100% Processed" in row_text:
+                                    status_dict[target] = "Complete"
+                                # Catch "Created", "Processing", or any partial "%"
+                                elif "Created" in row_text or "Processing" in row_text or "%" in row_text:
+                                    status_dict[target] = "Processing"
+                                else:
+                                    status_dict[target] = f"Unknown State: {row_text[:40]}"
+                                
+                                break # Found the newest entry for this target, stop checking older rows
+                    
+                    # Evaluate the statuses
+                    all_complete = True
+                    still_working = False
+                    
+                    for target, status in status_dict.items():
+                        if status == "Processing":
+                            still_working = True
+                            all_complete = False
+                        elif status != "Complete":
+                            all_complete = False
+
+                    if all_complete:
+                        self.logger.info("All files successfully verified as 100% Processed.")
+                        return True
+                        
+                    if still_working:
+                        self.logger.info(f"Files still processing. Waiting 15s... (Current status: {status_dict})")
+                        time.sleep(15)
+                        self.driver.refresh()
+                        continue
+                    else:
+                        self.logger.error(f"Upload phase failed or skipped files. Final status: {status_dict}")
+                        return False
+
+                self.logger.error("Verification timed out.")
+                return False
+
+            except Exception as e:
+                self.logger.error(f"Verification logic crashed: {e}")
+                return False

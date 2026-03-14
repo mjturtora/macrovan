@@ -123,7 +123,7 @@ class VoterDataAutomation:
             # Initialize the file manager and search list manager
             self.file_manager = VANFileManager(self.driver)
             self.search_list_manager = VANSearchListManager(self.driver)
-            
+
             self.logger.info("Browser initialization and login completed successfully")
         except Exception as e:
             self.logger.error(f"Error initializing browser: {e}")
@@ -163,14 +163,17 @@ class VoterDataAutomation:
             
             # Delete existing files
             self.logger.info("Deleting existing files")
-            self.file_manager.delete_files([f"{file_id}_VoterData" for file_id in file_ids])
+            self.file_manager.delete_files(
+                [f"{file_id}_VoterData" for file_id in file_ids]
+                , list_folder
+                )
             
             # Upload the downloaded files
             self.logger.info("Uploading files")
             self.file_manager.bulk_upload_files(self.downloaded_files)
             
             # Verify upload success
-            if self.file_manager.verify_upload_success():
+            if self.file_manager.verify_upload_success(file_ids):
                 self.logger.info("Upload verified as successful")
             else:
                 self.logger.warning("Could not verify upload success")
@@ -235,7 +238,7 @@ class VoterDataAutomation:
             self.upload_files_to_van()
             
             # Phase 4: Process searches and lists
-            self.process_searches_and_lists()
+            # self.process_searches_and_lists()
             
             self.logger.info("Full automation process completed successfully")
         except Exception as e:

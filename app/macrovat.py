@@ -42,22 +42,43 @@ def load_config(config_path="macrovan_config.json"):
             return json.load(f)
 
 def setup_logging(config):
-    """Set up logging configuration."""
+    """Set up logging with independent levels for console and file."""
     log_path = os.path.join(
         config["files"]["logs_directory"],
         config["files"]["log_files"]["macrovat"]
     )
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
+
+    logger = logging.getLogger("macrovat")
     
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_path),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger("macrovat")
+    # Set the master logger to DEBUG so it doesn't throttle the handlers
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_cfg = config.get("logging", {})
+
+    # 1. Configure File Handler
+    f_level_str = log_cfg.get("file_level", "INFO").upper()
+    f_level = getattr(logging, f_level_str, logging.INFO)
+    
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel(f_level)
+    file_handler.setFormatter(formatter)
+
+    # 2. Configure Console Handler
+    c_level_str = log_cfg.get("console_level", "INFO").upper()
+    c_level = getattr(logging, c_level_str, logging.INFO)
+    
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(c_level)
+    console_handler.setFormatter(formatter)
+
+    # 3. Attach Handlers
+    if not logger.handlers:
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+
+    return logger
 
 def main():
     """Run the full VoterData automation process."""
@@ -83,5 +104,7 @@ def main():
         return 1
 
 if __name__ == "__main__":
+    print(f"[*] Execution Dir: {os.getcwd()}")
+    print(f"[*] Python Path:   {sys.path[0]}")
     exit_code = main()
     exit(exit_code)

@@ -1,4 +1,8 @@
 {
+  "logging": {
+    "console_level": "INFO",
+    "file_level": "DEBUG"
+  },
   "api": {
     "base_url": "https://vat.flddc.org/API/VoterData/",
     "file_ids": ["G01", "G02", "G03", "G04", "G05", "G06", "G07", "G08", "G09", "G10"]
