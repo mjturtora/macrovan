@@ -10,6 +10,7 @@ Run these commands from the project root folder using Poetry.
 | :--- | :--- |
 | `poetry run vat` | **Main Automation:** Downloads files, uploads to VAN, and updates lists. |
 | `poetry run vat --reset` | **Credential Management:** Change or reset saved VAN username/password. |
+| `poetry run vat --searches` | **VAT Searches:** Only process saved searches and save to lists. Creates new lists if needed. |
 | `poetry run print-lists` | **VBM Targeting:** Process and print target lists from Excel. |
 | `poetry run mail-prints` | **Distribution:** Email generated PDFs to organizers. |
 | `poetry run pytest` | **Testing:** Run the internal test suite. |
@@ -59,16 +60,16 @@ macrovan/
 ├── app/                           # Main application code
 │   ├── auth.py                    # Secure Keyring Bridge (Replaces credentials file)
 │   ├── macrovat.py                # VAT automation entry point
-│   ├── voter_data_automation.py   # VAT orchestration logic
+│   ├── voter_data_automation.py   # VAT orchestration, search, and list processing
 │   ├── voter_data_downloader.py   # API data retrieval
 │   ├── van_file_manager.py        # Browser-based file handling in VAN
-│   ├── van_search_list_manager.py # Saved search and list processing
 │   ├── print_VBM_targets.py       # Vote-By-Mail list printing
 │   ├── mail_in_voter_prints.py    # Email automation for organizers
 │   ├── utils.py                   # Shared Selenium & PDF utilities
 │   └── macrovan_config.json       # JSON configuration for file paths/logs
 ├── io/                            # Data Input/Output
 │   ├── api_downloads/             # Cached VoterData from API
+|   ├── Input/                     # Source spreadsheets and trackers
 │   ├── logs/                      # Application log files
 │   └── Output/                    # Generated PDFs and distribution folders
 ├── pyproject.toml                 # Poetry environment & dependencies
@@ -80,7 +81,7 @@ macrovan/
 To support running automation modules from the project root, all entry points (e.g., `macrovat.py`, `print_VBM_targets.py`) must include the following path resolution at the very top:
 `import sys, os; sys.path.append(os.path.dirname(os.path.abspath(__file__)))`
 This ensures sibling modules like `auth.py` are discoverable regardless of the execution context.
-Only the VAT process meets this requirement in 2/2026.
+Only the VAT process meets this requirement in 3/2026.
 
 ---
 
