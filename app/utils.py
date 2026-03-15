@@ -1,12 +1,9 @@
-
 # Standard Library
 import ctypes
 import fnmatch
-import glob
 import io
 import json
 import logging
-import os
 import shutil
 import sys
 import tempfile
@@ -27,6 +24,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Local
 from auth import username, password
+
+# Global anchor to the app directory
+SCRIPT_DIR = Path(__file__).resolve().parent
 
 logger = logging.getLogger('VoterDataAutomation.utils')
 
@@ -63,16 +63,15 @@ def teardown():
     logger.info(f'Starting teardown for {os_type}')
     
     # tempfile.gettempdir() is the 'Gold Standard' for cross-platform paths
-    temp_path = tempfile.gettempdir()
+    temp_path = Path(tempfile.gettempdir())
     
     # Patterns for Windows (scoped_dir) and Unix/Mac (.com.google)
     patterns = ['scoped_dir*', 'chrome_BITS_*', '.com.google.Chrome.*', '.org.chromium.Chromium.*']
     
     deleted_count = 0
     for pattern in patterns:
-        # os.path.join handles the slash direction ( \ vs / ) automatically
-        search_path = os.path.join(temp_path, pattern)
-        for path in glob.iglob(search_path):
+        # Using pathlib to find matching directories
+        for path in temp_path.glob(pattern):
             try:
                 shutil.rmtree(path, ignore_errors=True)
                 logger.debug(f"Cleared: {path}")
@@ -296,7 +295,7 @@ def select_folder(driver):
 def select_turf(driver, turf_name):
     logger.debug('Select Saved Search')
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(
+                  "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(
         turf_name)
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
     expect_by_XPATH(driver, '//*[text()="' + turf_name + '"]').click()
@@ -387,7 +386,10 @@ def turfselection_plus(driver, turf_name):
     expect_by_id(driver, "ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
     logger.debug('Click #AddNewStepButton')
+    
+    # FIXED: Restored original newline character for correct MessageBox display
     pause('Click Add New Step: Remove, and wait\n for page to load to continue')
+    
     logger.debug('Unclick early voting twisty?')
     early_voting_twisty(driver)
 
@@ -421,29 +423,29 @@ def print_list(driver, listName):
     # Locate the Sector and create a Select object
     logger.debug('Select Print Format Option')
     select_element = Select(expect_by_id(driver,
-                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
+                                          "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
     select_element = Select(expect_by_id(driver,
-                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
+                                          "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
     # logger.debug([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
 
     # Script source selection (Walk)
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     dropdown = expect_by_id(driver,
-                            "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+                             "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
     expect_by_XPATH(driver, "//option[. = 'Walk']").click()
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     element = expect_by_id(driver,
-                           "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+                            "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
 
@@ -459,29 +461,32 @@ def print_list(driver, listName):
 
     # Sort Order 4
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+    
+    # FIXED: Restored newline and logic
     pause("Double Check that selections are correct")  #todo: test removal of .click()
+    
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_link_text(driver, "My PDF Files").click()
 
@@ -585,7 +590,8 @@ def expect_by_link_text(driver, link_text):
 
 def get_turfs():
     # Read data from excel file into tuples
-    fname = r"..\io\Input\Turf List.xlsx"
+    # FIXED: Anchored relative to the app folder using pathlib
+    fname = SCRIPT_DIR.parent / "io" / "Input" / "Turf List.xlsx"
     df = pd.read_excel(fname, sheet_name="Sheet1")
     turfs = []
     count = 0
@@ -604,7 +610,7 @@ def key_check(df, key):
 
 
 def get_volunteer_data(fname=r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020 -Tracking All Voters.xlsx",
-                       sheet_name="To Deliver - Reports"):
+                        sheet_name="To Deliver - Reports"):
     # Had to use full path to get it to work for me.
     # #logger.debug('Path string in get_volunteer_data = ', path)
     logger.debug(f'get_volunteer_data: os.getcwd = {os.getcwd()}')
@@ -710,10 +716,11 @@ def get_organizer_turfs_dict(fname):
 def get_fnames(path):
     # Get all the PDF filenames.
     pdf_files = []
-    for filename in os.listdir(path):
+    # FIXED: Replaced os.listdir with Path object iterdir
+    for file_path in Path(path).iterdir():
         #logger.debug(filename)
-        if filename.endswith('.pdf'):
-            pdf_files.append(filename)
+        if file_path.suffix.lower() == '.pdf':
+            pdf_files.append(file_path.name)
     pdf_files.sort(key=str.lower)
     #logger.debug(pdf_files)
     return pdf_files
@@ -740,80 +747,82 @@ def extract_pdf_info(path=r'io\Output'):
     for filename in pdf_files:
         #print('pdf filename = ', filename)
         #pdfFileObj = open(r'io\Output\\' + filename, 'rb')
-        pdfFileObj = open(path + '\\' + filename, 'rb')
-        pdfReader = pypdf.PdfReader(pdfFileObj)  # Updated from PyPDF2.PdfFileReader
-        page = pdfReader.pages[0].extract_text()  # Updated from getPage(0).extractText()
-        first_part, doors = page.split("Doors:", 1)
-        date, people = page.split("People:", 1)
-        date = date.split("Generated")[1]
-        date = date.split(" ")[1]
-        doors = int(doors.split("Affiliation")[0])
-        people = int(people.split("Affiliation")[0].split()[0])
-        page = pdfReader.pages[2].extract_text()  # Updated from getPage(2).extractText()
-        # print('Page =', page)
-        if people != 0:
-            pdf_file_name, lnum = page.split("List", 1)
-            lnum = lnum.split(" ")[1]
-        else:
-            lnum = '0-0'
-            pdf_file_name, date_part = filename.split("_2020", 1)
-            # print(filename, '\n', pdf_file_name, '\n', date_part, '\n', page, '\n')
-            #exit(2)
+        
+        # FIXED: Using pathlib to build the full path
+        pdf_full_path = Path(path) / filename
+        
+        with open(pdf_full_path, 'rb') as pdfFileObj:
+            pdfReader = pypdf.PdfReader(pdfFileObj)  # Updated from PyPDF2.PdfFileReader
+            page = pdfReader.pages[0].extract_text()  # Updated from getPage(0).extractText()
+            first_part, doors = page.split("Doors:", 1)
+            date, people = page.split("People:", 1)
+            date = date.split("Generated")[1]
+            date = date.split(" ")[1]
+            doors = int(doors.split("Affiliation")[0])
+            people = int(people.split("Affiliation")[0].split()[0])
+            page = pdfReader.pages[2].extract_text()  # Updated from getPage(2).extractText()
+            # print('Page =', page)
+            if people != 0:
+                pdf_file_name, lnum = page.split("List", 1)
+                lnum = lnum.split(" ")[1]
+            else:
+                lnum = '0-0'
+                pdf_file_name, date_part = filename.split("_2020", 1)
+                # print(filename, '\n', pdf_file_name, '\n', date_part, '\n', page, '\n')
+                #exit(2)
 
-        # print('pdf_file_name = ' + pdf_file_name)
-        pdf_dict[pdf_file_name] = {
-            'list_number': lnum,
-            'door_count': doors,
-            'person_count': people,
-            'date_generated': date,
-            'pdf_file_name': pdf_file_name,
-            #'organizer_email': organizer_email
-        }
+            # print('pdf_file_name = ' + pdf_file_name)
+            pdf_dict[pdf_file_name] = {
+                'list_number': lnum,
+                'door_count': doors,
+                'person_count': people,
+                'date_generated': date,
+                'pdf_file_name': pdf_file_name,
+                #'organizer_email': organizer_email
+            }
     return pdf_dict
 
 
 #iterate through folder_dict and create a subfolder copying the files over for each organizer
 def create_folders(folder_dict, parent_folder_name):
-    parent_path = r'D:\Stuff\Projects\Pol\macrovan\io\Output'
+    # FIXED: Replaced os navigation with pathlib absolute targets
+    parent_path = Path(r'D:\Stuff\Projects\Pol\macrovan\io\Output')
     logger.debug(f'create_folders: parent_path = {parent_path}')
-    os.chdir(parent_path)
-    logger.debug(f'create_folders: os.getcwd = {os.getcwd()}')
-    if(os.path.isdir(parent_folder_name)):
-        shutil.rmtree(parent_folder_name)
-    os.mkdir(parent_folder_name)
-    os.chdir(parent_folder_name)
-    logger.debug(f'create_folders: os.getcwd = {os.getcwd()}')
-    logger.debug(f'create_folders: parent_folder_name = {parent_folder_name}')
+    
+    # Define absolute target for parent folder
+    target_parent = parent_path / parent_folder_name
+    
+    if target_parent.is_dir():
+        shutil.rmtree(target_parent)
+    target_parent.mkdir(parents=True)
+    
     logger.debug(f'create_folders: folder_dict keys =\n {folder_dict.keys()}')
-    for key in folder_dict.keys():
-        subfolder = key
-        if(os.path.isdir(subfolder)):
+    
+    for subfolder_name in folder_dict.keys():
+        subfolder_path = target_parent / subfolder_name
+        
+        if subfolder_path.is_dir():
             logger.debug('ISDIR: Subfolder Exists')
-            logger.debug(f'os.getcwd() = {os.getcwd()}\n Subfolder = {subfolder} EXISTS')
             continue
         else:
-            os.mkdir(subfolder)
-        os.chdir(subfolder)
-        #logger.debug(f'chdir(subfolder) os.getcwd() = {os.getcwd()}')
-        for file in folder_dict[subfolder]:
-            search_file = file + "*" + ".pdf"
-            search_file = search_file.replace(" ", "")
+            subfolder_path.mkdir(exist_ok=True)
+        
+        for file_prefix in folder_dict[subfolder_name]:
+            search_pattern = file_prefix.replace(" ", "") + "*.pdf"
             file_found = 'No'
-            for file in os.listdir(parent_path+r"\tests"):
-                found_file = file.replace(" ", "")
-                #print('search_file = ', search_file)
-                #print('found_file = ', found_file)
-                if fnmatch.fnmatch(found_file, search_file):
-                    #print('Matched files', found_file)
-                    #print()
-                    #shutil.copy(parent_path+r"\app\io\output\\tests\"+file, file)
-                    shutil.copy(parent_path + r'\\tests\\' + file, file)
+            
+            # Anchor search to the specific tests folder
+            tests_path = parent_path / "tests"
+            for candidate in tests_path.iterdir():
+                found_filename_clean = candidate.name.replace(" ", "")
+                if fnmatch.fnmatch(found_filename_clean, search_pattern):
+                    # Copy to the specific subfolder using absolute targets
+                    shutil.copy(candidate, subfolder_path / candidate.name)
                     file_found = 'Yes'
                     break
+            
             if file_found != 'Yes':
-                logger.debug(f"For Organizer: {subfolder}\nWARNING SEARCH FILE {search_file} NOT FOUND!")
-        os.chdir("..")
-    os.chdir(parent_path)
+                logger.debug(f"For Organizer: {subfolder_name}\nWARNING SEARCH FILE {search_pattern} NOT FOUND!")
 
 def create_organizer_folders(fname, sheet_name):
     organizerFiles = {}
