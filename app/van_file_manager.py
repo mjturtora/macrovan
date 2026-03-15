@@ -1,10 +1,16 @@
-import os
+# 1. Standard Library
 import logging
+import os
 import time
+from datetime import datetime
+
+# 2. Third-Party Libraries
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+# 3. Local Application Imports
 import utils
 
 class VANFileManager:
@@ -24,12 +30,7 @@ class VANFileManager:
             driver: The Selenium WebDriver instance to use for browser automation.
         """
         self.driver = driver
-        
-        # Configure logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
+        # Use the logger configured by the orchestrator
         self.logger = logging.getLogger('VANFileManager')
     
     def navigate_to_file_folder(self, folder_name):
@@ -71,7 +72,6 @@ class VANFileManager:
     
     def delete_files(self, file_patterns, folder_name):
         """
-        todo: Handle the case where the file is not found
         Delete files in VAN that match the specified patterns.
         
         Uses the filter field to search for each file individually, then deletes them
@@ -103,7 +103,6 @@ class VANFileManager:
                 filter_field.send_keys("\n")  # Submit the filter
                 
                 # Wait briefly for filter to apply
-                import time
                 time.sleep(1)
                 
                 # Try to find the Edit button for this file (short timeout for existence check)
@@ -124,7 +123,6 @@ class VANFileManager:
                     self.navigate_to_file_folder(folder_name)
                     continue
 
-                # Now we're on the detail page - click the delete button
                 # Now we're on the detail page - click the delete button (use standard timeout)
                 delete_button = utils.expect_by_XPATH(
                     self.driver,
@@ -159,15 +157,11 @@ class VANFileManager:
         time.sleep(2)  # 10 minutes better be enough
         self.logger.info(f"Deletion complete: {deleted_count} deleted, {skipped_count} skipped")
     
-    def bulk_upload_files(self, file_paths):
+    def bulk_upload_files(self, file_paths, list_folder):
             """
             Guts of the upload logic using utils.py and vanilla Selenium.
             Replaces the stub in VANFileManager.
             """
-            import time
-            from selenium.webdriver.common.by import By
-            from selenium.webdriver.support.ui import Select
-
             # file_paths is self.downloaded_files passed from VoterDataAutomation
             for file_path in file_paths:
 
@@ -179,21 +173,16 @@ class VANFileManager:
                 # 1. Navigation & Upload (Retry Loop)
                 success = False
                 for attempt in range(2):
-                    # Using driver directly as it is an attribute of VANFileManager
                     self.driver.get("https://www.votebuilder.com/UploadDataSelectType.aspx")
                     
-                    # Pre-emptive refresh to clear server-side 'sticky' sessions
                     if attempt == 0:
                         self.driver.refresh()
                     
                     self.logger.info(f"1. Uploading file (Attempt {attempt + 1})...")
 
-                    # Step 1: Select 'State File ID' and proceed
-                    # Note: Assuming your utils.click_button handles the wait
                     utils.click_button(self.driver, "//option[. = 'State File ID']", "Select State File ID", locator_type=By.XPATH)
                     utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonUploadSubmit", "Upload Submit", locator_type=By.ID)
                     
-                    # Step 2: Choose File
                     file_input = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_InputFileDefault")
                     file_input.send_keys(file_path)
                     
@@ -208,18 +197,14 @@ class VANFileManager:
                         current_url = self.driver.current_url
                         if "Error.aspx" in current_url:
                             self.logger.error(f"!!! OOPS detected after VANPage_ButtonSubmitDefault on attempt {attempt + 1}")
-                            
-                            # Try to grab error text using your utility
                             try:
                                 error_msg = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_LabelErrorText").text
                                 self.logger.error(f"VAN Error: {error_msg}")
                             except:
                                 self.logger.error("Could not retrieve error text.")
-                                
                             time.sleep(10) # Cooldown before retry
                             break
                         
-                        # Check for the Step 2 "Unmatched" button to see if we succeeded
                         if len(self.driver.find_elements(By.NAME, "ctl00$ContentPlaceHolderVANPage$ctl09")) > 0:
                             response_found = True
                             break
@@ -239,7 +224,6 @@ class VANFileManager:
 
                         # Step 4: Fill Overlay (Iframe Context)
                         self.logger.info("4. Waiting for Overlay...")
-                        # utils.py doesn't have an iframe helper; use vanilla selenium
                         self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
                         
                         name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
@@ -247,13 +231,13 @@ class VANFileManager:
                         
                         folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
                         folder_drop = Select(folder_drop_element)
-                        folder_drop.select_by_visible_text("VAT Lists (ME)")
+                        # FIXED: Now uses the folder name from your config
+                        folder_drop.select_by_visible_text(list_folder)
 
                         # Step 5: Click Next and Exit Iframe
                         self.logger.info("5. Clicking Next and Exiting Iframe...")
                         utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
                         
-                        # Wait for iframe to finish processing before switching back
                         time.sleep(5) 
                         self.driver.switch_to.default_content()
                         
@@ -265,17 +249,15 @@ class VANFileManager:
                             
                             self.logger.info(f"Success: {filename}")
                             success = True
-                            break # Exit attempt loop for this file
+                            break 
                         except Exception as e:
                             self.logger.info(f"(!) Skipped finishing {filename}: {e}")
-                            # If we made it this far, the file is likely in the system anyway
                             success = True 
                             break
 
                 if not success:
                     self.logger.error(f"FATAL: Could not upload {filename} after all retries.")
 
-                # Post-file safety pause to let backend settle
                 time.sleep(5)
 
     def verify_upload_success(self, file_ids, timeout_minutes=5):
@@ -283,10 +265,6 @@ class VANFileManager:
             Poll the Batches List until all target files show as 100% Processed.
             Recognizes 'Created' as a valid processing state.
             """
-            import time
-            from datetime import datetime
-            from selenium.webdriver.common.by import By
-            
             today_str = datetime.now().strftime('%#m/%#d/%y')
             target_filenames = [f"{fid}_VoterData" for fid in file_ids]
             
@@ -297,15 +275,10 @@ class VANFileManager:
                     self.driver.get("https://www.votebuilder.com/BulkUploadBatchesList.aspx")
 
                 end_time = time.time() + (timeout_minutes * 60)
-                
-                # Bulletproof XPath: Find the table that contains the column "Import Name"
                 table_xpath = "//table[contains(., 'Import Name')]"
                 
                 while time.time() < end_time:
-                    # Wait for the table to exist
                     utils.expect_by_XPATH(self.driver, table_xpath)
-                    
-                    # Grab all rows
                     rows = self.driver.find_elements(By.XPATH, f"{table_xpath}//tr")
                     
                     status_dict = {target: "Not Found Today" for target in target_filenames}
@@ -318,15 +291,12 @@ class VANFileManager:
                                     status_dict[target] = "Old Date (Skipped?)"
                                 elif "100% Processed" in row_text:
                                     status_dict[target] = "Complete"
-                                # Catch "Created", "Processing", or any partial "%"
                                 elif "Created" in row_text or "Processing" in row_text or "%" in row_text:
                                     status_dict[target] = "Processing"
                                 else:
                                     status_dict[target] = f"Unknown State: {row_text[:40]}"
-                                
-                                break # Found the newest entry for this target, stop checking older rows
-                    
-                    # Evaluate the statuses
+                                break 
+
                     all_complete = True
                     still_working = False
                     

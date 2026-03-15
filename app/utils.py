@@ -1,27 +1,33 @@
 
-import os
-import io
-import sys
-import pypdf  # Updated from PyPDF2 which is deprecated
+# Standard Library
+import ctypes
+import fnmatch
 import glob
+import io
+import json
+import logging
+import os
 import shutil
+import sys
 import tempfile
 import time
+from pathlib import Path
+
+# Third-Party
+import pandas as pd
+import pypdf
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.remote.command import Command
-import ctypes  # for windows message pop-up
-import pandas as pd
-import fnmatch
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
+# Local
 from auth import username, password
-import logging
+
 logger = logging.getLogger('VoterDataAutomation.utils')
 
 pd.set_option('display.max_rows', 1000)
@@ -39,6 +45,17 @@ def get_os():
     os_name = platform_map.get(sys.platform, sys.platform)
     logger.info(f"OS Detected: {os_name} ({sys.platform})")
     return os_name
+
+
+def load_config(path):
+    """Load and return JSON configuration from a Path object."""
+    if not isinstance(path, Path):
+        path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Configuration file not found at: {path}")
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
 
 def teardown():
     """Remove temp files from prior run across different platforms"""

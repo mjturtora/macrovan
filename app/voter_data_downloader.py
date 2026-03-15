@@ -1,8 +1,6 @@
-import os
-import requests
 import logging
 import datetime
-import json
+import requests
 from pathlib import Path
 
 class VoterDataDownloader:
@@ -21,15 +19,11 @@ class VoterDataDownloader:
             base_url (str): The base URL for the API endpoint.
             output_directory (str): The directory where downloaded files will be saved.
         """
-        # Configure logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
+        # Configure logging - Now using getLogger only to respect the orchestrator's config
         self.logger = logging.getLogger('VoterDataDownloader')
         
         self.base_url = base_url
-        self.output_directory = output_directory
+        self.output_directory = Path(output_directory)
         self._ensure_output_directory()
     
     def download_file(self, file_id):
@@ -48,7 +42,7 @@ class VoterDataDownloader:
             IOError: If there's an error writing the file.
         """
         url = self._build_url(file_id)
-        output_path = os.path.join(self.output_directory, f"{file_id}_VoterData.csv")
+        output_path = self.output_directory / f"{file_id}_VoterData.csv"
         
         self.logger.info(f"Downloading file {file_id} from {url}")
         
@@ -68,7 +62,7 @@ class VoterDataDownloader:
                     f.write(response.content)
             
             self.logger.info(f"Successfully downloaded {file_id} to {output_path}")
-            return output_path
+            return str(output_path)
             
         except requests.exceptions.HTTPError as e:
             self.logger.error(f"HTTP error downloading {file_id}: {e}")
@@ -90,15 +84,15 @@ class VoterDataDownloader:
         Returns:
             bool: True if the file should be downloaded, False otherwise.
         """
-        output_path = os.path.join(self.output_directory, f"{file_id}_VoterData.csv")
+        output_path = self.output_directory / f"{file_id}_VoterData.csv"
         
         # If the file doesn't exist, it should be downloaded
-        if not os.path.exists(output_path):
+        if not output_path.exists():
             self.logger.info(f"File {file_id} does not exist, will download")
             return True
         
         # Get the file's last modification time
-        mod_time = datetime.datetime.fromtimestamp(os.path.getmtime(output_path))
+        mod_time = datetime.datetime.fromtimestamp(output_path.stat().st_mtime)
         today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         
         # If the file was modified today, don't download it again
@@ -135,7 +129,7 @@ class VoterDataDownloader:
                     downloaded_files.append(file_path)
                 else:
                     # If the file shouldn't be downloaded, add it to the list of skipped files
-                    skipped_files.append(os.path.join(self.output_directory, f"{file_id}_VoterData.csv"))
+                    skipped_files.append(str(self.output_directory / f"{file_id}_VoterData.csv"))
             except Exception as e:
                 self.logger.error(f"Error downloading file {file_id}: {e}")
                 raise
@@ -149,8 +143,8 @@ class VoterDataDownloader:
         """
         Ensure the output directory exists, creating it if necessary.
         """
-        if not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory)
+        if not self.output_directory.exists():
+            self.output_directory.mkdir(parents=True, exist_ok=True)
             self.logger.info(f"Created output directory: {self.output_directory}")
     
     def _build_url(self, file_id):

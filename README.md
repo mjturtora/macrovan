@@ -10,7 +10,8 @@ Run these commands from the project root folder using Poetry.
 | :--- | :--- |
 | `poetry run vat` | **Main Automation:** Downloads files, uploads to VAN, and updates lists. |
 | `poetry run vat --reset` | **Credential Management:** Change or reset saved VAN username/password. |
-| `poetry run vat --searches` | **VAT Searches:** Only process saved searches and save to lists. Creates new lists if needed. |
+| `poetry run vat --searches` | **Refresh Searches:** Only refresh saved searches and save to lists. Creates new lists if needed. |
+| `poetry run vat --lists` | **Refresh Lists:** Only refresh lists. Creates new lists if needed. |
 | `poetry run print-lists` | **VBM Targeting:** Process and print target lists from Excel. |
 | `poetry run mail-prints` | **Distribution:** Email generated PDFs to organizers. |
 | `poetry run pytest` | **Testing:** Run the internal test suite. |
