@@ -20,7 +20,7 @@ class VoterDataAutomation:
     Main orchestration class for the VoterData automation process.
     """
 
-    def __init__(self, config_path="macrovan_config.json"):
+    def __init__(self, config_path="macrovan_config.json", file_override=None):
         # 1. Anchor to script location
         self.script_dir = Path(__file__).resolve().parent
         
@@ -34,6 +34,7 @@ class VoterDataAutomation:
         self.driver = None
         self.downloader = None
         self.file_manager = None
+        self.file_override = file_override # Stores CLI subset if provided
         
         # 5. Configure logging using resolved paths
         log_dir = self.config["files"]["logs_directory"]
@@ -105,9 +106,18 @@ class VoterDataAutomation:
             raise
     
     def get_file_ids(self):
-        """Get file IDs from config."""
+        """Get file IDs from config or override."""
+        # Priority 1: CLI Argument (-f G10 G11)
+        if self.file_override:
+            return self.file_override
+            
+        # Priority 2: Manual Subsetter (Uncomment to use)
+        # return ["G10", "G11"]
+        
+        # Priority 3: Default JSON Config
         return self.config["api"]["file_ids"]
-    
+
+
     def upload_files_to_van(self):
         """
         Upload previously downloaded files to VAN.
@@ -262,18 +272,21 @@ class VoterDataAutomation:
         except Exception as e:
             self.logger.error(f"Critical failure: {e}")
             raise
-        finally:
-            self.cleanup()
-    
+
+
     def cleanup(self):
-        """Clean up WebDriver resources."""
-        self.logger.info("Cleaning up resources")
+        """Clean up WebDriver resources safely."""
         if self.driver:
+            self.logger.info("Cleaning up resources")
             try:
                 self.driver.quit()
                 self.logger.info("WebDriver quit successfully")
             except Exception as e:
-                self.logger.error(f"Error quitting WebDriver: {e}")
+                self.logger.debug(f"WebDriver was already closed or unreachable: {e}")
+            finally:
+                # CRITICAL: Set to None so a second call does nothing
+                self.driver = None
+
 
 if __name__ == "__main__":
     automation = VoterDataAutomation()

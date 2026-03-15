@@ -14,7 +14,6 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.append(str(SCRIPT_DIR))
 
-from auth import username, password
 from utils import load_config
 from voter_data_automation import VoterDataAutomation
 
@@ -60,27 +59,28 @@ def setup_logging(config):
 
 def main():
     """Run the VoterData automation process."""
-    # Set up argument parser for different phases
     parser = argparse.ArgumentParser(description="Macrovan VoterData Automation")
     parser.add_argument("--all", action="store_true", help="Run the complete process")
     parser.add_argument("--searches", action="store_true", help="Run Phase 4: Refresh Searches")
     parser.add_argument("--lists", action="store_true", help="Run Phase 5: Refresh Lists")
+    parser.add_argument("-f", "--files", nargs="+", help="Subset of files (e.g. -f G10 G11)")
+    
     args = parser.parse_args()
 
-    # Load configuration
-    # config = load_config()
     config = load_config(SCRIPT_DIR / "macrovan_config.json")
-    # Setup logging with config
     logger = setup_logging(config)
     
     logger.info("Starting VoterData automation process")
 
     try:
-        # Initialize the automation
-        automation = VoterDataAutomation(config_path="macrovan_config.json")
-        
+        # Pass the CLI override to the orchestrator
+        automation = VoterDataAutomation(
+            config_path="macrovan_config.json", 
+            file_override=args.files
+        )
+
         # 1. Handle the "Run Everything" case (The Default)
-        if args.all or not any(vars(args).values()):
+        if args.all or not (args.searches or args.lists):
             logger.info("Executing full VoterData automation process")
             automation.run_full_process()
             return 0
