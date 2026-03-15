@@ -293,6 +293,21 @@ def handle_alert(driver):
     print_title(driver)
 
 
+def expect_alert(driver, wait_time=10):
+    wait_no_longer_than = wait_time
+    logger.debug('Expecting alert')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.alert_is_present())
+    return element
+
+def expect_clickable_by_XPATH(driver, XPATH, wait_time=120):
+    wait_no_longer_than = wait_time
+    logger.debug(f'Expecting clickable {XPATH}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.element_to_be_clickable((By.XPATH, XPATH)))
+    return element
+
+
 def edit_search(driver):
     # Edit Search:
     logger.debug('Edit Search')

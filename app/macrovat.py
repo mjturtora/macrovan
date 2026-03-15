@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import logging
+import argparse
 
 # Add the current script's directory (app/) to the search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -81,30 +82,49 @@ def setup_logging(config):
     return logger
 
 def main():
-    """Run the full VoterData automation process."""
+    """Run the VoterData automation process."""
+    # Set up argument parser for different phases
+    parser = argparse.ArgumentParser(description="Macrovan VoterData Automation")
+    parser.add_argument("--all", action="store_true", help="Run the complete process")
+    parser.add_argument("--searches", action="store_true", help="Run Phase 4: Process Searches")
+    args = parser.parse_args()
+
     # Load configuration
     config = load_config()
     
     # Setup logging with config
     logger = setup_logging(config)
     
-    logger.info("Starting full VoterData automation process")
+    logger.info("Starting VoterData automation process")
     
     try:
         # Initialize the automation
         automation = VoterDataAutomation(config_path="macrovan_config.json")
         
-        # Run the full process
-        automation.run_full_process()
-        
-        logger.info("Full VoterData automation process completed successfully")
+        # Execute based on provided arguments
+# Execute based on provided arguments
+        if args.searches:
+            logger.info("Executing Phase 4 independently: Refresh Searches")
+            automation.initialize_browser() 
+            automation.refresh_searches() # Updated name
+            logger.info("Phase 4 completed successfully")
+        elif args.all or not any(vars(args).values()):
+            # Run the full process
+            logger.info("Executing full automation process")
+            automation.run_full_process()
+            logger.info("Full VoterData automation process completed successfully")
+            
         return 0
     except Exception as e:
         logger.error(f"Error in automation process: {e}")
         return 1
+        
+    finally:
+        # Ensure cleanup runs regardless of execution path
+        if 'automation' in locals():
+            automation.cleanup()
 
 if __name__ == "__main__":
     print(f"[*] Execution Dir: {os.getcwd()}")
     print(f"[*] Python Path:   {sys.path[0]}")
-    exit_code = main()
-    exit(exit_code)
+    exit_code = main() # Run the main function

@@ -1,7 +1,7 @@
 {
   "logging": {
     "console_level": "INFO",
-    "file_level": "DEBUG"
+    "file_level": "INFO"
   },
   "api": {
     "base_url": "https://vat.flddc.org/API/VoterData/",

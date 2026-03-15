@@ -1,10 +1,15 @@
 import logging
 import json
 import os
+import time
 import utils
 from voter_data_downloader import VoterDataDownloader
 from van_file_manager import VANFileManager
 from van_search_list_manager import VANSearchListManager
+
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
+
 
 class VoterDataAutomation:
     """
@@ -180,38 +185,90 @@ class VoterDataAutomation:
         except Exception as e:
             self.logger.error(f"Error uploading files to VAN: {e}")
             raise
-    
-    def process_searches_and_lists(self):
+
+
+    def refresh_searches(self):
         """
-        Process searches and lists in VAN.
-        
-        This method loads each search in the "VAT Searches" folder, saves the resulting
-        list in the "VAT Lists (MT)" folder, and then loads and saves each list in the
-        "VAT Lists (MT)" folder to replace the bulk uploaded version.
-        
-        Raises:
-            Exception: If processing fails.
+        Loads saved searches and overwrites existing lists using dynamic waits.
         """
-        self.logger.info("Starting search and list processing")
+        # Read directly from config to match upload_files_to_van()
+        search_folder = self.config["van"]["folders"]["search_folder"]
+        list_folder = self.config["van"]["folders"]["list_folder"]
+        file_ids = self.get_file_ids()
         
-        try:
-            # Get folder names from config
-            search_folder = self.config["van"]["folders"]["search_folder"]
-            list_folder = self.config["van"]["folders"]["list_folder"]
-            
-            # Process all searches
-            self.logger.info(f"Processing all searches in {search_folder}")
-            self.search_list_manager.process_all_searches(search_folder, list_folder)
-            
-            # Process all lists
-            self.logger.info(f"Processing all lists in {list_folder}")
-            self.search_list_manager.process_all_lists(list_folder)
-            
-            self.logger.info("Search and list processing completed successfully")
-        except Exception as e:
-            self.logger.error(f"Error in search and list processing: {e}")
-            raise
-    
+        suffixes = ["_BadAddress", "_LL_NPA"]
+        self.logger.info(f"Starting Phase 4: Processing searches in {search_folder}")
+
+        # Use the specific ID you captured in your recording
+        filter_id = "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName"
+        
+        for file_id in file_ids:
+            for suffix in suffixes:
+                target_name = f"{file_id}{suffix}"
+                self.logger.info(f"Processing search: {target_name}")
+                
+                try:
+                    utils.get_page(self.driver, url='https://www.votebuilder.com/Default.aspx')
+                    self.file_manager.navigate_to_file_folder(search_folder)
+
+                    # 1. Filter using ID
+                    filter_field = utils.expect_by_id(self.driver, filter_id)
+                    filter_field.clear()
+                    filter_field.send_keys(target_name)
+                    filter_field.send_keys("\n")
+                    
+                    # Wait 1: Keep XPATH for text-based link finding
+                    search_link_xpath = f"//span[contains(text(), '{target_name}')] | //a[contains(text(), '{target_name}')]"
+                    search_link = utils.expect_clickable_by_XPATH(self.driver, search_link_xpath, wait_time=10)
+                    search_link.click()
+                    
+                    # Wait 2: Alert
+                    utils.expect_alert(self.driver, wait_time=5)
+                    self.driver.switch_to.alert.accept()
+                    
+                    # 3. My List -> Save List As using ID
+                    save_as_id = "ctl00_ContentPlaceHolderVANPage_saveAsButton"
+                    save_as_btn = utils.expect_by_id(self.driver, save_as_id)
+                    save_as_btn.click()
+                    # 4. Radios (Default to Replace)
+                    utils.expect_by_id(self.driver, "SaveListRadioBtn").click()
+                    utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemNew_VANInputItemDetailsItemNew_New_1").click()
+                    
+                    # 5. Select Folder
+                    folder_dropdown = Select(utils.expect_by_id(self.driver, "Folder"))
+                    folder_dropdown.select_by_visible_text(list_folder)
+                    
+                    # Wait for AJAX to populate Replace dropdown based on folder choice
+                    time.sleep(2)
+                    
+                    # 6. Attempt Replace, Fallback to New
+                    try:
+                        replace_dropdown = Select(utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReplace_VANInputItemDetailsItemReplace_Replace"))
+                        replace_dropdown.select_by_visible_text(target_name)
+                    except Exception:  # Catches NoSuchElementException if name isn't in dropdown
+                        self.logger.warning(f"*** WARNING: List '{target_name}' not found. Creating as NEW list. ***")
+                        
+                        # Click "New List" radio button
+                        utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_VanDetailsItemNew_VANInputItemDetailsItemNew_New_0").click()
+                        
+                        # Enter the list name
+                        name_input = utils.expect_by_id(self.driver, "Name")
+                        name_input.clear()
+                        name_input.send_keys(target_name)
+
+                    # 7. Save
+                    utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_SubmitButton").click()
+                        
+                    # Wait for return to My List using ID
+                    utils.expect_by_id(self.driver, save_as_id)
+                    self.logger.info(f"Successfully replaced list: {target_name}")
+
+                except Exception as e: 
+                    self.logger.error(f"Failed to process {target_name}: {e}")
+                    continue
+        self.logger.info("Phase 4 complete.")
+
+
     def run_full_process(self):
         """
         Run the full automation process.
@@ -236,10 +293,12 @@ class VoterDataAutomation:
             
             # Phase 3: Upload files to VAN
             self.upload_files_to_van()
-            
+
             # Phase 4: Process searches and lists
-            # self.process_searches_and_lists()
-            
+            search_folder = self.config["van"]["folders"]["search_folder"]
+            list_folder = self.config["van"]["folders"]["list_folder"]
+            self.refresh_searches()
+
             self.logger.info("Full automation process completed successfully")
         except Exception as e:
             self.logger.error(f"Error in automation process: {e}")
@@ -271,4 +330,3 @@ if __name__ == "__main__":
         automation.run_full_process()
     except Exception as e:
         print(f"Error: {e}")
-        
