@@ -27,7 +27,7 @@ class VoterDataAutomation:
         # 2. Load config using centralized utility
         self.config = load_config(self.script_dir / config_path)
         
-        # 3. Standardize all internal paths to absolute
+        # 3. Standardize ONLY local file system paths to absolute
         self._resolve_config_paths()
 
         # 4. Core components
@@ -52,17 +52,16 @@ class VoterDataAutomation:
         )
         self.logger = logging.getLogger('VoterDataAutomation')
 
+
     def _resolve_config_paths(self):
-        """Converts relative paths in config to absolute paths based on script location."""
+        """Converts relative LOCAL paths in config to absolute paths."""
+
         if "files" in self.config:
             for key in ["logs_directory", "output_directory"]:
                 if key in self.config["files"]:
                     rel = self.config["files"][key]
                     self.config["files"][key] = str((self.script_dir / rel).resolve())
 
-        if "van" in self.config and "folders" in self.config["van"]:
-            for key, rel in self.config["van"]["folders"].items():
-                self.config["van"]["folders"][key] = str((self.script_dir / rel).resolve())
 
     def download_files_from_api(self):
         """

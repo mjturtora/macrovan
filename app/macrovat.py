@@ -2,14 +2,11 @@
 """
 Script to run the full VoterData automation process.
 
-This script uses the VoterDataAutomation class to run the full process of
-downloading VoterData files, managing them in VAN, and processing searches and lists.
 """
 
 import argparse
 import os
 import sys
-import json
 import logging
 from pathlib import Path
 
@@ -20,8 +17,6 @@ sys.path.append(str(SCRIPT_DIR))
 from auth import username, password
 from utils import load_config
 from voter_data_automation import VoterDataAutomation
-
-
 
 def setup_logging(config):
     """Set up logging using absolute path resolution."""
