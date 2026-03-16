@@ -1,5 +1,5 @@
 # Ignore everything in this directory
-# This folder is for output files
+# This folder is for logs
 *
 # Except this file
 !.gitignore

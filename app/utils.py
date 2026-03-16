@@ -1,53 +1,85 @@
-
-import os
+# Standard Library
+import ctypes
+import fnmatch
 import io
-import sys
-import pypdf  # Updated from PyPDF2 which is deprecated
-import glob
+import json
+import logging
 import shutil
+import sys
+import tempfile
 import time
+from pathlib import Path
+
+# Third-Party
+import pandas as pd
+import pypdf
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.remote.command import Command
-import ctypes  # for windows message pop-up
-import pandas as pd
-import fnmatch
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
+# Local
 from auth import username, password
+
+# Global anchor to the app directory
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+logger = logging.getLogger('VoterDataAutomation.utils')
 
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
+
 def get_os():
-    # print(sys.platform)
-    if "win" in sys.platform:
-        # print("os = Windows")
-        return "Windows"
+    # Keep the logging here so it shows up at the start of every run
+    platform_map = {
+        "win32": "Windows",
+        "darwin": "macOS",
+        "linux": "Linux"
+    }
+    os_name = platform_map.get(sys.platform, sys.platform)
+    logger.info(f"OS Detected: {os_name} ({sys.platform})")
+    return os_name
+
+
+def load_config(path):
+    """Load and return JSON configuration from a Path object."""
+    if not isinstance(path, Path):
+        path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Configuration file not found at: {path}")
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
 def teardown():
-    """Remove temp files from prior run before starting driver"""
+    """Remove temp files from prior run across different platforms"""
+    os_type = get_os()
+    logger.info(f'Starting teardown for {os_type}')
+    
+    # tempfile.gettempdir() is the 'Gold Standard' for cross-platform paths
+    temp_path = Path(tempfile.gettempdir())
+    
+    # Patterns for Windows (scoped_dir) and Unix/Mac (.com.google)
+    patterns = ['scoped_dir*', 'chrome_BITS_*', '.com.google.Chrome.*', '.org.chromium.Chromium.*']
+    
+    deleted_count = 0
+    for pattern in patterns:
+        # Using pathlib to find matching directories
+        for path in temp_path.glob(pattern):
+            try:
+                shutil.rmtree(path, ignore_errors=True)
+                logger.debug(f"Cleared: {path}")
+                deleted_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to clear {path}: {e}")
 
-    print('Start Teardown')
-    if get_os() == "Windows":
-        print("Do Windows")
-        windowsUser = os.getlogin()
-        for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'scoped_dir*')):
-            print(path)
-            shutil.rmtree(path)
-
-        for path in glob.iglob(os.path.join('C:\\', 'Users', windowsUser, 'AppData', 'Local', 'Temp', 'chrome_BITS_*')):
-            print(path)
-            shutil.rmtree(path)
-    print('Teardown complete')
-
+    logger.info(f'Teardown complete. {deleted_count} items cleared from {temp_path}')
 
 def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
@@ -118,16 +150,16 @@ def interact_with_field(driver, field_xpath, value, field_name, locator_type=By.
     Returns:
         The WebElement that was interacted with
     """
-    print(f"Looking for {field_name} field and waiting until it's clickable")
+    logger.debug(f"Looking for {field_name} field and waiting until it's clickable")
     field = WebDriverWait(driver, wait_time).until(
         EC.element_to_be_clickable((locator_type, field_xpath))
     )
-    print(f"Found clickable {field_name} field")
+    logger.debug(f"Found clickable {field_name} field")
     
-    print(f"Clicking on {field_name} field")
+    logger.debug(f"Clicking on {field_name} field")
     field.click()
     
-    print(f"Entering {field_name} value")
+    logger.debug(f"Entering {field_name} value")
     field.clear()
     field.send_keys(value)
     return field
@@ -147,13 +179,13 @@ def click_button(driver, button_xpath, button_name, locator_type=By.XPATH, wait_
     Returns:
         The WebElement that was clicked
     """
-    print(f"Looking for {button_name} button")
+    logger.debug(f"Looking for {button_name} button")
     button = WebDriverWait(driver, wait_time).until(
         EC.element_to_be_clickable((locator_type, button_xpath))
     )
-    print(f"Found {button_name} button")
+    logger.debug(f"Found {button_name} button")
     
-    print(f"Clicking {button_name} button")
+    logger.debug(f"Clicking {button_name} button")
     button.click()
     return button
 
@@ -172,11 +204,11 @@ def fill_login_form(driver, username, password):
     click_button(driver, '//button[@type="submit"]', "login")
     
     # Wait for a while to see what happens
-    print("Waiting after login...")
+    logger.debug("Waiting after login...")
     time.sleep(10)
     
     # Log the page title again
-    print(f"Page title after login: {driver.title}")
+    logger.debug(f"Page title after login: {driver.title}")
 
 
 def login_to_page(driver):
@@ -187,53 +219,53 @@ def login_to_page(driver):
         driver: The Selenium WebDriver instance
     """
     # First check if we're already logged in
-    print("Checking if already logged in")
+    logger.debug("Checking if already logged in")
     try:
         # Try to find the "View my folders" link which is only visible when logged in
         driver.find_element(By.XPATH, "//*[@id='ctl00_ContentPlaceHolderVANPage_HyperLinkMenuSavedLists']")
-        print("Already logged in, skipping login process")
+        logger.debug("Already logged in, skipping login process")
         return
     except:
-        print("Not logged in yet, proceeding with login")
+        logger.debug("Not logged in yet, proceeding with login")
     
     # Now check if we're at the login form
-    print("Checking if we're at the login form")
+    logger.debug("Checking if we're at the login form")
     try:
         # Try direct login approach
         fill_login_form(driver, username, password)
-        print("Direct login successful")
+        logger.debug("Direct login successful")
     except Exception as e:
-        print(f"Error with direct login form: {e}")
+        logger.debug(f"Error with direct login form: {e}")
         
         # If we couldn't find the login form directly, try clicking the ActionID button
         try:
-            print("Looking for ActionID button as fallback")
+            logger.debug("Looking for ActionID button as fallback")
             action_id_button = expect_by_XPATH(driver, '//a[@href="/OpenIdConnectLoginInitiator.ashx?ProviderID=4"]')
-            print("Found ActionID button, clicking it")
+            logger.debug("Found ActionID button, clicking it")
             action_id_button.click()
             
             # Wait for the Auth0 login form to appear
-            print("Waiting for Auth0 login form")
+            logger.debug("Waiting for Auth0 login form")
             time.sleep(5)  # Give it some time to load
             
             # Try login again
             fill_login_form(driver, username, password)
-            print("ActionID login successful")
+            logger.debug("ActionID login successful")
             
         except Exception as e:
-            print(f"Error with ActionID button approach: {e}")
+            logger.debug(f"Error with ActionID button approach: {e}")
             
             # Fall back to the traditional login form as a last resort
             try:
-                print("Trying traditional login form as last resort")
+                logger.debug("Trying traditional login form as last resort")
                 user_field = expect_by_id(driver, "username")
                 user_field.send_keys(username)
                 pass_field = expect_by_id(driver, "password")
                 pass_field.send_keys(password) # pyright: ignore[reportArgumentType]
                 expect_by_class(driver, "btn-blue").click()
-                print("Traditional login successful")
+                logger.debug("Traditional login successful")
             except Exception as e:
-                print(f"All login methods failed: {e}")
+                logger.debug(f"All login methods failed: {e}")
                 raise Exception("Unable to login with any method")
     
     return
@@ -248,12 +280,12 @@ def remember_this(driver):
 def list_folders(driver):
     # List "My Folders"
     expect_by_XPATH(driver, '//a[@href="FolderList.aspx"]').click()
-    print('AFTER FOLDER LIST CLICK')
+    logger.debug('AFTER FOLDER LIST CLICK')
 
 
 def select_folder(driver):
     """select folder"""
-    print('Select Folder')
+    logger.debug('Select Folder')
     # driver.find_element_by_xpath('//*[text()="District 68 2020 3/17 Primary/Municipals"]').click()
     # expect_by_XPATH(driver, '//*[text()="2020 District 68"]').click()
     expect_by_XPATH(driver, '//*[text()="2020 District 68 November"]').click()
@@ -261,9 +293,9 @@ def select_folder(driver):
 
 
 def select_turf(driver, turf_name):
-    print('Select Saved Search')
+    logger.debug('Select Saved Search')
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(
+                  "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName").send_keys(
         turf_name)
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_RefreshFilterButton").click()
     expect_by_XPATH(driver, '//*[text()="' + turf_name + '"]').click()
@@ -277,22 +309,37 @@ def handle_alert(driver):
     print_title(driver)
 
 
+def expect_alert(driver, wait_time=10):
+    wait_no_longer_than = wait_time
+    logger.debug('Expecting alert')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.alert_is_present())
+    return element
+
+def expect_clickable_by_XPATH(driver, XPATH, wait_time=120):
+    wait_no_longer_than = wait_time
+    logger.debug(f'Expecting clickable {XPATH}')
+    element = WebDriverWait(driver, wait_no_longer_than).until(
+        EC.element_to_be_clickable((By.XPATH, XPATH)))
+    return element
+
+
 def edit_search(driver):
     # Edit Search:
-    print('Edit Search')
+    logger.debug('Edit Search')
     expect_by_XPATH(driver, '//button[normalize-space()="Edit Search"]').click()
 
 
 def early_voting_twisty(driver):
     # to click Early Voting Twisty
     element = expect_by_id(driver, 'ImageButtonSectionEarlyVoting')
-    print(f'Early Voting Section element located = {element}')
+    logger.debug(f'Early Voting Section element located = {element}')
     expect_by_id(driver, "ImageButtonSectionEarlyVoting").click()
 
 
 def notes_twisty(driver):
     element = expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]')
-    print('Try to click "Notes" twisty')
+    logger.debug('Try to click "Notes" twisty')
     expect_by_XPATH(driver, '//*[@id="ImageButtonSectionNotes"]').click()
 
 
@@ -325,77 +372,80 @@ def turfselection_plus(driver, turf_name):
 
     # SELECT TURF NAME
     # use turf name selection method from macrovan
-    print(f'Select turf_name = {turf_name}')
+    logger.debug(f'Select turf_name = {turf_name}')
     select_turf(driver, turf_name)
-    print('Handle erase current list alert')
+    logger.debug('Handle erase current list alert')
     handle_alert(driver)
 
     expect_by_id(driver, "addStep").click()
     expect_by_id(driver, "stepTypeItem4").click()
     early_voting_twisty(driver)
-    print('Click anyone Who Requested a Ballot')
+    logger.debug('Click anyone Who Requested a Ballot')
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_EarlyVoteCheckboxId_RequestReceived").click()
-    print('Click Preview Button')
+    logger.debug('Click Preview Button')
     expect_by_id(driver, "ResultsPreviewButton").click()
     print("Driver title is: \n", driver.title)
-    print('Click #AddNewStepButton')
+    logger.debug('Click #AddNewStepButton')
+    
+    # FIXED: Restored original newline character for correct MessageBox display
     pause('Click Add New Step: Remove, and wait\n for page to load to continue')
-    print('Unclick early voting twisty?')
+    
+    logger.debug('Unclick early voting twisty?')
     early_voting_twisty(driver)
 
     # click notes twisty
     notes_twisty(driver)
 
-    print('Click in note text field. Is this needed?')
+    logger.debug('Click in note text field. Is this needed?')
     expect_by_id(driver, "NoteText").click()
-    print('Send keys to NoteText "*moved')
+    logger.debug('Send keys to NoteText "*moved')
     expect_by_id(driver, "NoteText").send_keys("*moved")
-    print(f'Sent keys *moved for remove step')
+    logger.debug(f'Sent keys *moved for remove step')
 
     # unclick notes_twisty
     notes_twisty(driver)
 
-    print('Run Search to Remove selected voters (Click Run Search Button)')
+    logger.debug('Run Search to Remove selected voters (Click Run Search Button)')
     element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_SearchRunButton").click()
     print("Driver title is: \n", driver.title)
-    print("And done with turfselection_plus SIDE function")
+    logger.debug("And done with turfselection_plus SIDE function")
 
 
 def print_list(driver, listName):
     # Print a List
-    print('in print_list waiting for print icon')
+    logger.debug('in print_list waiting for print icon')
     element = expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms")
-    print('in print_list trying to click')
+    logger.debug('in print_list trying to click')
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_HyperLinkImagePrintReportsAndForms").click()
-    print('just clicked print icon might need another EC')
+    logger.debug('just clicked print icon might need another EC')
 
     # Select Report Format Option
     # Locate the Sector and create a Select object
-    print('Select Print Format Option')
+    logger.debug('Select Print Format Option')
     select_element = Select(expect_by_id(driver,
-                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
+                                          "ctl00_ContentPlaceHolderVANPage_VanDetailsItemReportFormatInfo_VANInputItemDetailsItemReportFormatInfo_ReportFormatInfo"))
     element = select_element.select_by_visible_text("*2020 D68 Aug Primary")
 
     # Select Script Option
     # Locate the Sector and create a Select object
     select_element = Select(expect_by_id(driver,
-                                         "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
-    # print([o.text for o in select_element.options])
+                                          "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID"))
+    # logger.debug([o.text for o in select_element.options])
     element = select_element.select_by_visible_text('*2020 D68 Aug Primary')
 
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemvdiScriptID_VANInputItemDetailsItemActiveScriptID_ActiveScriptID").click()
 
     # Script source selection (Walk)
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     dropdown = expect_by_id(driver,
-                            "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
+                             "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource")
     expect_by_XPATH(driver, "//option[. = 'Walk']").click()
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemVANDetailsItemScriptSource_ScriptSource_VANInputItemDetailsItemScriptSource_ScriptSource").click()
     element = expect_by_id(driver,
-                           "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
+                            "ctl00_ContentPlaceHolderVANPage_VANDetailsItemReportTitle_VANInputItemDetailsItemReportTitle_ReportTitle")
     element.clear()
     element.send_keys(listName)
 
@@ -411,29 +461,32 @@ def print_list(driver, listName):
 
     # Sort Order 4
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder4_VANInputItemDetailsItemSortOrder4_SortOrder4"))
     dropdown.select_by_index(4)
 
     # Sort Order 5
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder5_VANInputItemDetailsItemSortOrder5_SortOrder5"))
     dropdown.select_by_index(5)
 
     # Sort Order 6
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6").click()
     dropdown = Select(expect_by_id(driver,
                                    "ctl00_ContentPlaceHolderVANPage_VanDetailsItemSortOrder6_VANInputItemDetailsItemSortOrder6_SortOrder6"))
     dropdown.select_by_index(0)
 
     # Submit
     expect_by_id(driver,
-                 "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+                  "ctl00_ContentPlaceHolderVANPage_VanDetailsItemPrintMapNew_VANInputItemDetailsItemPrintMapNew_PrintMapNew_0")
+    
+    # FIXED: Restored newline and logic
     pause("Double Check that selections are correct")  #todo: test removal of .click()
+    
     expect_by_id(driver, "ctl00_ContentPlaceHolderVANPage_ButtonSortOptionsSubmit").click()
     expect_by_link_text(driver, "My PDF Files").click()
 
@@ -447,24 +500,24 @@ def exit_program(window, driver):
     try:
         window.destroy()
     except:
-        print("Window does not exist!")
+        logger.debug("Window does not exist!")
     else:
-        print("Window closed!")
+        logger.debug("Window closed!")
 
     try:
         driver.close
         driver.quit()
     except:
-        print("Driver does not exist!")
+        logger.debug("Driver does not exist!")
     else:
-        print("Driver closed!")
+        logger.debug("Driver closed!")
 
     try:
         teardown()
     except:
-        print("Teardown failed!")
+        logger.debug("Teardown failed!")
     # else:
-    # print("Teardown successfully ran!")
+    # logger.debug("Teardown successfully ran!")
 
 
 # Checks if the chrome browser is open or not closes everything if the chrome browser closed.
@@ -490,14 +543,14 @@ def disable_print():
 
 def display_to_console(x):
     enable_print()
-    print(x)
+    logger.debug(x)
     disable_print()
 
 
 def expect_by_id(driver, id_tag):
     # handle expected conditions by id
     wait_no_longer_than = 120
-    print(f'Expecting {id_tag}')
+    logger.debug(f'Expecting {id_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.ID, id_tag)))
     return element
@@ -505,7 +558,7 @@ def expect_by_id(driver, id_tag):
 
 def expect_by_XPATH(driver, XPATH):
     wait_no_longer_than = 120
-    print(f'Expecting {XPATH}')
+    logger.debug(f'Expecting {XPATH}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.XPATH, XPATH)))
     return element
@@ -513,7 +566,7 @@ def expect_by_XPATH(driver, XPATH):
 
 def expect_by_class(driver, class_tag):
     wait_no_longer_than = 120
-    print(f'Expecting {class_tag}')
+    logger.debug(f'Expecting {class_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.CLASS_NAME, class_tag)))
     return element
@@ -521,7 +574,7 @@ def expect_by_class(driver, class_tag):
 
 def expect_by_css(driver, css_tag):
     wait_no_longer_than = 120
-    print(f'Expecting {css_tag}')
+    logger.debug(f'Expecting {css_tag}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, css_tag)))
     return element
@@ -529,7 +582,7 @@ def expect_by_css(driver, css_tag):
 
 def expect_by_link_text(driver, link_text):
     wait_no_longer_than = 120
-    print(f'Expecting {link_text}')
+    logger.debug(f'Expecting {link_text}')
     element = WebDriverWait(driver, wait_no_longer_than).until(
         EC.presence_of_element_located((By.LINK_TEXT, link_text)))
     return element
@@ -537,7 +590,8 @@ def expect_by_link_text(driver, link_text):
 
 def get_turfs():
     # Read data from excel file into tuples
-    fname = r"..\io\Input\Turf List.xlsx"
+    # FIXED: Anchored relative to the app folder using pathlib
+    fname = SCRIPT_DIR.parent / "io" / "Input" / "Turf List.xlsx"
     df = pd.read_excel(fname, sheet_name="Sheet1")
     turfs = []
     count = 0
@@ -556,13 +610,13 @@ def key_check(df, key):
 
 
 def get_volunteer_data(fname=r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020 -Tracking All Voters.xlsx",
-                       sheet_name="To Deliver - Reports"):
+                        sheet_name="To Deliver - Reports"):
     # Had to use full path to get it to work for me.
-    # #print('Path string in get_volunteer_data = ', path)
-    print(f'get_volunteer_data: os.getcwd = {os.getcwd()}')
+    # #logger.debug('Path string in get_volunteer_data = ', path)
+    logger.debug(f'get_volunteer_data: os.getcwd = {os.getcwd()}')
     df = pd.read_excel(fname, sheet_name)
-    print(f'df.keys = {df.keys()}')
-    #print(f"df['Organizer Email'] = \n {df['Organizer Email'}")
+    logger.debug(f'df.keys = {df.keys()}')
+    #logger.debug(f"df['Organizer Email'] = \n {df['Organizer Email'}")
     df['Organizer Email'] = df['Organizer Email'].str.lower()
     df['Organizer Email'] = df['Organizer Email'].str.lstrip()
     # df = df.sort_values('Organizer Email')
@@ -589,7 +643,7 @@ def get_volunteer_data(fname=r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020
         if 'Organizer Email' in df.columns:
             organizer_email = df['Organizer Email'].values[count]
             if organizer_email != organizer_email:
-                print('organizer_email = nan')
+                logger.debug('organizer_email = nan')
                 organizer_email = ''
         else:
             organizer_email = ''
@@ -618,7 +672,7 @@ def get_volunteer_data(fname=r"C:\Users\Grant\Desktop\macrovan\io\Input\Nov 2020
             #print("df['Name in VAN'].values[count] = ", df['Name in VAN'].values[count])
             turf_name_in_van = df['Name in VAN'].values[count]
         else:
-            print('No Name in VAN')
+            logger.debug('No Name in VAN')
             turf_name_in_van = ''
 
         if 'Total Voters' in df.columns:
@@ -662,12 +716,13 @@ def get_organizer_turfs_dict(fname):
 def get_fnames(path):
     # Get all the PDF filenames.
     pdf_files = []
-    for filename in os.listdir(path):
-        #print(filename)
-        if filename.endswith('.pdf'):
-            pdf_files.append(filename)
+    # FIXED: Replaced os.listdir with Path object iterdir
+    for file_path in Path(path).iterdir():
+        #logger.debug(filename)
+        if file_path.suffix.lower() == '.pdf':
+            pdf_files.append(file_path.name)
     pdf_files.sort(key=str.lower)
-    #print(pdf_files)
+    #logger.debug(pdf_files)
     return pdf_files
 
 
@@ -692,80 +747,82 @@ def extract_pdf_info(path=r'io\Output'):
     for filename in pdf_files:
         #print('pdf filename = ', filename)
         #pdfFileObj = open(r'io\Output\\' + filename, 'rb')
-        pdfFileObj = open(path + '\\' + filename, 'rb')
-        pdfReader = pypdf.PdfReader(pdfFileObj)  # Updated from PyPDF2.PdfFileReader
-        page = pdfReader.pages[0].extract_text()  # Updated from getPage(0).extractText()
-        first_part, doors = page.split("Doors:", 1)
-        date, people = page.split("People:", 1)
-        date = date.split("Generated")[1]
-        date = date.split(" ")[1]
-        doors = int(doors.split("Affiliation")[0])
-        people = int(people.split("Affiliation")[0].split()[0])
-        page = pdfReader.pages[2].extract_text()  # Updated from getPage(2).extractText()
-        # print('Page =', page)
-        if people != 0:
-            pdf_file_name, lnum = page.split("List", 1)
-            lnum = lnum.split(" ")[1]
-        else:
-            lnum = '0-0'
-            pdf_file_name, date_part = filename.split("_2020", 1)
-            # print(filename, '\n', pdf_file_name, '\n', date_part, '\n', page, '\n')
-            #exit(2)
+        
+        # FIXED: Using pathlib to build the full path
+        pdf_full_path = Path(path) / filename
+        
+        with open(pdf_full_path, 'rb') as pdfFileObj:
+            pdfReader = pypdf.PdfReader(pdfFileObj)  # Updated from PyPDF2.PdfFileReader
+            page = pdfReader.pages[0].extract_text()  # Updated from getPage(0).extractText()
+            first_part, doors = page.split("Doors:", 1)
+            date, people = page.split("People:", 1)
+            date = date.split("Generated")[1]
+            date = date.split(" ")[1]
+            doors = int(doors.split("Affiliation")[0])
+            people = int(people.split("Affiliation")[0].split()[0])
+            page = pdfReader.pages[2].extract_text()  # Updated from getPage(2).extractText()
+            # print('Page =', page)
+            if people != 0:
+                pdf_file_name, lnum = page.split("List", 1)
+                lnum = lnum.split(" ")[1]
+            else:
+                lnum = '0-0'
+                pdf_file_name, date_part = filename.split("_2020", 1)
+                # print(filename, '\n', pdf_file_name, '\n', date_part, '\n', page, '\n')
+                #exit(2)
 
-        # print('pdf_file_name = ' + pdf_file_name)
-        pdf_dict[pdf_file_name] = {
-            'list_number': lnum,
-            'door_count': doors,
-            'person_count': people,
-            'date_generated': date,
-            'pdf_file_name': pdf_file_name,
-            #'organizer_email': organizer_email
-        }
+            # print('pdf_file_name = ' + pdf_file_name)
+            pdf_dict[pdf_file_name] = {
+                'list_number': lnum,
+                'door_count': doors,
+                'person_count': people,
+                'date_generated': date,
+                'pdf_file_name': pdf_file_name,
+                #'organizer_email': organizer_email
+            }
     return pdf_dict
 
 
 #iterate through folder_dict and create a subfolder copying the files over for each organizer
 def create_folders(folder_dict, parent_folder_name):
-    parent_path = r'D:\Stuff\Projects\Pol\macrovan\io\Output'
-    print(f'create_folders: parent_path = {parent_path}')
-    os.chdir(parent_path)
-    print(f'create_folders: os.getcwd = {os.getcwd()}')
-    if(os.path.isdir(parent_folder_name)):
-        shutil.rmtree(parent_folder_name)
-    os.mkdir(parent_folder_name)
-    os.chdir(parent_folder_name)
-    print(f'create_folders: os.getcwd = {os.getcwd()}')
-    print(f'create_folders: parent_folder_name = {parent_folder_name}')
-    print(f'create_folders: folder_dict keys =\n {folder_dict.keys()}')
-    for key in folder_dict.keys():
-        subfolder = key
-        if(os.path.isdir(subfolder)):
-            print('ISDIR: Subfolder Exists')
-            print(f'os.getcwd() = {os.getcwd()}\n Subfolder = {subfolder} EXISTS')
+    # FIXED: Replaced os navigation with pathlib absolute targets
+    parent_path = Path(r'D:\Stuff\Projects\Pol\macrovan\io\Output')
+    logger.debug(f'create_folders: parent_path = {parent_path}')
+    
+    # Define absolute target for parent folder
+    target_parent = parent_path / parent_folder_name
+    
+    if target_parent.is_dir():
+        shutil.rmtree(target_parent)
+    target_parent.mkdir(parents=True)
+    
+    logger.debug(f'create_folders: folder_dict keys =\n {folder_dict.keys()}')
+    
+    for subfolder_name in folder_dict.keys():
+        subfolder_path = target_parent / subfolder_name
+        
+        if subfolder_path.is_dir():
+            logger.debug('ISDIR: Subfolder Exists')
             continue
         else:
-            os.mkdir(subfolder)
-        os.chdir(subfolder)
-        #print(f'chdir(subfolder) os.getcwd() = {os.getcwd()}')
-        for file in folder_dict[subfolder]:
-            search_file = file + "*" + ".pdf"
-            search_file = search_file.replace(" ", "")
+            subfolder_path.mkdir(exist_ok=True)
+        
+        for file_prefix in folder_dict[subfolder_name]:
+            search_pattern = file_prefix.replace(" ", "") + "*.pdf"
             file_found = 'No'
-            for file in os.listdir(parent_path+r"\tests"):
-                found_file = file.replace(" ", "")
-                #print('search_file = ', search_file)
-                #print('found_file = ', found_file)
-                if fnmatch.fnmatch(found_file, search_file):
-                    #print('Matched files', found_file)
-                    #print()
-                    #shutil.copy(parent_path+r"\app\io\output\\tests\"+file, file)
-                    shutil.copy(parent_path + r'\\tests\\' + file, file)
+            
+            # Anchor search to the specific tests folder
+            tests_path = parent_path / "tests"
+            for candidate in tests_path.iterdir():
+                found_filename_clean = candidate.name.replace(" ", "")
+                if fnmatch.fnmatch(found_filename_clean, search_pattern):
+                    # Copy to the specific subfolder using absolute targets
+                    shutil.copy(candidate, subfolder_path / candidate.name)
                     file_found = 'Yes'
                     break
+            
             if file_found != 'Yes':
-                print(f"For Organizer: {subfolder}\nWARNING SEARCH FILE {search_file} NOT FOUND!")
-        os.chdir("..")
-    os.chdir(parent_path)
+                logger.debug(f"For Organizer: {subfolder_name}\nWARNING SEARCH FILE {search_pattern} NOT FOUND!")
 
 def create_organizer_folders(fname, sheet_name):
     organizerFiles = {}
@@ -774,7 +831,7 @@ def create_organizer_folders(fname, sheet_name):
         turf_name = turf['turf_name_in_van']
         organizer_email = turf['organizer_email_address']
         # PRINT to show emails flagged TO SEND TO ORG
-        print(f"create_organizer_folders: For Org = {organizer_email}, zip_to_org = {turf['zip_to_org']}"
+        logger.debug(f"create_organizer_folders: For Org = {organizer_email}, zip_to_org = {turf['zip_to_org']}"
               f"\n\tEMAIL SENT for turf_name = {turf_name}")
         if turf['zip_to_org'] == 'y':
             if organizer_email != organizer_email:
@@ -786,7 +843,7 @@ def create_organizer_folders(fname, sheet_name):
                 organizerFiles[organizer_email] = [filename]
         else:
             # PRINT to show emails flagged DO NOT SEND TO ORG
-            print(f"create_organizer_folders: For Org = {organizer_email}, zip_to_org = {turf['zip_to_org']}"
+            logger.debug(f"create_organizer_folders: For Org = {organizer_email}, zip_to_org = {turf['zip_to_org']}"
                   f"\n\tSo EMAIL ABORTED for turf_name = {turf_name}!")
             continue
     create_folders(organizerFiles, "Organizers")
