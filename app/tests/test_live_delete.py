@@ -70,7 +70,7 @@ def test_delete_files(start_file=0, num_files=3):
         # Delete only the test files (first num_files)
         file_patterns = [f"{file_id}_VoterData" for file_id in test_file_ids]
         automation.logger.info(f"Deleting files: {file_patterns}")
-        automation.file_manager.delete_files(file_patterns)
+        automation.file_manager.delete_files(file_patterns, list_folder)
         
         automation.logger.info("=" * 60)
         automation.logger.info("TEST COMPLETED SUCCESSFULLY")

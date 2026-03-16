@@ -77,10 +77,10 @@ def test_upload_files(num_files=3):
         
         # Upload the files
         automation.logger.info(f"Uploading {len(file_paths)} files...")
-        automation.file_manager.bulk_upload_files(file_paths)
+        automation.file_manager.bulk_upload_files(file_paths, list_folder)
         
         # Verify upload
-        if automation.file_manager.verify_upload_success():
+        if automation.file_manager.verify_upload_success(test_file_ids, timeout_minutes=5):
             automation.logger.info("Upload verified as successful")
         else:
             automation.logger.warning("Could not verify upload success")
@@ -107,4 +107,4 @@ def test_upload_files(num_files=3):
 
 if __name__ == "__main__":
     """Allow running directly: poetry run python tests/test_live_upload.py"""
-    test_upload_files(num_files=3)
+    test_upload_files(num_files=10)

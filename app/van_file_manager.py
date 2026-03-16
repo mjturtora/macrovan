@@ -156,12 +156,14 @@ class VANFileManager:
         # sleep a long time to ensure the files are fully deleted
         time.sleep(2)  # 10 minutes better be enough
         self.logger.info(f"Deletion complete: {deleted_count} deleted, {skipped_count} skipped")
-    
+
+
     def bulk_upload_files(self, file_paths, list_folder):
         """
         Guts of the upload logic using utils.py and vanilla Selenium.
         Replaces the stub in VANFileManager.
         """
+
         # file_paths is self.downloaded_files passed from VoterDataAutomation
         for file_path in file_paths:
 
@@ -172,7 +174,7 @@ class VANFileManager:
             
             # 1. Navigation & Upload (Retry Loop)
             success = False
-            for attempt in range(2):
+            for attempt in range(3):
                 self.driver.get("https://www.votebuilder.com/UploadDataSelectType.aspx")
                 
                 if attempt == 0:
@@ -194,6 +196,7 @@ class VANFileManager:
                 # 2. SMART WAIT: Poll for response (OOPS vs Success)
                 response_found = False
                 for _ in range(22): # ~22 seconds max
+                    time.sleep(1)
                     current_url = self.driver.current_url
                     if "Error.aspx" in current_url:
                         self.logger.error(f"!!! OOPS detected after VANPage_ButtonSubmitDefault on attempt {attempt + 1}")
@@ -208,52 +211,54 @@ class VANFileManager:
                     if len(self.driver.find_elements(By.NAME, "ctl00$ContentPlaceHolderVANPage$ctl09")) > 0:
                         response_found = True
                         break
-                    time.sleep(1)
 
-                if response_found:
-                    # Step 2: Unmatched Alert (ctl09)
-                    self.logger.info(f"2. Waiting for Unmatched People (Attempt {attempt + 1})...")
-                    utils.click_button(self.driver, 'ctl00$ContentPlaceHolderVANPage$ctl09', "Unmatched Button", locator_type=By.NAME)
-                    
-                    # Step 3: Trigger Save-as-List Overlay (Value 154)
-                    self.logger.info("3. Waiting for Mapping Dropdown...")
-                    time.sleep(1)
-                    dropdown_element = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_ctl03_AddULFieldID")
-                    dropdown = Select(dropdown_element)
-                    dropdown.select_by_value("154")
+                # Early exit: Skip the rest of this attempt and loop back
+                if not response_found:
+                    continue
 
-                    # Step 4: Fill Overlay (Iframe Context)
-                    self.logger.info("4. Waiting for Overlay...")
-                    self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
-                    
-                    name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
-                    name_field.send_keys(filename)
-                    
-                    folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
-                    folder_drop = Select(folder_drop_element)
-                    # FIXED: Now uses the folder name from your config
-                    folder_drop.select_by_visible_text(list_folder)
+                # Step 2: Unmatched Alert (ctl09)
+                self.logger.info(f"2. Waiting for Unmatched People (Attempt {attempt + 1})...")
+                utils.click_button(self.driver, 'ctl00$ContentPlaceHolderVANPage$ctl09', "Unmatched Button", locator_type=By.NAME)
+                
+                # Step 3: Trigger Save-as-List Overlay (Value 154)
+                self.logger.info("3. Waiting for Mapping Dropdown...")
+                time.sleep(1)
+                dropdown_element = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_ctl03_AddULFieldID")
+                dropdown = Select(dropdown_element)
+                dropdown.select_by_value("154")
 
-                    # Step 5: Click Next and Exit Iframe
-                    self.logger.info("5. Clicking Next and Exiting Iframe...")
-                    utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
+                # Step 4: Fill Overlay (Iframe Context)
+                self.logger.info("4. Waiting for Overlay...")
+                self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
+                
+                name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
+                name_field.send_keys(filename)
+                
+                folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
+                folder_drop = Select(folder_drop_element)
+                # FIXED: Now uses the folder name from your config
+                folder_drop.select_by_visible_text(list_folder)
+
+                # Step 5: Click Next and Exit Iframe
+                self.logger.info("5. Clicking Next and Exiting Iframe...")
+                utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
+                
+                time.sleep(5) 
+                self.driver.switch_to.default_content()
+                
+                # Step 6: Final Finish (Main Page)
+                self.logger.info("6. Waiting for First Finish...")
+                try:
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonFinishUpload", "Finish 1", locator_type=By.ID)
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_FinishUploadModal__submitButton", "Finish 2", locator_type=By.ID)
                     
-                    time.sleep(5) 
-                    self.driver.switch_to.default_content()
-                    
-                    # Step 6: Final Finish (Main Page)
-                    self.logger.info("6. Waiting for First Finish...")
-                    try:
-                        utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonFinishUpload", "Finish 1", locator_type=By.ID)
-                        utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_FinishUploadModal__submitButton", "Finish 2", locator_type=By.ID)
-                        
-                        self.logger.info(f"Success: {filename}")
-                        success = True
-                        break 
-                    except Exception as e:
-                        self.logger.info(f"(!) Skipped finishing {filename}: {e}")
-                        success = True 
-                        break
+                    self.logger.info(f"Success: {filename}")
+                    success = True
+                    break 
+                except Exception as e:
+                    self.logger.info(f"(!) Skipped finishing {filename}: {e}")
+                    success = True 
+                    break
 
             if not success:
                 self.logger.error(f"FATAL: Could not upload {filename} after all retries.")
