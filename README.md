@@ -31,6 +31,7 @@ MacroVan automates critical campaign operations using Selenium and the system ke
 * **PDF Processing:** Extracts information from generated PDFs, organizes output by organizer, and manages file cleanup.
 * **Secure Auth:** Uses **Windows Credential Manager** (via `keyring`) to eliminate plain-text password files.
 * **Credential Configuration:** The script proactively prompts for username/password on the first run. To update later, use the `--reset` flag.
+* **Standalone Executables:** Includes GitHub Actions workflows to compile cross-platform (Mac/Windows) binaries for non-technical users.
 
 ---
 
@@ -59,10 +60,23 @@ chmod +x setup_environment.sh
 
 ---
 
+## 📦 Building Executables
+
+For users without Python installed, you can compile standalone executables using the included GitHub Actions workflows.
+
+1. Navigate to the **Actions** tab on your GitHub repository (or use the VS Code GitHub Actions extension).
+2. Select either the **Build Mac Executable** or **Build Cross-Platform Executables** workflow from the sidebar.
+3. Click **Run workflow**.
+4. Once completed, download the `.exe` (Windows) or Unix executable (Mac) from the Artifacts section at the bottom of the run summary.
+
+---
+
 ## 📁 Project Structure
 
 ```text
 macrovan/
+├── .github/                       # GitHub Actions CI/CD
+│   └── workflows/                 # Compilation workflows (Mac, Cross-Platform)
 ├── app/                           # Main application code
 │   ├── auth.py                    # Secure Keyring Bridge
 │   ├── macrovat.py                # VAT automation entry point

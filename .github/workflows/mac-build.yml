@@ -1,0 +1,40 @@
+name: Build Mac Executable
+
+on:
+  workflow_dispatch: # Allows manual execution from the GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Dependencies
+        run: poetry install --no-root
+
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
+
+      - name: Compile Executable
+        # --onefile creates a single Unix executable. 
+        # Removing --windowed keeps the terminal visible for CLI prompts/auth.
+        run: poetry run pyinstaller --onefile --name MacroVan app/macrovat.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroVan-Mac
+          path: dist/MacroVan

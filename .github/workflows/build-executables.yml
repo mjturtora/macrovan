@@ -1,0 +1,70 @@
+name: Build Cross-Platform Executables
+
+on:
+  workflow_dispatch: # Manual trigger from Actions tab
+
+jobs:
+  # --- MAC BUILD JOB ---
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Dependencies
+        run: poetry install --no-root
+
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
+
+      - name: Compile Mac Executable
+        run: poetry run pyinstaller --onefile --name MacroVan app/macrovat.py
+
+      - name: Upload Mac Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroVan-MacOS
+          path: dist/MacroVan
+
+  # --- WINDOWS BUILD JOB ---
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          echo "$env:USERPROFILE\AppData\Roaming\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Install Dependencies
+        run: poetry install --no-root
+
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
+
+      - name: Compile Windows EXE
+        run: poetry run pyinstaller --onefile --name MacroVan app/macrovat.py
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroVan-Windows
+          path: dist/MacroVan.exe
