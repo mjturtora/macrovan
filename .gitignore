@@ -11,6 +11,10 @@ van_credentials.py
 # Selenium IDE
 side/
 
+# GitHub Action Downloaded Artifacts
+MacroVan-MacOS/
+MacroVan-Windows/
+
 # executables and other randos
 chromedriver*.*
 
