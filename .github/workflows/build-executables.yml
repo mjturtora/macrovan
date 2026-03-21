@@ -3,9 +3,6 @@ name: Build Cross-Platform Executables
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   # --- MAC BUILD JOB ---
   # build-mac:
@@ -54,6 +51,8 @@ jobs:
   # --- WINDOWS BUILD JOB ---
   build-windows:
     runs-on: windows-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
