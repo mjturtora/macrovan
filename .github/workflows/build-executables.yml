@@ -31,10 +31,19 @@ jobs:
       - name: Install PyInstaller
         run: poetry run pip install pyinstaller
 
-      - name: Compile Mac Executable
+      - name: DIAGNOSTIC & COMPILE (MAC)
         run: |
+          echo "--- ENTERING APP DIRECTORY ---"
           cd app
-          poetry run pyinstaller --onefile --name MacroVan --add-data "macrovan_config.json:." macrovat.py
+          echo "Current Directory: $(pwd)"
+          echo "Files in Directory:"
+          ls -la
+          echo "--- STARTING PYINSTALLER ---"
+          poetry run pyinstaller --onefile --name MacroVan \
+          --hidden-import utils \
+          --hidden-import voter_data_automation \
+          --add-data "macrovan_config.json:." \
+          macrovat.py
 
       - name: Upload Mac Artifact
         uses: actions/upload-artifact@v4
@@ -65,13 +74,22 @@ jobs:
       - name: Install PyInstaller
         run: poetry run pip install pyinstaller
 
-      - name: Compile Windows EXE
+      - name: DIAGNOSTIC & COMPILE (WINDOWS)
         run: |
+          Write-Host "--- ENTERING APP DIRECTORY ---"
           cd app
-          poetry run pyinstaller --onefile --name MacroVan --add-data "macrovan_config.json;." macrovat.py
+          Write-Host "Current Directory: $((Get-Location).Path)"
+          Write-Host "Files in Directory:"
+          Get-ChildItem
+          Write-Host "--- STARTING PYINSTALLER ---"
+          poetry run pyinstaller --onefile --name MacroVan `
+          --hidden-import utils `
+          --hidden-import voter_data_automation `
+          --add-data "macrovan_config.json;." `
+          macrovat.py
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MacroVan-Windows
-          path: app/dist/MacroVan.exe
+          path: app\dist\MacroVan.exe
