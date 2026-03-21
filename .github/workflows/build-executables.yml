@@ -8,48 +8,48 @@ env:
 
 jobs:
   # --- MAC BUILD JOB ---
-  build-mac:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+  # build-mac:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.11'
 
-      - name: Install Poetry
-        run: curl -sSL https://install.python-poetry.org | python3 -
+  #     - name: Install Poetry
+  #       run: curl -sSL https://install.python-poetry.org | python3 -
 
-      - name: Add Poetry to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+  #     - name: Add Poetry to PATH
+  #       run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install Dependencies
-        run: poetry install --no-root
+  #     - name: Install Dependencies
+  #       run: poetry install --no-root
 
-      - name: Install PyInstaller
-        run: poetry run pip install pyinstaller
+  #     - name: Install PyInstaller
+  #       run: poetry run pip install pyinstaller
 
-      - name: DIAGNOSTIC & COMPILE (MAC)
-        run: |
-          echo "--- ENTERING APP DIRECTORY ---"
-          cd app
-          echo "Current Directory: $(pwd)"
-          echo "Files in Directory:"
-          ls -la
-          echo "--- STARTING PYINSTALLER ---"
-          poetry run pyinstaller --onefile --name MacroVan \
-          --hidden-import utils \
-          --hidden-import voter_data_automation \
-          --add-data "macrovan_config.json:." \
-          macrovat.py
+  #     - name: DIAGNOSTIC & COMPILE (MAC)
+  #       run: |
+  #         echo "--- ENTERING APP DIRECTORY ---"
+  #         cd app
+  #         echo "Current Directory: $(pwd)"
+  #         echo "Files in Directory:"
+  #         ls -la
+  #         echo "--- STARTING PYINSTALLER ---"
+  #         poetry run pyinstaller --onefile --name MacroVan \
+  #         --hidden-import utils \
+  #         --hidden-import voter_data_automation \
+  #         --add-data "macrovan_config.json:." \
+  #         macrovat.py
 
-      - name: Upload Mac Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: MacroVan-MacOS
-          path: app/dist/MacroVan
+  #     - name: Upload Mac Artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: MacroVan-MacOS
+  #         path: app/dist/MacroVan
 
   # --- WINDOWS BUILD JOB ---
   build-windows:
@@ -83,6 +83,7 @@ jobs:
           Get-ChildItem
           Write-Host "--- STARTING PYINSTALLER ---"
           poetry run pyinstaller --onefile --name MacroVan `
+          --paths .
           --hidden-import utils `
           --hidden-import voter_data_automation `
           --add-data "macrovan_config.json;." `
