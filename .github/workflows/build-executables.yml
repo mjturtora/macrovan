@@ -86,6 +86,7 @@ jobs:
           --paths . `
           --hidden-import utils `
           --hidden-import voter_data_automation `
+          --collect-submodules selenium `
           --add-data "macrovan_config.json;." `
           macrovat.py
 

@@ -25,8 +25,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Local
 from auth import username, password
 
-# Global anchor to the app directory
-SCRIPT_DIR = Path(__file__).resolve().parent
+# Global anchor to the app directory (EXE-aware)
+if getattr(sys, 'frozen', False):
+    SCRIPT_DIR = Path(sys.executable).resolve().parent
+else:
+    SCRIPT_DIR = Path(__file__).resolve().parent
 
 logger = logging.getLogger('VoterDataAutomation.utils')
 

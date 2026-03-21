@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -21,9 +22,12 @@ class VoterDataAutomation:
     """
 
     def __init__(self, config_path="macrovan_config.json", file_override=None):
-        # 1. Anchor to script location
-        self.script_dir = Path(__file__).resolve().parent
-        
+        # 1. Anchor to script location (EXE-aware)
+        if getattr(sys, 'frozen', False):
+            self.script_dir = Path(sys.executable).resolve().parent
+        else:
+            self.script_dir = Path(__file__).resolve().parent
+
         # 2. Load config using centralized utility
         self.config = load_config(self.script_dir / config_path)
         
