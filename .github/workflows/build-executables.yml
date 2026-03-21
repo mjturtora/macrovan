@@ -83,7 +83,7 @@ jobs:
           Get-ChildItem
           Write-Host "--- STARTING PYINSTALLER ---"
           poetry run pyinstaller --onefile --name MacroVan `
-          --paths .
+          --paths . `
           --hidden-import utils `
           --hidden-import voter_data_automation `
           --add-data "macrovan_config.json;." `
