@@ -1,7 +1,7 @@
 name: Build Cross-Platform Executables
 
 on:
-  workflow_dispatch: # Allows manual execution from the Actions tab
+  workflow_dispatch:
 
 jobs:
   # --- MAC BUILD JOB ---
@@ -29,18 +29,15 @@ jobs:
         run: poetry run pip install pyinstaller
 
       - name: Compile Mac Executable
-        # Note the ":" separator for Mac --add-data
         run: |
-          poetry run pyinstaller --onefile --name MacroVan \
-          --paths app \
-          --add-data "app:app" \
-          app/macrovat.py
+          cd app
+          poetry run pyinstaller --onefile --name MacroVan --add-data "macrovan_config.json:." macrovat.py
 
       - name: Upload Mac Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MacroVan-MacOS
-          path: dist/MacroVan
+          path: app/dist/MacroVan
 
   # --- WINDOWS BUILD JOB ---
   build-windows:
@@ -66,15 +63,12 @@ jobs:
         run: poetry run pip install pyinstaller
 
       - name: Compile Windows EXE
-        # Note the ";" separator for Windows --add-data
         run: |
-          poetry run pyinstaller --onefile --name MacroVan `
-          --paths app `
-          --add-data "app;app" `
-          app/macrovat.py
+          cd app
+          poetry run pyinstaller --onefile --name MacroVan --add-data "macrovan_config.json;." macrovat.py
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MacroVan-Windows
-          path: dist/MacroVan.exe
+          path: app/dist/MacroVan.exe

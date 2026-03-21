@@ -15,7 +15,7 @@ if getattr(sys, 'frozen', False):
     # BASE_DIR is where the .exe sits. 
     # CODE_DIR is the internal temp folder where PyInstaller unpacked the scripts.
     BASE_DIR = Path(sys.executable).resolve().parent
-    CODE_DIR = Path(sys._MEIPASS).resolve() / "app"
+    CODE_DIR = Path(sys._MEIPASS).resolve()  # / "app"
 else:
     # RUNNING AS .PY:
     # CODE_DIR is the /app folder. 
