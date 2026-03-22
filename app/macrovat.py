@@ -24,7 +24,7 @@ sys.path.append(str(CODE_DIR))
 
 # 2. FOLDER GUARDIAN
 # Ensures the user always has a workspace, even if they run the EXE in a new folder.
-for folder in ["api_downloads", "Input", "logs", "Output"]:
+for folder in ["api_downloads", "logs"]:
     (BASE_DIR / "io" / folder).mkdir(parents=True, exist_ok=True)
 
 from utils import load_config
@@ -50,6 +50,7 @@ def setup_logging(config):
     # log_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger("macrovat")
+    logger.propagate = False  # Prevents double-logging in the console
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     
@@ -99,7 +100,7 @@ def main():
     try:
         # Pass the FULL path to the orchestrator so it doesn't rely on the current directory.
         automation = VoterDataAutomation(
-            config_path=str(config_path), 
+            config_path = str(config_path), 
             file_override=args.files
         )
 

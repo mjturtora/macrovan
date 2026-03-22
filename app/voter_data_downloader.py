@@ -1,6 +1,7 @@
 import logging
 import datetime
 import requests
+import sys
 from pathlib import Path
 
 class VoterDataDownloader:
@@ -10,22 +11,30 @@ class VoterDataDownloader:
     This class handles downloading VoterData files from the specified API endpoint,
     saving them to a local directory, and managing the download process.
     """
-    
-    def __init__(self, base_url="https://vat.flddc.org/API/VoterData/", output_directory="../io/api_downloads"):
+
+
+    def __init__(self, base_url="https://vat.flddc.org/API/VoterData/", output_directory=None):
         """
         Initialize the VoterDataDownloader.
-        
-        Args:
-            base_url (str): The base URL for the API endpoint.
-            output_directory (str): The directory where downloaded files will be saved.
         """
-        # Configure logging - Now using getLogger only to respect the orchestrator's config
         self.logger = logging.getLogger('VoterDataDownloader')
-        
         self.base_url = base_url
-        self.output_directory = Path(output_directory)
+
+        # 1. Establish the Anchor Point (EXE-aware)
+        if getattr(sys, 'frozen', False):
+            app_root = Path(sys.executable).resolve().parent
+        else:
+            app_root = Path(__file__).resolve().parent
+
+        # 2. Resolve Output Directory
+        if output_directory:
+            # Anchor the JSON path to our app_root
+            self.output_directory = (app_root / output_directory).resolve()
+        else:
+            self.output_directory = app_root / "io" / "api_downloads"
         self._ensure_output_directory()
-    
+
+
     def download_file(self, file_id):
         """
         Download a single VoterData file.

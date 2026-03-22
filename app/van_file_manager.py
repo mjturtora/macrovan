@@ -1,8 +1,9 @@
 # 1. Standard Library
 import logging
-import os
 import time
 from datetime import datetime
+from pathlib import Path
+import sys
 
 # 2. Third-Party Libraries
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -167,8 +168,9 @@ class VANFileManager:
         # file_paths is self.downloaded_files passed from VoterDataAutomation
         for file_path in file_paths:
 
-            file_path = os.path.abspath(file_path)
-            filename = os.path.basename(file_path).replace(".csv", "")
+            # Convert to Path object and ensure it's absolute
+            path_obj = Path(file_path).resolve()
+            filename = path_obj.stem
 
             self.logger.info(f"\n--- Processing: {filename} ---")
             
@@ -186,7 +188,7 @@ class VANFileManager:
                 utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonUploadSubmit", "Upload Submit", locator_type=By.ID)
                 
                 file_input = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_InputFileDefault")
-                file_input.send_keys(file_path)
+                file_input.send_keys(str(path_obj))
                 
                 # The 'Solid Attachment' pause - prevents 'Invalid File' OOPS
                 time.sleep(4)

@@ -1,7 +1,5 @@
 # 1. Standard Library
-import json
 import logging
-import os
 import sys
 import time
 from pathlib import Path
@@ -28,22 +26,31 @@ class VoterDataAutomation:
         else:
             self.script_dir = Path(__file__).resolve().parent
 
-        # 2. Load config using centralized utility
-        self.config = load_config(self.script_dir / config_path)
-        
+        # 2. Load config (Smart anchor: handles absolute or relative paths)
+        path_obj = Path(config_path)
+        if path_obj.is_absolute():
+            self.config = load_config(path_obj)
+        else:
+            self.config = load_config(self.script_dir / path_obj)
+
         # 3. Standardize ONLY local file system paths to absolute
         self._resolve_config_paths()
 
         # 4. Core components
         self.driver = None
-        self.downloader = None
         self.file_manager = None
         self.file_override = file_override # Stores CLI subset if provided
         
-        # 5. Configure logging using resolved paths
-        log_dir = self.config["files"]["logs_directory"]
+        # Initialize downloader once with resolved paths
+        self.downloader = VoterDataDownloader(
+            base_url=self.config["api"]["base_url"],
+            output_directory=self.config["files"]["output_directory"]
+        )
+
+        # 5. Configure logging (Explicitly anchored via resolved config)
+        log_dir = Path(self.config["files"]["logs_directory"])
         log_file = self.config["files"]["log_files"]["vat_automation"]
-        log_path = Path(log_dir) / log_file
+        log_path = log_dir / log_file
         
         log_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -60,26 +67,22 @@ class VoterDataAutomation:
 
     def _resolve_config_paths(self):
         """Converts relative LOCAL paths in config to absolute paths."""
-
         if "files" in self.config:
             for key in ["logs_directory", "output_directory"]:
                 if key in self.config["files"]:
-                    rel = self.config["files"][key]
-                    self.config["files"][key] = str((self.script_dir / rel).resolve())
+                    rel_path = self.config["files"][key]
+                    # Anchor the JSON path to our script_dir
+                    self.config["files"][key] = str((self.script_dir / rel_path).resolve())
 
 
     def download_files_from_api(self):
         """
-        Download VoterData files from API.
+        Phase 1: Download VoterData files from API.
         """
         self.logger.info("Phase 1: Downloading files from API")
         
         try:
-            self.downloader = VoterDataDownloader(
-                base_url=self.config["api"]["base_url"],
-                output_directory=self.config["files"]["output_directory"]
-            )
-            
+            # Downloader is already initialized in __init__
             file_ids = self.get_file_ids()
             self.downloaded_files = self.downloader.download_all_files(file_ids)
             
@@ -87,7 +90,8 @@ class VoterDataAutomation:
         except Exception as e:
             self.logger.error(f"Error downloading files from API: {e}")
             raise
-    
+
+
     def initialize_browser(self):
         """
         Initialize browser and login to VAN.
