@@ -80,9 +80,10 @@ class VANFileManager:
         
         Args:
             file_patterns (list): A list of file name patterns to match for deletion.
-        
-        Raises:
-            TimeoutException: If critical elements cannot be found.
+            folder_name (str): The name of the folder being operated on.
+            
+        Returns:
+            int: The number of files successfully deleted.
         """
         self.logger.info(f"Deleting files matching patterns: {file_patterns}")
         
@@ -97,7 +98,6 @@ class VANFileManager:
             
             try:
                 # Wait for and interact with the filter field
-                # Convert CSS selector to XPath (input#id -> //input[@id='id'])
                 filter_xpath = f"//input[@id='{filter_selector.split('#')[1]}']"
                 filter_field = utils.expect_by_XPATH(self.driver, filter_xpath)
                 filter_field.send_keys(filename)
@@ -155,15 +155,26 @@ class VANFileManager:
                 continue
 
         # sleep a long time to ensure the files are fully deleted
-        time.sleep(2)  # 10 minutes better be enough
+        time.sleep(2) 
         self.logger.info(f"Deletion complete: {deleted_count} deleted, {skipped_count} skipped")
+        
+        # RETURN RECEIPT for the orchestrator
+        return deleted_count
 
 
     def bulk_upload_files(self, file_paths, list_folder):
         """
-        Guts of the upload logic using utils.py and vanilla Selenium.
-        Replaces the stub in VANFileManager.
+        Uploads local files into the VAN system.
+        
+        Args:
+            file_paths (list): A list of local file paths to upload.
+            list_folder (str): The destination folder name in VAN.
+            
+        Returns:
+            int: The total count of successfully uploaded files.
         """
+        uploaded_count = 0
+        failed_files = []
 
         # file_paths is self.downloaded_files passed from VoterDataAutomation
         for file_path in file_paths:
@@ -238,7 +249,6 @@ class VANFileManager:
                 
                 folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
                 folder_drop = Select(folder_drop_element)
-                # FIXED: Now uses the folder name from your config
                 folder_drop.select_by_visible_text(list_folder)
 
                 # Step 5: Click Next and Exit Iframe
@@ -258,14 +268,24 @@ class VANFileManager:
                     success = True
                     break 
                 except Exception as e:
-                    self.logger.info(f"(!) Skipped finishing {filename}: {e}")
-                    success = True 
-                    break
+                    # FIX: Do NOT set success = True here. Allow the retry loop to trigger.
+                    self.logger.warning(f"Failed to click finish buttons for {filename} on attempt {attempt + 1}: {e}")
+                    continue
 
-            if not success:
+            # Check if the file successfully uploaded after all retries
+            if success:
+                uploaded_count += 1
+            else:
                 self.logger.error(f"FATAL: Could not upload {filename} after all retries.")
+                failed_files.append(filename)
 
             time.sleep(5)
+            
+        if failed_files:
+            self.logger.error(f"Bulk upload finished with {len(failed_files)} failures: {failed_files}")
+
+        # RETURN RECEIPT for the orchestrator
+        return uploaded_count
 
 
     def verify_upload_success(self, file_ids, timeout_minutes=5):

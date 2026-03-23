@@ -17,6 +17,7 @@ from voter_data_downloader import VoterDataDownloader
 class VoterDataAutomation:
     """
     Main orchestration class for the VoterData automation process.
+    Executes a 6-phase pipeline to synchronize external data with VAN.
     """
 
     def __init__(self, config_path="macrovan_config.json", file_override=None):
@@ -46,6 +47,15 @@ class VoterDataAutomation:
             base_url=self.config["api"]["base_url"],
             output_directory=self.config["files"]["output_directory"]
         )
+
+        # Performance & Tracking Stats for final summary
+        self.stats = {
+            "files_downloaded": 0,
+            "files_deleted": 0,
+            "files_uploaded": 0,
+            "searches_refreshed": 0,
+            "lists_refreshed": 0
+        }
 
         # 5. Configure logging (Explicitly anchored via resolved config)
         log_dir = Path(self.config["files"]["logs_directory"])
@@ -86,6 +96,7 @@ class VoterDataAutomation:
             file_ids = self.get_file_ids()
             self.downloaded_files = self.downloader.download_all_files(file_ids)
             
+            self.stats["files_downloaded"] = len(self.downloaded_files)
             self.logger.info(f"Successfully downloaded/verified {len(self.downloaded_files)} files")
         except Exception as e:
             self.logger.error(f"Error downloading files from API: {e}")
@@ -94,7 +105,7 @@ class VoterDataAutomation:
 
     def initialize_browser(self):
         """
-        Initialize browser and login to VAN.
+        Phase 2: Initialize browser and login to VAN.
         """
         self.logger.info("Phase 2: Initializing browser and logging in")
         
@@ -128,43 +139,56 @@ class VoterDataAutomation:
 
     def upload_files_to_van(self):
         """
-        Upload previously downloaded files to VAN.
+        Phase 3: Cleanup existing files in VAN.
+        Phase 4: Upload previously downloaded files to VAN.
+        Includes "Halt and Catch Fire" logic to prevent stale data refreshes.
         """
-        self.logger.info("Phase 3: Uploading files to VAN")
+        list_folder = self.config["van"]["folders"]["list_folder"]
+        file_ids = self.get_file_ids()
         
         try:
-            list_folder = self.config["van"]["folders"]["list_folder"]
-            file_ids = self.get_file_ids()
-            
+            # --- PHASE 3: CLEANUP ---
+            self.logger.info("Phase 3: Cleanup existing files in VAN")
             self.file_manager.navigate_to_file_folder(list_folder)
             
-            self.logger.info("Deleting existing files")
-            self.file_manager.delete_files(
+            self.logger.info(f"Phase 3: Deleting {len(file_ids)} existing files")
+            self.stats["files_deleted"] = self.file_manager.delete_files(
                 [f"{file_id}_VoterData" for file_id in file_ids], 
                 list_folder
             )
             
-            self.logger.info("Uploading files")
-            self.file_manager.bulk_upload_files(self.downloaded_files, list_folder)
+            # --- PHASE 4: IMPORT & VERIFY ---
+            self.logger.info("Phase 4: Uploading new files to VAN")
+            self.stats["files_uploaded"] = self.file_manager.bulk_upload_files(self.downloaded_files, list_folder)
             
+            # HALT AND CATCH FIRE 1: Count Mismatch
+            if self.stats["files_uploaded"] < len(self.downloaded_files):
+                error_msg = "\n" + "!"*65 + "\n!!! CRITICAL FAILURE: NOT ALL FILES WERE SUCCESSFULLY UPLOADED !!!\n" + "!"*65
+                self.logger.error(error_msg)
+                raise RuntimeError("Upload count mismatch. Halting pipeline to prevent stale data refresh.")
+
+            # HALT AND CATCH FIRE 2: Verification Timeout
             if self.file_manager.verify_upload_success(file_ids):
-                self.logger.info("Upload verified as successful")
+                self.logger.info("Phase 4: Upload verified as successful")
             else:
-                self.logger.warning("Could not verify upload success")
+                error_msg = "\n" + "!"*65 + "\n!!! CRITICAL FAILURE: VAN UPLOAD VERIFICATION TIMED OUT !!!\n" + "!"*65
+                self.logger.error(error_msg)
+                raise RuntimeError("VAN processing timeout. Halting pipeline to prevent stale data refresh.")
+
         except Exception as e:
-            self.logger.error(f"Error uploading files to VAN: {e}")
+            self.logger.error(f"Error during VAN file upload/cleanup: {e}")
             raise
 
     def refresh_searches(self):
         """
-        Phase 4: Loads saved searches and overwrites existing lists.
+        Phase 5: Loads saved searches and overwrites existing lists.
         """
         search_folder = self.config["van"]["folders"]["search_folder"]
         list_folder = self.config["van"]["folders"]["list_folder"]
         file_ids = self.get_file_ids()
         
         suffixes = ["_BadAddress", "_LL_NPA"]
-        self.logger.info(f"Starting Phase 4: Processing searches in {search_folder}")
+        self.logger.info(f"Starting Phase 5: Processing searches in {search_folder}")
 
         filter_id = "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName"
         save_as_id = "ctl00_ContentPlaceHolderVANPage_saveAsButton"
@@ -209,21 +233,23 @@ class VoterDataAutomation:
                     utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_SubmitButton").click()
                     utils.expect_by_id(self.driver, save_as_id)
                     self.logger.info(f"Successfully replaced list: {target_name}")
+                    
+                    self.stats["searches_refreshed"] += 1
 
                 except Exception as e: 
                     self.logger.error(f"Failed to process {target_name}: {e}")
                     continue
-        self.logger.info("Phase 4 complete.")
+        self.logger.info("Phase 5 complete.")
 
     def refresh_lists(self):
         """
-        Phase 5: Refreshes VoterData lists to force a data update.
+        Phase 6: Refreshes VoterData lists to force a data update.
         """
         list_folder = self.config["van"]["folders"]["list_folder"]
         file_ids = self.get_file_ids()
         suffixes = ["_VoterData"]
         
-        self.logger.info(f"Starting Phase 5: Refreshing lists in {list_folder}")
+        self.logger.info(f"Starting Phase 6: Refreshing lists in {list_folder}")
 
         filter_id = "ctl00_ContentPlaceHolderVANPage_VanInputItemviiFilterName_VanInputItemviiFilterName"
         save_as_id = "ctl00_ContentPlaceHolderVANPage_saveAsButton"
@@ -261,15 +287,17 @@ class VoterDataAutomation:
                     utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_SubmitButton").click()
                     utils.expect_by_id(self.driver, save_as_id)
                     self.logger.info(f"Successfully refreshed: {target_name}")
+                    
+                    self.stats["lists_refreshed"] += 1
 
                 except Exception as e:
                     self.logger.error(f"Failed to refresh list {target_name}: {e}")
                     continue
-        self.logger.info("Phase 5 complete.")
+        self.logger.info("Phase 6 complete.")
 
     def run_full_process(self):
-        """Orchestrates the 5-phase pipeline."""
-        self.logger.info("Starting full automation process")
+        """Orchestrates the 6-phase pipeline."""
+        self.logger.info("Starting full 6-phase automation process")
         try:
             self.download_files_from_api()
             self.initialize_browser()
@@ -294,11 +322,3 @@ class VoterDataAutomation:
             finally:
                 # CRITICAL: Set to None so a second call does nothing
                 self.driver = None
-
-
-if __name__ == "__main__":
-    automation = VoterDataAutomation()
-    try:
-        automation.run_full_process()
-    except Exception as e:
-        print(f"Error: {e}")
