@@ -164,7 +164,7 @@ class VANFileManager:
 
     def bulk_upload_files(self, file_paths, list_folder):
         """
-        Uploads local files into the VAN system.
+        Uploads local files into the VAN system with a bulletproof 3-attempt retry loop.
         
         Args:
             file_paths (list): A list of local file paths to upload.
@@ -176,103 +176,93 @@ class VANFileManager:
         uploaded_count = 0
         failed_files = []
 
-        # file_paths is self.downloaded_files passed from VoterDataAutomation
         for file_path in file_paths:
-
-            # Convert to Path object and ensure it's absolute
             path_obj = Path(file_path).resolve()
             filename = path_obj.stem
 
             self.logger.info(f"\n--- Processing: {filename} ---")
             
-            # 1. Navigation & Upload (Retry Loop)
             success = False
             for attempt in range(3):
-                self.driver.get("https://www.votebuilder.com/UploadDataSelectType.aspx")
-                
-                if attempt == 0:
-                    self.driver.refresh()
-                
-                self.logger.info(f"1. Uploading file (Attempt {attempt + 1})...")
-
-                utils.click_button(self.driver, "//option[. = 'State File ID']", "Select State File ID", locator_type=By.XPATH)
-                utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonUploadSubmit", "Upload Submit", locator_type=By.ID)
-                
-                file_input = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_InputFileDefault")
-                file_input.send_keys(str(path_obj))
-                
-                # The 'Solid Attachment' pause - prevents 'Invalid File' OOPS
-                time.sleep(4)
-                
-                utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonSubmitDefault", "Process File", locator_type=By.ID)
-
-                # 2. SMART WAIT: Poll for response (OOPS vs Success)
-                response_found = False
-                for _ in range(22): # ~22 seconds max
-                    time.sleep(1)
-                    current_url = self.driver.current_url
-                    if "Error.aspx" in current_url:
-                        self.logger.error(f"!!! OOPS detected after VANPage_ButtonSubmitDefault on attempt {attempt + 1}")
-                        try:
-                            error_msg = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_LabelErrorText").text
-                            self.logger.error(f"VAN Error: {error_msg}")
-                        except:
-                            self.logger.error("Could not retrieve error text.")
-                        time.sleep(10) # Cooldown before retry
-                        break
-                    
-                    if len(self.driver.find_elements(By.NAME, "ctl00$ContentPlaceHolderVANPage$ctl09")) > 0:
-                        response_found = True
-                        break
-
-                # Early exit: Skip the rest of this attempt and loop back
-                if not response_found:
-                    continue
-
-                # Step 2: Unmatched Alert (ctl09)
-                self.logger.info(f"2. Waiting for Unmatched People (Attempt {attempt + 1})...")
-                utils.click_button(self.driver, 'ctl00$ContentPlaceHolderVANPage$ctl09', "Unmatched Button", locator_type=By.NAME)
-                
-                # Step 3: Trigger Save-as-List Overlay (Value 154)
-                self.logger.info("3. Waiting for Mapping Dropdown...")
-                time.sleep(1)
-                dropdown_element = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_ctl03_AddULFieldID")
-                dropdown = Select(dropdown_element)
-                dropdown.select_by_value("154")
-
-                # Step 4: Fill Overlay (Iframe Context)
-                self.logger.info("4. Waiting for Overlay...")
-                self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
-                
-                name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
-                name_field.send_keys(filename)
-                
-                folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
-                folder_drop = Select(folder_drop_element)
-                folder_drop.select_by_visible_text(list_folder)
-
-                # Step 5: Click Next and Exit Iframe
-                self.logger.info("5. Clicking Next and Exiting Iframe...")
-                utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
-                
-                time.sleep(5) 
-                self.driver.switch_to.default_content()
-                
-                # Step 6: Final Finish (Main Page)
-                self.logger.info("6. Waiting for First Finish...")
                 try:
+                    self.logger.info(f"1. Uploading file (Attempt {attempt + 1}/3)...")
+                    self.driver.get("https://www.votebuilder.com/UploadDataSelectType.aspx")
+                    
+                    if attempt == 0:
+                        self.driver.refresh()
+
+                    utils.click_button(self.driver, "//option[. = 'State File ID']", "Select State File ID", locator_type=By.XPATH)
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonUploadSubmit", "Upload Submit", locator_type=By.ID)
+                    
+                    file_input = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_InputFileDefault")
+                    file_input.send_keys(str(path_obj))
+                    time.sleep(4) # Solid Attachment pause
+                    
+                    utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonSubmitDefault", "Process File", locator_type=By.ID)
+
+                    # 2. SMART WAIT: Poll for response (OOPS vs Success)
+                    response_found = False
+                    for _ in range(22): # ~22 seconds max
+                        time.sleep(1)
+                        if "Error.aspx" in self.driver.current_url:
+                            error_msg = "Unknown Error"
+                            try:
+                                error_msg = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_LabelErrorText").text
+                            except:
+                                pass
+                            # Manually trigger the except block to force a retry
+                            raise Exception(f"VAN Error.aspx encountered: {error_msg}")
+                        
+                        if len(self.driver.find_elements(By.NAME, "ctl00$ContentPlaceHolderVANPage$ctl09")) > 0:
+                            response_found = True
+                            break
+
+                    if not response_found:
+                        raise Exception("Timeout waiting for 'Unmatched People' button to appear.")
+
+                    # Step 2: Unmatched Alert
+                    self.logger.info(f"2. Waiting for Unmatched People...")
+                    utils.click_button(self.driver, 'ctl00$ContentPlaceHolderVANPage$ctl09', "Unmatched Button", locator_type=By.NAME)
+                    
+                    # Step 3: Trigger Save-as-List Overlay
+                    self.logger.info("3. Waiting for Mapping Dropdown...")
+                    time.sleep(1)
+                    dropdown_element = utils.expect_by_id(self.driver, "ctl00_ContentPlaceHolderVANPage_ctl03_AddULFieldID")
+                    Select(dropdown_element).select_by_value("154")
+
+                    # Step 4: Fill Overlay (Iframe Context)
+                    self.logger.info("4. Waiting for Overlay...")
+                    self.driver.switch_to.frame(self.driver.find_element(By.NAME, "RadWindow1"))
+                    
+                    name_field = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_ListName_ListName_tb_ListName")
+                    name_field.send_keys(filename)
+                    
+                    folder_drop_element = utils.expect_by_id(self.driver, "ctl01_ContentPlaceHolderVANPage_myLabelCont0_FolderID_FolderID_ddl_FolderID")
+                    Select(folder_drop_element).select_by_visible_text(list_folder)
+
+                    # Step 5: Click Next and Exit Iframe
+                    self.logger.info("5. Clicking Next and Exiting Iframe...")
+                    utils.click_button(self.driver, "ctl01_ContentPlaceHolderVANPage_Next0", "Overlay Next", locator_type=By.ID)
+                    
+                    time.sleep(5) 
+                    self.driver.switch_to.default_content()
+                    
+                    # Step 6: Final Finish
+                    self.logger.info("6. Waiting for First Finish...")
                     utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_ButtonFinishUpload", "Finish 1", locator_type=By.ID)
                     utils.click_button(self.driver, "ctl00_ContentPlaceHolderVANPage_FinishUploadModal__submitButton", "Finish 2", locator_type=By.ID)
                     
+                    # IF WE REACH THIS LINE, ALL 6 STEPS PASSED
                     self.logger.info(f"Success: {filename}")
                     success = True
                     break 
+
                 except Exception as e:
-                    # FIX: Do NOT set success = True here. Allow the retry loop to trigger.
-                    self.logger.warning(f"Failed to click finish buttons for {filename} on attempt {attempt + 1}: {e}")
+                    # Catch ANY failure in steps 1-6, log it, and loop back for the next attempt
+                    self.logger.warning(f"Upload attempt {attempt + 1} failed for {filename}: {e}")
+                    time.sleep(3) # Short breather before retrying
                     continue
 
-            # Check if the file successfully uploaded after all retries
             if success:
                 uploaded_count += 1
             else:
@@ -284,13 +274,11 @@ class VANFileManager:
         if failed_files:
             self.logger.error(f"Bulk upload finished with {len(failed_files)} failures: {failed_files}")
 
-        # RETURN RECEIPT for the orchestrator
         return uploaded_count
 
 
     def verify_upload_success(self, file_ids, timeout_minutes=5):
         """Poll Batches List until all target files show as 100% Processed."""
-        # Standardize date: m/d/yy without leading zeros (cross-platform)
         now = datetime.now()
         today_str = f"{now.month}/{now.day}/{now.strftime('%y')}"
         
@@ -324,23 +312,21 @@ class VANFileManager:
                                 status_dict[target] = f"Unknown: {row_text[:20]}..."
                             break 
 
-                # Log every poll result so 'Complete' appears in logs before exiting
                 self.logger.info(f"Poll result: {status_dict}")
 
+                # Success: Every single file is marked complete
                 if all(s == "Complete" for s in status_dict.values()):
                     self.logger.info("All files successfully verified as 100% Processed.")
                     return True
                 
-                if any(s == "Processing" for s in status_dict.values()):
-                    self.logger.info("Files still processing. Waiting 15s...")
+                # BUG FIX: If ANY file is not complete (Processing, Not Found, Old Date), keep waiting!
+                if any(s != "Complete" for s in status_dict.values()):
+                    self.logger.info("Files still processing or not yet visible. Waiting 15s...")
                     time.sleep(15)
                     self.driver.refresh()
                     continue
-                
-                self.logger.error(f"Upload verification failed. Final status: {status_dict}")
-                return False
 
-            self.logger.error("Verification timed out.")
+            self.logger.error(f"Verification timed out after {timeout_minutes} minutes.")
             return False
 
         except Exception as e:
