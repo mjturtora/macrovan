@@ -23,16 +23,16 @@ class VoterDataAutomation:
     def __init__(self, config_path="macrovan_config.json", file_override=None):
         # 1. Anchor to script location (EXE-aware)
         if getattr(sys, 'frozen', False):
-            self.script_dir = Path(sys.executable).resolve().parent
+            self.base_dir = Path(sys.executable).resolve().parent
         else:
-            self.script_dir = Path(__file__).resolve().parent
+            self.base_dir = Path(__file__).resolve().parent.parent
 
         # 2. Load config (Smart anchor: handles absolute or relative paths)
         path_obj = Path(config_path)
         if path_obj.is_absolute():
             self.config = load_config(path_obj)
         else:
-            self.config = load_config(self.script_dir / path_obj)
+            self.config = load_config(self.base_dir / path_obj)
 
         # 3. Standardize ONLY local file system paths to absolute
         self._resolve_config_paths()
@@ -81,8 +81,8 @@ class VoterDataAutomation:
             for key in ["logs_directory", "output_directory"]:
                 if key in self.config["files"]:
                     rel_path = self.config["files"][key]
-                    # Anchor the JSON path to our script_dir
-                    self.config["files"][key] = str((self.script_dir / rel_path).resolve())
+                    # Anchor the JSON path to our base_dir
+                    self.config["files"][key] = str((self.base_dir / rel_path).resolve())
 
 
     def download_files_from_api(self):
@@ -110,7 +110,8 @@ class VoterDataAutomation:
         self.logger.info("Phase 2: Initializing browser and logging in")
         
         try:
-            self.driver = utils.start_driver()
+            self.driver = utils.start_driver(base_path=self.base_dir)
+
             self.driver.implicitly_wait(self.config["selenium"]["implicit_wait"])
             
             utils.get_page(self.driver, self.config["van"]["url"])
@@ -159,8 +160,10 @@ class VoterDataAutomation:
             
             # --- PHASE 4: IMPORT & VERIFY ---
             self.logger.info("Phase 4: Uploading new files to VAN")
-            self.stats["files_uploaded"] = self.file_manager.bulk_upload_files(self.downloaded_files, list_folder)
-            
+            uploaded_count, alerts = self.file_manager.bulk_upload_files(self.downloaded_files, list_folder)
+            self.stats["files_uploaded"] = uploaded_count
+            self.stats["alerts"] = alerts
+
             # HALT AND CATCH FIRE 1: Count Mismatch
             if self.stats["files_uploaded"] < len(self.downloaded_files):
                 error_msg = "\n" + "!"*65 + "\n!!! CRITICAL FAILURE: NOT ALL FILES WERE SUCCESSFULLY UPLOADED !!!\n" + "!"*65

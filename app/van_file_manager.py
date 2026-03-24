@@ -33,6 +33,7 @@ class VANFileManager:
         self.driver = driver
         # Use the logger configured by the orchestrator
         self.logger = logging.getLogger('VANFileManager')
+        self.alerts = [] # <--- NEW: Stores the 'OOPS' errors to send to the final summary
     
     def navigate_to_file_folder(self, folder_name):
         """
@@ -172,6 +173,7 @@ class VANFileManager:
             
         Returns:
             int: The total count of successfully uploaded files.
+            list: A list of any VAN error alerts encountered during upload.
         """
         uploaded_count = 0
         failed_files = []
@@ -210,6 +212,12 @@ class VANFileManager:
                                 error_msg = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolderVANPage_LabelErrorText").text
                             except:
                                 pass
+                            
+                            # <--- NEW: The OOPS logging and percolation tracking --->
+                            self.logger.error(f"!!! OOPS! VAN Error Page detected during attempt {attempt + 1}")
+                            self.logger.error(f"!!! VAN Says: {error_msg}")
+                            self.alerts.append(error_msg) 
+                            
                             # Manually trigger the except block to force a retry
                             raise Exception(f"VAN Error.aspx encountered: {error_msg}")
                         
@@ -274,7 +282,7 @@ class VANFileManager:
         if failed_files:
             self.logger.error(f"Bulk upload finished with {len(failed_files)} failures: {failed_files}")
 
-        return uploaded_count
+        return uploaded_count, self.alerts # <--- NEW: Returning the alerts tuple
 
 
     def verify_upload_success(self, file_ids, timeout_minutes=5):

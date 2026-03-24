@@ -149,3 +149,9 @@ voter_data_automation.log
 
 # VSCode
 .vscode/
+
+# WebDriver Manager local cache
+.wdm/
+drivers.json
+LICENSE.chromedriver
+THIRD_PARTY_NOTICES.chromedriver

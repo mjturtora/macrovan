@@ -95,9 +95,10 @@ def main():
             return 1
     else:
         # Bootstrap: Create a template from the internal settings for the user
-        print(f"[!] Custom config not found. Bootstrapping template: {external_config}")
+        print(f"[!] Custom config not found. Bootstrapping template to (external_config): {external_config}")
         factory_settings = load_config(internal_config)
         with open(external_config, 'w', encoding='utf-8') as f:
+            print(f"[*] Writing new config from (internal_config) {internal_config}")
             json.dump(factory_settings, f, indent=2)
         config_path = external_config
 

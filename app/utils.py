@@ -4,6 +4,7 @@ import fnmatch
 import io
 import json
 import logging
+import os
 import shutil
 import sys
 import tempfile
@@ -88,7 +89,7 @@ def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
-def start_driver():
+def start_driver(base_path=None):
     """Initialize Chrome WebDriver with option that saves user-data-dir to local
      folder to handle cookies"""
     # driver.get('chrome://settings/')
@@ -98,13 +99,19 @@ def start_driver():
 
     chrome_options = Options()
 
+    # 1. Build an absolute path for the Chrome profile
+    if base_path:
+        profile_path = Path(base_path) / "io" / "chrome-data"
+    else:
+        profile_path = Path("chrome-data").resolve() # Fallback
+
     # todo: following lines added 7/8 trying to make repo pretty.
     #  Trying to save chrome-data elsewhere. Gave up. Maybe later.
     # chrome_options.add_argument(r"--user-data-dir='..\io\chrome-data'")
     # #chrome_options.add_argument("--enable-caret-browsing")
 
     # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
-    chrome_options.add_argument("--user-data-dir=chrome-data")
+    chrome_options.add_argument(f"--user-data-dir={profile_path}")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
@@ -113,6 +120,10 @@ def start_driver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")
+
+    # Force webdriver_manager to save locally instead of global user dir
+    os.environ['WDM_LOCAL'] = '1'
+
     # display_to_console("Loading...")
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)

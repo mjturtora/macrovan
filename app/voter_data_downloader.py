@@ -15,23 +15,30 @@ class VoterDataDownloader:
 
     def __init__(self, base_url="https://vat.flddc.org/API/VoterData/", output_directory=None):
         """
-        Initialize the VoterDataDownloader.
+        Initialize the VoterDataDownloader with a unified project base path.
         """
         self.logger = logging.getLogger('VoterDataDownloader')
         self.base_url = base_url
 
-        # 1. Establish the Anchor Point (EXE-aware)
+        # 1. Establish the Unified Base (EXE-aware, matching macrovat and vda)
         if getattr(sys, 'frozen', False):
-            app_root = Path(sys.executable).resolve().parent
+            self.base_dir = Path(sys.executable).resolve().parent
         else:
-            app_root = Path(__file__).resolve().parent
+            # We use .parent.parent to go from 'app/' up to the project root 'macrovan/'
+            self.base_dir = Path(__file__).resolve().parent.parent
 
         # 2. Resolve Output Directory
         if output_directory:
-            # Anchor the JSON path to our app_root
-            self.output_directory = (app_root / output_directory).resolve()
+            path_obj = Path(output_directory)
+            # If VDA passes an absolute path, use it. Otherwise, anchor to our base_dir.
+            if path_obj.is_absolute():
+                self.output_directory = path_obj
+            else:
+                self.output_directory = (self.base_dir / output_directory).resolve()
         else:
-            self.output_directory = app_root / "io" / "api_downloads"
+            # Default fallback if nothing is provided
+            self.output_directory = self.base_dir / "io" / "api_downloads"
+            
         self._ensure_output_directory()
 
 
@@ -52,9 +59,9 @@ class VoterDataDownloader:
         """
         url = self._build_url(file_id)
         output_path = self.output_directory / f"{file_id}_VoterData.csv"
-        
+
         self.logger.info(f"Downloading file {file_id} from {url}")
-        
+
         try:
             response = requests.get(url, stream=True)
             response.raise_for_status()  # Raise an exception for HTTP errors
