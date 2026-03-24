@@ -22,6 +22,7 @@ from selenium.webdriver.remote.command import Command
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.driver_cache import DriverCacheManager
 
 # Local
 from auth import username, password
@@ -89,7 +90,7 @@ def pause(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Macrovan", 1)
 
 
-def start_driver(base_path=None):
+def start_driver(base_dir):
     """Initialize Chrome WebDriver with option that saves user-data-dir to local
      folder to handle cookies"""
     # driver.get('chrome://settings/')
@@ -97,37 +98,22 @@ def start_driver(base_path=None):
 
     # https://stackoverflow.com/questions/15058462/how-to-save-and-load-cookies-using-python-selenium-webdriver
 
+    chrome_root = base_dir / "chrome-data"
+
     chrome_options = Options()
-
-    # 1. Build an absolute path for the Chrome profile
-    if base_path:
-        profile_path = Path(base_path) / "io" / "chrome-data"
-    else:
-        profile_path = Path("chrome-data").resolve() # Fallback
-
-    # todo: following lines added 7/8 trying to make repo pretty.
-    #  Trying to save chrome-data elsewhere. Gave up. Maybe later.
-    # chrome_options.add_argument(r"--user-data-dir='..\io\chrome-data'")
-    # #chrome_options.add_argument("--enable-caret-browsing")
-
-    # adding argument causes chrome to open with address bar highlighted and I can't figure out why!
-    chrome_options.add_argument(f"--user-data-dir={profile_path}")
+    chrome_options.add_argument(f"--user-data-dir={chrome_root}")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-logging'])
     chrome_options.add_argument('disable-infobars')
-    
-    # Add options to fix "DevToolsActivePort file doesn't exist" error
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")
 
-    # Force webdriver_manager to save locally instead of global user dir
-    os.environ['WDM_LOCAL'] = '1'
-
-    # display_to_console("Loading...")
-    service = Service(ChromeDriverManager().install())
+    cache_manager = DriverCacheManager(root_dir=str(chrome_root))
+    driver_path = ChromeDriverManager(cache_manager=cache_manager).install()
+    
+    service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    # display_to_console("Finished loading!")
     return driver
 
 

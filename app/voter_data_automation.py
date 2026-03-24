@@ -110,7 +110,7 @@ class VoterDataAutomation:
         self.logger.info("Phase 2: Initializing browser and logging in")
         
         try:
-            self.driver = utils.start_driver(base_path=self.base_dir)
+            self.driver = utils.start_driver(self.base_dir)
 
             self.driver.implicitly_wait(self.config["selenium"]["implicit_wait"])
             
