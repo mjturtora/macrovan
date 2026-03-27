@@ -40,6 +40,10 @@ jobs:
           --paths . \
           --hidden-import utils \
           --hidden-import voter_data_automation \
+          --hidden-import voter_data_downloader \
+          --hidden-import van_file_manager \
+          --hidden-import auth \
+          --hidden-import printing_steps \
           --collect-submodules selenium \
           --add-data "macrovan_config.json:." \
           macrovat.py
