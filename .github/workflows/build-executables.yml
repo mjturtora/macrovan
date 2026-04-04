@@ -1,4 +1,4 @@
-name: Build Cross-Platform Executables
+name: Build Cross-Platform Executables macos-macos-13
 
 on:
   workflow_dispatch:
