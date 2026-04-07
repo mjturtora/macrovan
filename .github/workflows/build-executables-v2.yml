@@ -1,4 +1,4 @@
-name: Build Cross-Platform Executables macos-13
+name: Build Cross-Platform Executables macos-26-intel
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 jobs:
 # --- MAC BUILD JOB ---
   build-mac:
-    runs-on: macos-13
+    runs-on: macos-26-intel
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

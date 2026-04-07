@@ -6,7 +6,7 @@ SERVICE_ID = "MacroVan"
 USER_CONFIG_KEY = "current_username"
 
 def _prompt_for_username():
-    user = input("Enter web username: ").strip()
+    user = input("Enter VAN username: ").strip()
     if not user:
         print("Error: Username cannot be empty.")
         sys.exit(1)
@@ -14,7 +14,7 @@ def _prompt_for_username():
     return user
 
 def _prompt_for_password(user):
-    pwd = getpass.getpass(f"Enter password for {user}: ")
+    pwd = getpass.getpass(f"Enter VAN password for {user}: ")
     if not pwd:
         print("Error: Password cannot be empty.")
         sys.exit(1)
