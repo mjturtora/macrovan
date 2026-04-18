@@ -131,9 +131,14 @@ jobs:
       - name: Install PyInstaller
         run: poetry run pip install pyinstaller
 
-      - name: COMPILE (WINDOWS)
+      - name: DIAGNOSTIC & COMPILE (WINDOWS)
         run: |
+          Write-Host "--- ENTERING APP DIRECTORY ---"
           cd app
+          Write-Host "Current Directory: $((Get-Location).Path)"
+          Write-Host "Files in Directory:"
+          Get-ChildItem
+          Write-Host "--- STARTING PYINSTALLER ---"
           poetry run pyinstaller --onefile --name MacroVan `
           --paths . `
           --hidden-import utils `

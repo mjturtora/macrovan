@@ -61,104 +61,104 @@ jobs:
           path: app/dist/MacroVan
 
 # --- MAC BUILD JOB  Build Apple M1 MAC 15 ---
-  # build-mac:
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v4
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.11'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-  #     - name: Install Poetry
-  #       run: curl -sSL https://install.python-poetry.org | python3 -
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
 
-  #     - name: Add Poetry to PATH
-  #       run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-  #     - name: Install Dependencies
-  #       run: poetry install --no-root
+      - name: Install Dependencies
+        run: poetry install --no-root
 
-  #     - name: Install PyInstaller
-  #       run: poetry run pip install pyinstaller
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
 
-  #     - name: DIAGNOSTIC & COMPILE (MAC)
-  #       run: |
-  #         echo "--- ENTERING APP DIRECTORY ---"
-  #         cd app
-  #         echo "Current Directory: $(pwd)"
+      - name: DIAGNOSTIC & COMPILE (MAC)
+        run: |
+          echo "--- ENTERING APP DIRECTORY ---"
+          cd app
+          echo "Current Directory: $(pwd)"
           
-  #         echo "--- STARTING PYINSTALLER ---"
-  #         # Note: Mac uses ':' as the separator for --add-data
-  #         poetry run pyinstaller --onefile --name MacroVan \
-  #         --paths . \
-  #         --hidden-import utils \
-  #         --hidden-import voter_data_automation \
-  #         --hidden-import voter_data_downloader \
-  #         --hidden-import van_file_manager \
-  #         --hidden-import auth \
-  #         --hidden-import printing_steps \
-  #         --collect-submodules selenium \
-  #         --add-data "macrovan_config.json:." \
-  #         macrovat.py
+          echo "--- STARTING PYINSTALLER ---"
+          # Note: Mac uses ':' as the separator for --add-data
+          poetry run pyinstaller --onefile --name MacroVan \
+          --paths . \
+          --hidden-import utils \
+          --hidden-import voter_data_automation \
+          --hidden-import voter_data_downloader \
+          --hidden-import van_file_manager \
+          --hidden-import auth \
+          --hidden-import printing_steps \
+          --collect-submodules selenium \
+          --add-data "macrovan_config.json:." \
+          macrovat.py
 
-  #     - name: COMPRESS ARTIFACT (MAC)
-  #       # We zip the file to preserve the +x executable permissions
-  #       run: |
-  #         cd app/dist
-  #         zip MacroVan-MacOS.zip MacroVan
+      - name: COMPRESS ARTIFACT (MAC)
+        # We zip the file to preserve the +x executable permissions
+        run: |
+          cd app/dist
+          zip MacroVan-MacOS.zip MacroVan
 
-  #     - name: Upload Mac Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: MacroVan-MacOS
-  #         path: app/dist/MacroVan
+      - name: Upload Mac Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroVan-MacOS
+          path: app/dist/MacroVan
 
   # --- WINDOWS BUILD JOB ---
-  # build-windows:
-  #   runs-on: windows-latest
-  #   env:
-  #     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v4
+  build-windows:
+    runs-on: windows-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.11'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-  #     - name: Install Poetry
-  #       run: |
-  #         (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-  #         echo "$env:USERPROFILE\AppData\Roaming\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install Poetry
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          echo "$env:USERPROFILE\AppData\Roaming\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-  #     - name: Install Dependencies
-  #       run: poetry install --no-root
+      - name: Install Dependencies
+        run: poetry install --no-root
 
-  #     - name: Install PyInstaller
-  #       run: poetry run pip install pyinstaller
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
 
-  #     - name: DIAGNOSTIC & COMPILE (WINDOWS)
-  #       run: |
-  #         Write-Host "--- ENTERING APP DIRECTORY ---"
-  #         cd app
-  #         Write-Host "Current Directory: $((Get-Location).Path)"
-  #         Write-Host "Files in Directory:"
-  #         Get-ChildItem
-  #         Write-Host "--- STARTING PYINSTALLER ---"
-  #         poetry run pyinstaller --onefile --name MacroVan `
-  #         --paths . `
-  #         --hidden-import utils `
-  #         --hidden-import voter_data_automation `
-  #         --collect-submodules selenium `
-  #         --add-data "macrovan_config.json;." `
-  #         macrovat.py
+      - name: DIAGNOSTIC & COMPILE (WINDOWS)
+        run: |
+          Write-Host "--- ENTERING APP DIRECTORY ---"
+          cd app
+          Write-Host "Current Directory: $((Get-Location).Path)"
+          Write-Host "Files in Directory:"
+          Get-ChildItem
+          Write-Host "--- STARTING PYINSTALLER ---"
+          poetry run pyinstaller --onefile --name MacroVan `
+          --paths . `
+          --hidden-import utils `
+          --hidden-import voter_data_automation `
+          --collect-submodules selenium `
+          --add-data "macrovan_config.json;." `
+          macrovat.py
 
-  #     - name: Upload Windows Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: MacroVan-Windows
-  #         path: app\dist\MacroVan.exe
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroVan-Windows
+          path: app\dist\MacroVan.exe
