@@ -11,7 +11,7 @@ packages = [{include = "app"}, {include = "test_poetry_setup.py"}]
 python = "^3.11"
 pandas = ">=2.2.2"
 selenium = "^4.10.0"
-requests = "^2.31.0"
+requests = "^2.33.0"
 pypdf = "^6.5.0"
 webdriver-manager = "^4.0.0"
 numpy = "<2.0"
